@@ -72,26 +72,26 @@ export default function Dashboard() {
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-        <h3 className="font-bold text-lg text-slate-900 mb-6">รายการคำขอล่าสุด</h3>
+        <h3 className="font-bold text-lg text-slate-900 mb-6 px-4">รายการคำขอทั้งหมด</h3>
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
               <tr className="text-slate-500 text-sm font-medium border-b border-slate-100">
-                <th className="pb-4 pl-2">ลำดับ</th>
-                <th className="pb-4">ชื่อโครงการ</th>
-                <th className="pb-4">แผนก</th>
-                <th className="pb-4">วันที่ขอ</th>
-                <th className="pb-4">สถานะ</th>
+                <th className="pb-4 pl-6">ลำดับ</th>
+                <th className="pb-4 px-4">ชื่อโครงการ</th>
+                <th className="pb-4 px-4">แผนก</th>
+                <th className="pb-4 px-4">วันที่ขอ</th>
+                <th className="pb-4 pr-6 text-center">สถานะ</th>
               </tr>
             </thead>
             <tbody className="text-sm">
-              {requests.slice(0, 5).map((req, index) => (
+              {requests.map((req, index) => (
                 <tr key={req.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
-                  <td className="py-4 pl-2 font-medium">{index + 1}</td>
-                  <td className="py-4">{req.topic}</td>
-                  <td className="py-4">{req.department}</td>
-                  <td className="py-4">{new Date(req.date).toLocaleDateString('th-TH')}</td>
-                  <td className="py-4">
+                  <td className="py-4 pl-6 font-medium">{index + 1}</td>
+                  <td className="py-4 px-4">{req.topic}</td>
+                  <td className="py-4 px-4">{req.department}</td>
+                  <td className="py-4 px-4">{new Date(req.date).toLocaleDateString('th-TH')}</td>
+                  <td className="py-4 pr-6 text-center">
                     <span className={`inline-flex items-center justify-center w-28 py-1 rounded-full text-xs font-medium border status-${req.status.replace('_', '')}`}>
                       {req.status === 'pending' && 'รออนุมัติ'}
                       {req.status === 'accepted' && 'รับงาน'}
@@ -104,7 +104,7 @@ export default function Dashboard() {
               ))}
               {requests.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="py-8 text-center text-slate-500">ไม่มีข้อมูลคำขอ</td>
+                  <td colSpan={5} className="py-12 text-center text-slate-500 font-medium">ไม่มีข้อมูลคำขอ</td>
                 </tr>
               )}
             </tbody>
