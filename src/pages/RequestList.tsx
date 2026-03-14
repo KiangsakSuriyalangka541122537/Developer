@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAppStore, DevRequest } from '../store';
-import { FileText, Edit, Trash2, CheckCircle, XCircle, Forward, UserPlus, UserCheck, Eye, Calendar } from 'lucide-react';
+import { FileText, Edit, Trash2, CheckCircle, XCircle, Forward, UserCheck, Eye, Calendar, MailOpen } from 'lucide-react';
 
 export default function RequestList() {
   const { currentUser, requests, updateRequest, deleteRequest, users } = useAppStore();
@@ -165,7 +165,7 @@ export default function RequestList() {
                         )}
                         {currentUser?.role === 'approver' && req.status === 'pending' && (
                           <button onClick={() => { setSelectedReq(req); setShowAssignModal(true); }} className="p-1.5 text-slate-400 hover:text-blue-600 transition-colors" title="มอบหมายงาน">
-                            <UserPlus className="size-5" />
+                            <MailOpen className="size-5" />
                           </button>
                         )}
                         {currentUser?.role === 'developer' && (
@@ -398,7 +398,7 @@ export default function RequestList() {
                 <XCircle className="size-5" />
               </button>
             </div>
-            <div className="p-6 overflow-y-auto space-y-6">
+            <div className="p-6 overflow-y-auto space-y-6 pb-32">
               <div className="flex justify-between items-center">
                 {getStatusBadge(selectedReq.status)}
                 <span className="text-sm text-slate-500">วันที่ขอ: {new Date(selectedReq.date).toLocaleDateString('th-TH')}</span>
@@ -406,10 +406,10 @@ export default function RequestList() {
               
               <div>
                 <h5 className="text-sm font-bold text-slate-500 mb-1">หัวข้อ/ชื่อโปรแกรม</h5>
-                <p className="text-slate-900 font-medium">{selectedReq.topic}</p>
+                <p className="text-slate-900 font-medium text-lg">{selectedReq.topic}</p>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <h5 className="text-sm font-bold text-slate-500 mb-1">แผนกผู้ขอ</h5>
                   <p className="text-slate-900">{selectedReq.department}</p>
@@ -425,14 +425,14 @@ export default function RequestList() {
                 {selectedReq.developerId && (
                   <div>
                     <h5 className="text-sm font-bold text-slate-500 mb-1">ผู้รับผิดชอบ (Developer)</h5>
-                    <p className="text-slate-900">{users.find(u => u.id === selectedReq.developerId)?.name}</p>
+                    <p className="text-slate-900 font-semibold text-primary">{users.find(u => u.id === selectedReq.developerId)?.name}</p>
                   </div>
                 )}
               </div>
 
               <div>
                 <h5 className="text-sm font-bold text-slate-500 mb-1">วัตถุประสงค์และความต้องการ</h5>
-                <div className="bg-slate-50 p-4 rounded-xl text-slate-700 whitespace-pre-wrap">
+                <div className="bg-slate-50 p-4 rounded-xl text-slate-700 whitespace-pre-wrap border border-slate-100">
                   {selectedReq.objective}
                 </div>
               </div>
@@ -454,38 +454,39 @@ export default function RequestList() {
               {selectedReq.projectLink && (
                 <div className="bg-emerald-50 p-4 rounded-xl border border-emerald-100">
                   <h5 className="text-sm font-bold text-emerald-700 mb-1">ลิงก์โปรแกรม / คู่มือ</h5>
-                  <a href={selectedReq.projectLink} target="_blank" rel="noreferrer" className="text-emerald-600 hover:underline break-all">
+                  <a href={selectedReq.projectLink} target="_blank" rel="noreferrer" className="text-emerald-600 hover:underline font-medium break-all flex items-center gap-2">
+                    <FileText className="size-4" />
                     {selectedReq.projectLink}
                   </a>
                 </div>
               )}
 
-              {/* Developer Time Estimation (Only visible if accepted or in_progress and user is developer or approver) */}
+              {/* Developer Time Estimation */}
               {(selectedReq.status === 'accepted' || selectedReq.status === 'in_progress' || selectedReq.status === 'done') && (currentUser?.role === 'developer' || currentUser?.role === 'approver') && (
                 <div className="border-t border-slate-100 pt-6">
                   <h5 className="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
-                    <Calendar className="size-4" />
+                    <Calendar className="size-5 text-primary" />
                     กำหนดการพัฒนา
                   </h5>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div className="flex flex-col gap-2">
-                      <label className="text-xs font-semibold text-slate-500">เริ่มพัฒนา (เดือน/ปี)</label>
+                      <label className="text-sm font-semibold text-slate-600">เริ่มพัฒนา (เดือน/ปี)</label>
                       <input 
                         type="month" 
                         value={selectedReq.startMonthYear || ''}
                         onChange={(e) => updateRequest(selectedReq.id, { startMonthYear: e.target.value })}
                         disabled={currentUser?.role !== 'developer'}
-                        className="border border-slate-200 rounded-lg p-2 text-sm outline-none focus:border-primary disabled:bg-slate-50"
+                        className="w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm disabled:bg-slate-50 disabled:text-slate-400 transition-all cursor-pointer"
                       />
                     </div>
                     <div className="flex flex-col gap-2">
-                      <label className="text-xs font-semibold text-slate-500">คาดว่าเสร็จ (เดือน/ปี)</label>
+                      <label className="text-sm font-semibold text-slate-600">คาดว่าเสร็จ (เดือน/ปี)</label>
                       <input 
                         type="month" 
                         value={selectedReq.expectedFinishMonthYear || ''}
                         onChange={(e) => updateRequest(selectedReq.id, { expectedFinishMonthYear: e.target.value })}
                         disabled={currentUser?.role !== 'developer'}
-                        className="border border-slate-200 rounded-lg p-2 text-sm outline-none focus:border-primary disabled:bg-slate-50"
+                        className="w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm disabled:bg-slate-50 disabled:text-slate-400 transition-all cursor-pointer"
                       />
                     </div>
                   </div>
