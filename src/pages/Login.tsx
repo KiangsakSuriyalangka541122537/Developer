@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../store';
 import { Terminal, Lock, User, Eye, EyeOff, LogIn, Phone } from 'lucide-react';
@@ -10,6 +10,24 @@ export default function Login() {
   const [error, setError] = useState('');
   const { login } = useAppStore();
   const navigate = useNavigate();
+  const usernameRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    // Focus username field on mount
+    if (usernameRef.current) {
+      usernameRef.current.focus();
+    }
+  }, []);
+
+  const handleUsernameKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (passwordRef.current) {
+        passwordRef.current.focus();
+      }
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,9 +60,11 @@ export default function Login() {
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 size-5" />
                 <input 
+                  ref={usernameRef}
                   type="text" 
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
+                  onKeyDown={handleUsernameKeyDown}
                   className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all placeholder:text-slate-400" 
                   placeholder="ระบุชื่อผู้ใช้งาน" 
                   required
@@ -57,6 +77,7 @@ export default function Login() {
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 size-5" />
                 <input 
+                  ref={passwordRef}
                   type={showPassword ? "text" : "password"} 
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
