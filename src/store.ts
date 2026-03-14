@@ -56,12 +56,90 @@ const initialUsers: User[] = [
   { id: '6', username: 'parn', password: 'parn', role: 'developer', name: 'นางสาวนิธิพร ใสปา', position: 'นักวิชาการคอมพิวเตอร์' }
 ];
 
+const initialRequests: DevRequest[] = [
+  {
+    id: 'REQ-2026-005',
+    requesterId: '2',
+    requesterName: 'งานการเงิน',
+    department: 'งานการเงิน',
+    date: new Date(Date.now() - 86400000 * 1).toISOString(),
+    topic: 'ระบบเบิกจ่ายออนไลน์',
+    estimatedUsers: '21-50',
+    objective: 'เพื่อลดการใช้กระดาษและเพิ่มความรวดเร็วในการอนุมัติการเบิกจ่าย',
+    currentSystem: 'Paper, Excel',
+    attachmentUrl: 'requirement_finance.pdf',
+    status: 'pending',
+    createdAt: new Date(Date.now() - 86400000 * 1).toISOString()
+  },
+  {
+    id: 'REQ-2026-004',
+    requesterId: '3',
+    requesterName: 'งานผ่าตัด',
+    department: 'งานผ่าตัด',
+    date: new Date(Date.now() - 86400000 * 3).toISOString(),
+    topic: 'ระบบจองคิวห้องผ่าตัด',
+    estimatedUsers: '51+',
+    objective: 'จัดการคิวห้องผ่าตัดให้มีประสิทธิภาพ ลดความซ้ำซ้อน',
+    currentSystem: 'Google Calendar',
+    status: 'accepted',
+    developerId: '5',
+    createdAt: new Date(Date.now() - 86400000 * 3).toISOString()
+  },
+  {
+    id: 'REQ-2026-003',
+    requesterId: '1',
+    requesterName: 'งานเทคโนโลยีสารสนเทศ',
+    department: 'งานเทคโนโลยีสารสนเทศ',
+    date: new Date(Date.now() - 86400000 * 7).toISOString(),
+    topic: 'ระบบแจ้งซ่อมอุปกรณ์คอมพิวเตอร์ (Helpdesk)',
+    estimatedUsers: '51+',
+    objective: 'ติดตามสถานะการแจ้งซ่อมและประเมินผลการทำงานของช่าง',
+    currentSystem: 'Line Group',
+    status: 'in_progress',
+    developerId: '6',
+    startMonthYear: '03/2026',
+    expectedFinishMonthYear: '05/2026',
+    createdAt: new Date(Date.now() - 86400000 * 7).toISOString()
+  },
+  {
+    id: 'REQ-2026-002',
+    requesterId: '2',
+    requesterName: 'งานการเงิน',
+    department: 'งานการเงิน',
+    date: new Date(Date.now() - 86400000 * 30).toISOString(),
+    topic: 'รายงานสรุปรายได้ประจำวัน',
+    estimatedUsers: '1-5',
+    objective: 'ดึงข้อมูลจากระบบ HIS มาแสดงผลในรูปแบบ Dashboard',
+    currentSystem: 'HIS Export to Excel',
+    status: 'done',
+    developerId: '5',
+    startMonthYear: '02/2026',
+    expectedFinishMonthYear: '02/2026',
+    projectLink: 'http://internal-report/finance',
+    createdAt: new Date(Date.now() - 86400000 * 30).toISOString()
+  },
+  {
+    id: 'REQ-2026-001',
+    requesterId: '3',
+    requesterName: 'งานผ่าตัด',
+    department: 'งานผ่าตัด',
+    date: new Date(Date.now() - 86400000 * 45).toISOString(),
+    topic: 'แอปพลิเคชันแจ้งเตือนหมอผ่านมือถือ',
+    estimatedUsers: '21-50',
+    objective: 'แจ้งเตือนแพทย์เมื่อถึงคิวผ่าตัด',
+    currentSystem: 'โทรศัพท์',
+    status: 'rejected',
+    rejectionReason: 'อยู่นอกเหนือขอบเขตการพัฒนาระบบภายใน ปัจจุบันมีระบบ Paging ที่ใช้งานได้ดีอยู่แล้ว',
+    createdAt: new Date(Date.now() - 86400000 * 45).toISOString()
+  }
+];
+
 export const useAppStore = create<AppState>()(
   persist(
     (set, get) => ({
       currentUser: null,
       users: initialUsers,
-      requests: [],
+      requests: initialRequests,
       login: (username, password) => {
         const user = get().users.find(u => u.username === username && u.password === password);
         if (user) {
