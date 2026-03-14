@@ -29,3 +29,11 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
 .status-inprogress { @apply bg-primary/10 text-primary border-primary/20; }
 .status-done { @apply bg-emerald-100 text-emerald-700 border-emerald-200; }
 .status-rejected { @apply bg-rose-100 text-rose-700 border-rose-200; }
+
+.scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

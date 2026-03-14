@@ -510,7 +510,7 @@ export default function RequestList() {
                 <XCircle className="size-5" />
               </button>
             </div>
-            <div className="p-6 overflow-y-auto space-y-6 pb-32">
+            <div className="p-6 overflow-y-auto space-y-6 pb-6 scrollbar-hide">
               <div className="flex justify-between items-center">
                 {getStatusBadge(selectedReq.status)}
                 <span className="text-sm text-slate-500">วันที่ขอ: {new Date(selectedReq.date).toLocaleDateString('th-TH')}</span>
