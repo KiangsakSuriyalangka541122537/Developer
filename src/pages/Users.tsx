@@ -145,20 +145,20 @@ export default function Users() {
           <table className="w-full text-left">
             <thead>
               <tr className="text-slate-500 text-sm font-medium border-b border-slate-100 bg-slate-50">
-                <th className="py-4 pl-6">{activeTab === 'department' ? 'ชื่อแผนก' : 'ชื่อ-นามสกุล'}</th>
-                <th className="py-4">ชื่อผู้ใช้งาน (Username)</th>
-                {activeTab === 'staff' && <th className="py-4 text-center">บทบาท (Role)</th>}
-                {activeTab === 'staff' && <th className="py-4">ตำแหน่ง</th>}
-                <th className="py-4 text-right pr-6">จัดการ</th>
+                <th className="py-4 pl-10 pr-4 w-1/3">{activeTab === 'department' ? 'ชื่อแผนก' : 'ชื่อ-นามสกุล'}</th>
+                <th className="py-4 px-4">ชื่อผู้ใช้งาน (Username)</th>
+                {activeTab === 'staff' && <th className="py-4 px-4 text-center">บทบาท (Role)</th>}
+                {activeTab === 'staff' && <th className="py-4 px-4">ตำแหน่ง</th>}
+                <th className="py-4 pl-4 pr-10 text-right w-32">จัดการ</th>
               </tr>
             </thead>
             <tbody className="text-sm">
               {filteredUsers.length > 0 ? filteredUsers.map(user => (
                 <tr key={user.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
-                  <td className="py-4 pl-6 font-medium text-slate-900">{user.name}</td>
-                  <td className="py-4 text-slate-500">{user.username}</td>
+                  <td className="py-4 pl-10 pr-4 font-medium text-slate-900">{user.name}</td>
+                  <td className="py-4 px-4 text-slate-500">{user.username}</td>
                   {activeTab === 'staff' && (
-                    <td className="py-4 text-center">
+                    <td className="py-4 px-4 text-center">
                       <span className={`inline-flex items-center justify-center w-32 py-1 rounded-full text-xs font-medium border ${
                         user.role === 'approver' ? 'bg-purple-50 text-purple-700 border-purple-200' :
                         user.role === 'developer' ? 'bg-blue-50 text-blue-700 border-blue-200' :
@@ -168,9 +168,9 @@ export default function Users() {
                       </span>
                     </td>
                   )}
-                  {activeTab === 'staff' && <td className="py-4 text-slate-500">{user.position || '-'}</td>}
-                  <td className="py-4 text-right pr-6">
-                    <div className="flex justify-end gap-2">
+                  {activeTab === 'staff' && <td className="py-4 px-4 text-slate-500">{user.position || '-'}</td>}
+                  <td className="py-4 pl-4 pr-10 text-right">
+                    <div className="flex justify-end gap-3">
                       <button onClick={() => handleOpenModal(user)} className="p-1.5 text-slate-400 hover:text-primary transition-colors" title="แก้ไข">
                         <Edit2 className="size-5" />
                       </button>
