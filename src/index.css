@@ -1,0 +1,25 @@
+@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #2D6A4F;
+  --color-secondary: #40916C;
+  --color-accent: #95D5B2;
+  --color-background-light: #F8FAF9;
+  --color-background-dark: #1B241E;
+  --font-display: "Kanit", sans-serif;
+  --font-sans: "Kanit", sans-serif;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-background-light);
+  color: #1e293b;
+}
+
+/* Custom Status Badges */
+.status-pending { @apply bg-amber-100 text-amber-700 border-amber-200; }
+.status-accepted { @apply bg-blue-100 text-blue-700 border-blue-200; }
+.status-inprogress { @apply bg-primary/10 text-primary border-primary/20; }
+.status-done { @apply bg-emerald-100 text-emerald-700 border-emerald-200; }
+.status-rejected { @apply bg-rose-100 text-rose-700 border-rose-200; }

@@ -1,0 +1,400 @@
+import { useState } from 'react';
+import { useAppStore, DevRequest } from '../store';
+import { FileText, Edit, Trash2, CheckCircle, XCircle, Forward, UserPlus, Eye, Calendar } from 'lucide-react';
+
+export default function RequestList() {
+  const { currentUser, requests, updateRequest, deleteRequest, users } = useAppStore();
+  const [selectedReq, setSelectedReq] = useState<DevRequest | null>(null);
+  const [rejectReason, setRejectReason] = useState('');
+  const [projectLink, setProjectLink] = useState('');
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [showDoneModal, setShowDoneModal] = useState(false);
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [selectedDevId, setSelectedDevId] = useState('');
+
+  const developers = users.filter(u => u.role === 'developer');
+
+  // Filter requests based on role
+  let visibleRequests = requests;
+  if (currentUser?.role === 'department') {
+    visibleRequests = requests.filter(r => r.requesterId === currentUser.id);
+  } else if (currentUser?.role === 'developer') {
+    visibleRequests = requests.filter(r => r.developerId === currentUser.id || r.status === 'accepted'); // Can see accepted to take them
+  }
+
+  const handleDelete = (id: string, status: string) => {
+    if (currentUser?.role === 'department' && status !== 'pending') {
+      alert('ไม่สามารถลบคำขอที่ถูกรับงานไปแล้วได้');
+      return;
+    }
+    if (window.confirm('คุณต้องการลบคำขอนี้ใช่หรือไม่?')) {
+      deleteRequest(id);
+    }
+  };
+
+  const handleReject = () => {
+    if (selectedReq && rejectReason) {
+      updateRequest(selectedReq.id, { status: 'rejected', rejectionReason: rejectReason });
+      setShowRejectModal(false);
+      setRejectReason('');
+      setSelectedReq(null);
+    }
+  };
+
+  const handleDone = () => {
+    if (selectedReq && projectLink) {
+      updateRequest(selectedReq.id, { status: 'done', projectLink });
+      setShowDoneModal(false);
+      setProjectLink('');
+      setSelectedReq(null);
+    }
+  };
+
+  const handleAssign = () => {
+    if (selectedReq && selectedDevId) {
+      updateRequest(selectedReq.id, { status: 'accepted', developerId: selectedDevId });
+      setShowAssignModal(false);
+      setSelectedDevId('');
+      setSelectedReq(null);
+    }
+  };
+
+  const handleReassign = () => {
+    if (selectedReq && selectedDevId) {
+      updateRequest(selectedReq.id, { developerId: selectedDevId });
+      setShowAssignModal(false);
+      setSelectedDevId('');
+      setSelectedReq(null);
+    }
+  };
+
+  const handleDevAccept = (req: DevRequest) => {
+    updateRequest(req.id, { status: 'in_progress', developerId: currentUser?.id });
+  };
+
+  const getStatusBadge = (status: string) => {
+    const badges: Record<string, { label: string, color: string }> = {
+      pending: { label: 'รออนุมัติ', color: 'status-pending' },
+      accepted: { label: 'รับงาน', color: 'status-accepted' },
+      in_progress: { label: 'กำลังดำเนินการ', color: 'status-inprogress' },
+      done: { label: 'เสร็จสิ้น', color: 'status-done' },
+      rejected: { label: 'ปฏิเสธ', color: 'status-rejected' }
+    };
+    const b = badges[status];
+    return <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${b.color}`}>{b.label}</span>;
+  };
+
+  return (
+    <div className="space-y-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-900">รายการคำขอพัฒนาโปรแกรม</h1>
+          <p className="text-slate-500 mt-1">ติดตามและจัดการคำขอพัฒนาซอฟต์แวร์</p>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="text-slate-500 text-sm font-medium border-b border-slate-100 bg-slate-50">
+                <th className="py-4 pl-6">รหัสคำขอ</th>
+                <th className="py-4">ชื่อโครงการ</th>
+                <th className="py-4">แผนก</th>
+                <th className="py-4">วันที่ขอ</th>
+                <th className="py-4">สถานะ</th>
+                <th className="py-4 text-right pr-6">จัดการ</th>
+              </tr>
+            </thead>
+            <tbody className="text-sm">
+              {visibleRequests.map(req => (
+                <tr key={req.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
+                  <td className="py-4 pl-6 font-mono font-medium">{req.id}</td>
+                  <td className="py-4">{req.topic}</td>
+                  <td className="py-4">{req.department}</td>
+                  <td className="py-4">{new Date(req.date).toLocaleDateString('th-TH')}</td>
+                  <td className="py-4">
+                    <button onClick={() => { setSelectedReq(req); setShowDetailsModal(true); }} className="hover:opacity-80 transition-opacity">
+                      {getStatusBadge(req.status)}
+                    </button>
+                  </td>
+                  <td className="py-4 text-right pr-6">
+                    <div className="flex justify-end gap-2">
+                      <button onClick={() => { setSelectedReq(req); setShowDetailsModal(true); }} className="p-1.5 text-slate-400 hover:text-primary transition-colors" title="ดูรายละเอียด">
+                        <Eye className="size-5" />
+                      </button>
+
+                      {/* Department Actions */}
+                      {currentUser?.role === 'department' && (
+                        <>
+                          <button onClick={() => handleDelete(req.id, req.status)} className="p-1.5 text-slate-400 hover:text-rose-600 transition-colors" title="ลบคำขอ">
+                            <Trash2 className="size-5" />
+                          </button>
+                        </>
+                      )}
+
+                      {/* Approver Actions */}
+                      {currentUser?.role === 'approver' && (
+                        <>
+                          {req.status === 'pending' && (
+                            <button onClick={() => { setSelectedReq(req); setShowAssignModal(true); }} className="p-1.5 text-slate-400 hover:text-blue-600 transition-colors" title="มอบหมายงาน">
+                              <UserPlus className="size-5" />
+                            </button>
+                          )}
+                          <button onClick={() => handleDelete(req.id, req.status)} className="p-1.5 text-slate-400 hover:text-rose-600 transition-colors" title="ลบคำขอ">
+                            <Trash2 className="size-5" />
+                          </button>
+                          {req.status !== 'done' && req.status !== 'rejected' && (
+                             <button onClick={() => { setSelectedReq(req); setShowRejectModal(true); }} className="p-1.5 text-slate-400 hover:text-rose-600 transition-colors" title="ปฏิเสธ">
+                               <XCircle className="size-5" />
+                             </button>
+                          )}
+                        </>
+                      )}
+
+                      {/* Developer Actions */}
+                      {currentUser?.role === 'developer' && (
+                        <>
+                          {req.status === 'accepted' && (
+                            <button onClick={() => handleDevAccept(req)} className="p-1.5 text-slate-400 hover:text-emerald-600 transition-colors" title="รับงาน">
+                              <CheckCircle className="size-5" />
+                            </button>
+                          )}
+                          {(req.status === 'accepted' || req.status === 'in_progress') && (
+                            <button onClick={() => { setSelectedReq(req); setShowAssignModal(true); }} className="p-1.5 text-slate-400 hover:text-blue-600 transition-colors" title="ส่งต่องาน">
+                              <Forward className="size-5" />
+                            </button>
+                          )}
+                          {req.status === 'in_progress' && req.developerId === currentUser.id && (
+                            <button onClick={() => { setSelectedReq(req); setShowDoneModal(true); }} className="p-1.5 text-slate-400 hover:text-emerald-600 transition-colors" title="เสร็จสิ้น">
+                              <CheckCircle className="size-5" />
+                            </button>
+                          )}
+                          {(req.status === 'accepted' || req.status === 'in_progress') && (
+                            <button onClick={() => { setSelectedReq(req); setShowRejectModal(true); }} className="p-1.5 text-slate-400 hover:text-rose-600 transition-colors" title="ปฏิเสธ">
+                              <XCircle className="size-5" />
+                            </button>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {visibleRequests.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="py-12 text-center text-slate-500">ไม่มีข้อมูลคำขอ</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Reject Modal */}
+      {showRejectModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm px-4">
+          <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-slate-200">
+            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+              <h4 className="text-lg font-bold text-slate-900">ระบุเหตุผลการปฏิเสธ</h4>
+              <button onClick={() => setShowRejectModal(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
+                <XCircle className="size-5" />
+              </button>
+            </div>
+            <div className="p-6 flex flex-col gap-4">
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-semibold">เหตุผลประกอบการพิจารณา</label>
+                <textarea 
+                  value={rejectReason}
+                  onChange={(e) => setRejectReason(e.target.value)}
+                  className="w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm" 
+                  placeholder="กรุณาระบุรายละเอียดที่ต้องแก้ไข หรือเหตุผลที่ไม่สามารถดำเนินการได้..." 
+                  rows={4}
+                ></textarea>
+              </div>
+            </div>
+            <div className="px-6 py-4 bg-slate-50 flex justify-end gap-3">
+              <button onClick={() => setShowRejectModal(false)} className="px-5 py-2 rounded-lg text-slate-600 font-bold hover:bg-slate-100 transition-all">ยกเลิก</button>
+              <button onClick={handleReject} disabled={!rejectReason} className="px-5 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold transition-all disabled:opacity-50">ยืนยันการปฏิเสธ</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Done Modal */}
+      {showDoneModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm px-4">
+          <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-slate-200">
+            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+              <h4 className="text-lg font-bold text-slate-900">ยืนยันการเสร็จสิ้นโครงการ</h4>
+              <button onClick={() => setShowDoneModal(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
+                <XCircle className="size-5" />
+              </button>
+            </div>
+            <div className="p-6 flex flex-col gap-4">
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-semibold">ลิงก์โปรแกรม / คู่มือการใช้งาน</label>
+                <input 
+                  type="url"
+                  value={projectLink}
+                  onChange={(e) => setProjectLink(e.target.value)}
+                  className="w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm" 
+                  placeholder="https://..." 
+                />
+              </div>
+            </div>
+            <div className="px-6 py-4 bg-slate-50 flex justify-end gap-3">
+              <button onClick={() => setShowDoneModal(false)} className="px-5 py-2 rounded-lg text-slate-600 font-bold hover:bg-slate-100 transition-all">ยกเลิก</button>
+              <button onClick={handleDone} disabled={!projectLink} className="px-5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold transition-all disabled:opacity-50">ยืนยันส่งงาน</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Assign Modal */}
+      {showAssignModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm px-4">
+          <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-slate-200">
+            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+              <h4 className="text-lg font-bold text-slate-900">มอบหมายงาน</h4>
+              <button onClick={() => setShowAssignModal(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
+                <XCircle className="size-5" />
+              </button>
+            </div>
+            <div className="p-6 flex flex-col gap-4">
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-semibold">เลือกผู้พัฒนาโปรแกรม</label>
+                <select 
+                  value={selectedDevId}
+                  onChange={(e) => setSelectedDevId(e.target.value)}
+                  className="w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm" 
+                >
+                  <option value="">-- เลือกผู้พัฒนา --</option>
+                  {developers.map(dev => (
+                    <option key={dev.id} value={dev.id}>{dev.name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="px-6 py-4 bg-slate-50 flex justify-end gap-3">
+              <button onClick={() => setShowAssignModal(false)} className="px-5 py-2 rounded-lg text-slate-600 font-bold hover:bg-slate-100 transition-all">ยกเลิก</button>
+              <button onClick={currentUser?.role === 'developer' ? handleReassign : handleAssign} disabled={!selectedDevId} className="px-5 py-2 rounded-lg bg-primary hover:bg-secondary text-white font-bold transition-all disabled:opacity-50">มอบหมาย</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Details Modal */}
+      {showDetailsModal && selectedReq && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm px-4 py-8">
+          <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden border border-slate-200 max-h-full flex flex-col">
+            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center sticky top-0 bg-white">
+              <h4 className="text-lg font-bold text-slate-900">รายละเอียดคำขอ {selectedReq.id}</h4>
+              <button onClick={() => setShowDetailsModal(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
+                <XCircle className="size-5" />
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto space-y-6">
+              <div className="flex justify-between items-center">
+                {getStatusBadge(selectedReq.status)}
+                <span className="text-sm text-slate-500">วันที่ขอ: {new Date(selectedReq.date).toLocaleDateString('th-TH')}</span>
+              </div>
+              
+              <div>
+                <h5 className="text-sm font-bold text-slate-500 mb-1">หัวข้อ/ชื่อโปรแกรม</h5>
+                <p className="text-slate-900 font-medium">{selectedReq.topic}</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h5 className="text-sm font-bold text-slate-500 mb-1">แผนกผู้ขอ</h5>
+                  <p className="text-slate-900">{selectedReq.department}</p>
+                </div>
+                <div>
+                  <h5 className="text-sm font-bold text-slate-500 mb-1">ผู้ขอ</h5>
+                  <p className="text-slate-900">{selectedReq.requesterName}</p>
+                </div>
+                <div>
+                  <h5 className="text-sm font-bold text-slate-500 mb-1">จำนวนผู้ใช้งาน</h5>
+                  <p className="text-slate-900">{selectedReq.estimatedUsers}</p>
+                </div>
+                {selectedReq.developerId && (
+                  <div>
+                    <h5 className="text-sm font-bold text-slate-500 mb-1">ผู้รับผิดชอบ (Developer)</h5>
+                    <p className="text-slate-900">{users.find(u => u.id === selectedReq.developerId)?.name}</p>
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <h5 className="text-sm font-bold text-slate-500 mb-1">วัตถุประสงค์และความต้องการ</h5>
+                <div className="bg-slate-50 p-4 rounded-xl text-slate-700 whitespace-pre-wrap">
+                  {selectedReq.objective}
+                </div>
+              </div>
+
+              {selectedReq.currentSystem && (
+                <div>
+                  <h5 className="text-sm font-bold text-slate-500 mb-1">ระบบเดิมที่ใช้งานอยู่</h5>
+                  <p className="text-slate-900">{selectedReq.currentSystem}</p>
+                </div>
+              )}
+
+              {selectedReq.rejectionReason && (
+                <div className="bg-rose-50 p-4 rounded-xl border border-rose-100">
+                  <h5 className="text-sm font-bold text-rose-700 mb-1">เหตุผลที่ปฏิเสธ</h5>
+                  <p className="text-rose-600">{selectedReq.rejectionReason}</p>
+                </div>
+              )}
+
+              {selectedReq.projectLink && (
+                <div className="bg-emerald-50 p-4 rounded-xl border border-emerald-100">
+                  <h5 className="text-sm font-bold text-emerald-700 mb-1">ลิงก์โปรแกรม / คู่มือ</h5>
+                  <a href={selectedReq.projectLink} target="_blank" rel="noreferrer" className="text-emerald-600 hover:underline break-all">
+                    {selectedReq.projectLink}
+                  </a>
+                </div>
+              )}
+
+              {/* Developer Time Estimation (Only visible if accepted or in_progress and user is developer or approver) */}
+              {(selectedReq.status === 'accepted' || selectedReq.status === 'in_progress' || selectedReq.status === 'done') && (currentUser?.role === 'developer' || currentUser?.role === 'approver') && (
+                <div className="border-t border-slate-100 pt-6">
+                  <h5 className="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
+                    <Calendar className="size-4" />
+                    กำหนดการพัฒนา
+                  </h5>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="flex flex-col gap-2">
+                      <label className="text-xs font-semibold text-slate-500">เริ่มพัฒนา (เดือน/ปี)</label>
+                      <input 
+                        type="month" 
+                        value={selectedReq.startMonthYear || ''}
+                        onChange={(e) => updateRequest(selectedReq.id, { startMonthYear: e.target.value })}
+                        disabled={currentUser?.role !== 'developer'}
+                        className="border border-slate-200 rounded-lg p-2 text-sm outline-none focus:border-primary disabled:bg-slate-50"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <label className="text-xs font-semibold text-slate-500">คาดว่าเสร็จ (เดือน/ปี)</label>
+                      <input 
+                        type="month" 
+                        value={selectedReq.expectedFinishMonthYear || ''}
+                        onChange={(e) => updateRequest(selectedReq.id, { expectedFinishMonthYear: e.target.value })}
+                        disabled={currentUser?.role !== 'developer'}
+                        className="border border-slate-200 rounded-lg p-2 text-sm outline-none focus:border-primary disabled:bg-slate-50"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="px-6 py-4 bg-slate-50 flex justify-end">
+              <button onClick={() => setShowDetailsModal(false)} className="px-5 py-2 rounded-lg bg-white border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-all">ปิด</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
