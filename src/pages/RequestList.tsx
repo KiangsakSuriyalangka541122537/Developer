@@ -513,33 +513,33 @@ export default function RequestList() {
               </div>
               
               <div>
-                <h5 className="text-sm font-bold text-slate-500 mb-2">หัวข้อ/ชื่อโปรแกรม</h5>
+                <h5 className="text-base font-bold text-slate-500 mb-2">หัวข้อ/ชื่อโปรแกรม</h5>
                 <p className="text-slate-900 font-bold text-xl">{selectedReq.topic}</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-4">
                 <div>
-                  <h5 className="text-sm font-bold text-slate-500 mb-2">แผนกผู้ขอ</h5>
+                  <h5 className="text-base font-bold text-slate-500 mb-2">แผนกผู้ขอ</h5>
                   <p className="text-slate-900 font-semibold text-base">{selectedReq.department}</p>
                 </div>
                 <div>
-                  <h5 className="text-sm font-bold text-slate-500 mb-2">ผู้ขอ</h5>
+                  <h5 className="text-base font-bold text-slate-500 mb-2">ผู้ขอ</h5>
                   <p className="text-slate-900 font-semibold text-base">{selectedReq.requesterName}</p>
                 </div>
                 <div>
-                  <h5 className="text-sm font-bold text-slate-500 mb-2">จำนวนผู้ใช้งาน</h5>
+                  <h5 className="text-base font-bold text-slate-500 mb-2">จำนวนผู้ใช้งาน</h5>
                   <p className="text-slate-900 font-semibold text-base">{selectedReq.estimatedUsers}</p>
                 </div>
                 {selectedReq.developerId && (
                   <div>
-                    <h5 className="text-sm font-bold text-slate-500 mb-2">ผู้รับผิดชอบ (Developer)</h5>
+                    <h5 className="text-base font-bold text-slate-500 mb-2">ผู้รับผิดชอบ (Developer)</h5>
                     <p className="text-slate-900 font-bold text-base">{users.find(u => u.id === selectedReq.developerId)?.name}</p>
                   </div>
                 )}
               </div>
 
               <div>
-                <h5 className="text-sm font-bold text-slate-500 mb-2">วัตถุประสงค์และความต้องการ</h5>
+                <h5 className="text-base font-bold text-slate-500 mb-2">วัตถุประสงค์และความต้องการ</h5>
                 <div className="bg-slate-50/80 p-4 rounded-xl text-slate-800 font-medium whitespace-pre-wrap">
                   {selectedReq.objective}
                 </div>
@@ -547,21 +547,21 @@ export default function RequestList() {
 
               {selectedReq.currentSystem && (
                 <div>
-                  <h5 className="text-sm font-bold text-slate-500 mb-2">ระบบเดิมที่ใช้งานอยู่</h5>
+                  <h5 className="text-base font-bold text-slate-500 mb-2">ระบบเดิมที่ใช้งานอยู่</h5>
                   <p className="text-slate-900 font-semibold text-base">{selectedReq.currentSystem}</p>
                 </div>
               )}
 
               {selectedReq.rejectionReason && (
                 <div className="bg-rose-50 p-4 rounded-xl border border-rose-100">
-                  <h5 className="text-sm font-bold text-rose-700 mb-2">เหตุผลที่ปฏิเสธ</h5>
+                  <h5 className="text-base font-bold text-rose-700 mb-2">เหตุผลที่ปฏิเสธ</h5>
                   <p className="text-rose-700 font-medium">{selectedReq.rejectionReason}</p>
                 </div>
               )}
 
               {selectedReq.projectLink && (
                 <div className="bg-emerald-50/50 p-5 rounded-xl border border-emerald-100">
-                  <h5 className="text-sm font-bold text-emerald-700 mb-2">ลิงก์โปรแกรม / คู่มือ</h5>
+                  <h5 className="text-base font-bold text-emerald-700 mb-2">ลิงก์โปรแกรม / คู่มือ</h5>
                   <a href={selectedReq.projectLink} target="_blank" rel="noreferrer" className="text-emerald-700 hover:underline font-bold break-all flex items-center gap-2 text-base">
                     <FileText className="size-5" />
                     {selectedReq.projectLink}
@@ -572,7 +572,7 @@ export default function RequestList() {
               {/* Developer Time Estimation */}
               {(selectedReq.status === 'accepted' || selectedReq.status === 'in_progress' || selectedReq.status === 'done') && (currentUser?.role === 'developer' || currentUser?.role === 'approver') && (
                 <div className="border-t border-slate-100 pt-6">
-                  <h5 className="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
+                  <h5 className="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
                     <Calendar className="size-5 text-primary" />
                     กำหนดการพัฒนา
                   </h5>
