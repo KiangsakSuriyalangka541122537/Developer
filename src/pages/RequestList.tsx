@@ -502,9 +502,6 @@ export default function RequestList() {
           <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden border border-slate-200 max-h-full flex flex-col">
             <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center sticky top-0 bg-white">
               <h4 className="text-lg font-bold text-slate-900">รายละเอียดคำขอ {selectedReq.id}</h4>
-              <button onClick={() => setShowDetailsModal(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
-                <XCircle className="size-5" />
-              </button>
             </div>
             <div className="p-6 overflow-y-auto space-y-6 pb-6 scrollbar-hide">
               <div className="flex justify-between items-center">
