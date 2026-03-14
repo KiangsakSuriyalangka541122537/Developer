@@ -114,7 +114,7 @@ export default function RequestList() {
           <table className="w-full text-left">
             <thead>
               <tr className="text-slate-500 text-sm font-medium border-b border-slate-100 bg-slate-50">
-                <th className="py-4 pl-6">รหัสคำขอ</th>
+                <th className="py-4 pl-6">ลำดับ</th>
                 <th className="py-4">ชื่อโครงการ</th>
                 <th className="py-4">แผนก</th>
                 <th className="py-4">วันที่ขอ</th>
@@ -123,9 +123,9 @@ export default function RequestList() {
               </tr>
             </thead>
             <tbody className="text-sm">
-              {visibleRequests.map(req => (
+              {visibleRequests.map((req, index) => (
                 <tr key={req.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
-                  <td className="py-4 pl-6 font-mono font-medium">{req.id}</td>
+                  <td className="py-4 pl-6 font-medium">{index + 1}</td>
                   <td className="py-4">{req.topic}</td>
                   <td className="py-4">{req.department}</td>
                   <td className="py-4">{new Date(req.date).toLocaleDateString('th-TH')}</td>
