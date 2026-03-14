@@ -97,7 +97,7 @@ export default function RequestList() {
       rejected: { label: 'ปฏิเสธ', color: 'status-rejected' }
     };
     const b = badges[status];
-    return <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${b.color}`}>{b.label}</span>;
+    return <span className={`inline-flex items-center justify-center w-28 py-1 rounded-full text-xs font-medium border ${b.color}`}>{b.label}</span>;
   };
 
   return (

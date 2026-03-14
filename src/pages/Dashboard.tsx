@@ -92,7 +92,7 @@ export default function Dashboard() {
                   <td className="py-4">{req.department}</td>
                   <td className="py-4">{new Date(req.date).toLocaleDateString('th-TH')}</td>
                   <td className="py-4">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border status-${req.status.replace('_', '')}`}>
+                    <span className={`inline-flex items-center justify-center w-28 py-1 rounded-full text-xs font-medium border status-${req.status.replace('_', '')}`}>
                       {req.status === 'pending' && 'รออนุมัติ'}
                       {req.status === 'accepted' && 'รับงาน'}
                       {req.status === 'in_progress' && 'กำลังดำเนินการ'}
