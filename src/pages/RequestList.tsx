@@ -500,67 +500,70 @@ export default function RequestList() {
       {showDetailsModal && selectedReq && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm px-4 py-8">
           <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden border border-slate-200 max-h-full flex flex-col">
-            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center sticky top-0 bg-white">
-              <h4 className="text-lg font-bold text-slate-900">รายละเอียดคำขอ {selectedReq.id}</h4>
+            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center sticky top-0 bg-white z-10">
+              <h4 className="text-xl font-black text-slate-900">รายละเอียดคำขอ {selectedReq.id}</h4>
+              <button onClick={() => setShowDetailsModal(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
+                <XCircle className="size-6" />
+              </button>
             </div>
             <div className="p-6 overflow-y-auto space-y-6 pb-6 scrollbar-hide">
               <div className="flex justify-between items-center">
                 {getStatusBadge(selectedReq.status)}
-                <span className="text-sm text-slate-500">วันที่ขอ: {new Date(selectedReq.date).toLocaleDateString('th-TH')}</span>
+                <span className="text-sm font-medium text-slate-500">วันที่ขอ: {new Date(selectedReq.date).toLocaleDateString('th-TH')}</span>
               </div>
               
               <div>
-                <h5 className="text-sm font-bold text-slate-500 mb-1">หัวข้อ/ชื่อโปรแกรม</h5>
-                <p className="text-slate-900 font-medium text-lg">{selectedReq.topic}</p>
+                <h5 className="text-sm font-bold text-slate-500 mb-2">หัวข้อ/ชื่อโปรแกรม</h5>
+                <p className="text-slate-900 font-bold text-xl">{selectedReq.topic}</p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-4">
                 <div>
-                  <h5 className="text-sm font-bold text-slate-500 mb-1">แผนกผู้ขอ</h5>
-                  <p className="text-slate-900">{selectedReq.department}</p>
+                  <h5 className="text-sm font-bold text-slate-500 mb-2">แผนกผู้ขอ</h5>
+                  <p className="text-slate-900 font-semibold text-base">{selectedReq.department}</p>
                 </div>
                 <div>
-                  <h5 className="text-sm font-bold text-slate-500 mb-1">ผู้ขอ</h5>
-                  <p className="text-slate-900">{selectedReq.requesterName}</p>
+                  <h5 className="text-sm font-bold text-slate-500 mb-2">ผู้ขอ</h5>
+                  <p className="text-slate-900 font-semibold text-base">{selectedReq.requesterName}</p>
                 </div>
                 <div>
-                  <h5 className="text-sm font-bold text-slate-500 mb-1">จำนวนผู้ใช้งาน</h5>
-                  <p className="text-slate-900">{selectedReq.estimatedUsers}</p>
+                  <h5 className="text-sm font-bold text-slate-500 mb-2">จำนวนผู้ใช้งาน</h5>
+                  <p className="text-slate-900 font-semibold text-base">{selectedReq.estimatedUsers}</p>
                 </div>
                 {selectedReq.developerId && (
                   <div>
-                    <h5 className="text-sm font-bold text-slate-500 mb-1">ผู้รับผิดชอบ (Developer)</h5>
-                    <p className="text-slate-900 font-semibold text-primary">{users.find(u => u.id === selectedReq.developerId)?.name}</p>
+                    <h5 className="text-sm font-bold text-slate-500 mb-2">ผู้รับผิดชอบ (Developer)</h5>
+                    <p className="text-slate-900 font-bold text-base">{users.find(u => u.id === selectedReq.developerId)?.name}</p>
                   </div>
                 )}
               </div>
 
               <div>
-                <h5 className="text-sm font-bold text-slate-500 mb-1">วัตถุประสงค์และความต้องการ</h5>
-                <div className="bg-slate-50 p-4 rounded-xl text-slate-700 whitespace-pre-wrap border border-slate-100">
+                <h5 className="text-sm font-bold text-slate-500 mb-2">วัตถุประสงค์และความต้องการ</h5>
+                <div className="bg-slate-50/80 p-4 rounded-xl text-slate-800 font-medium whitespace-pre-wrap">
                   {selectedReq.objective}
                 </div>
               </div>
 
               {selectedReq.currentSystem && (
                 <div>
-                  <h5 className="text-sm font-bold text-slate-500 mb-1">ระบบเดิมที่ใช้งานอยู่</h5>
-                  <p className="text-slate-900">{selectedReq.currentSystem}</p>
+                  <h5 className="text-sm font-bold text-slate-500 mb-2">ระบบเดิมที่ใช้งานอยู่</h5>
+                  <p className="text-slate-900 font-semibold text-base">{selectedReq.currentSystem}</p>
                 </div>
               )}
 
               {selectedReq.rejectionReason && (
                 <div className="bg-rose-50 p-4 rounded-xl border border-rose-100">
-                  <h5 className="text-sm font-bold text-rose-700 mb-1">เหตุผลที่ปฏิเสธ</h5>
-                  <p className="text-rose-600">{selectedReq.rejectionReason}</p>
+                  <h5 className="text-sm font-bold text-rose-700 mb-2">เหตุผลที่ปฏิเสธ</h5>
+                  <p className="text-rose-700 font-medium">{selectedReq.rejectionReason}</p>
                 </div>
               )}
 
               {selectedReq.projectLink && (
-                <div className="bg-emerald-50 p-4 rounded-xl border border-emerald-100">
-                  <h5 className="text-sm font-bold text-emerald-700 mb-1">ลิงก์โปรแกรม / คู่มือ</h5>
-                  <a href={selectedReq.projectLink} target="_blank" rel="noreferrer" className="text-emerald-600 hover:underline font-medium break-all flex items-center gap-2">
-                    <FileText className="size-4" />
+                <div className="bg-emerald-50/50 p-5 rounded-xl border border-emerald-100">
+                  <h5 className="text-sm font-bold text-emerald-700 mb-2">ลิงก์โปรแกรม / คู่มือ</h5>
+                  <a href={selectedReq.projectLink} target="_blank" rel="noreferrer" className="text-emerald-700 hover:underline font-bold break-all flex items-center gap-2 text-base">
+                    <FileText className="size-5" />
                     {selectedReq.projectLink}
                   </a>
                 </div>
