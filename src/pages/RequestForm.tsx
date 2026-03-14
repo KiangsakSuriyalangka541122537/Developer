@@ -181,7 +181,7 @@ export default function RequestForm() {
                 <div className="mt-4 space-y-2">
                   {files.map((file, index) => (
                     <div key={index} className="flex items-center justify-between bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
-                      <span className="text-sm text-slate-700 truncate">{file.name}</span>
+                      <span className="text-sm text-slate-500 truncate">{file.name}</span>
                       <button type="button" onClick={() => removeFile(index)} className="text-rose-500 hover:text-rose-700 text-sm font-medium">ลบ</button>
                     </div>
                   ))}
