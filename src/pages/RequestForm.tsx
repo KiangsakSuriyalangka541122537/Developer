@@ -81,7 +81,7 @@ export default function RequestForm() {
                 name="requesterName"
                 value={formData.requesterName} 
                 onChange={handleChange}
-                className="bg-white border-slate-200 rounded-lg h-12 px-4 text-slate-900 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all" 
+                className="border border-slate-200 focus:ring-2 focus:ring-primary focus:border-primary rounded-lg h-12 px-4 bg-white outline-none transition-all" 
                 placeholder="ระบุชื่อ-นามสกุล"
               />
             </div>
