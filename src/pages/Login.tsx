@@ -23,14 +23,14 @@ export default function Login() {
   };
 
   return (
-    <div className="flex-1 flex items-start justify-center pt-4 pb-12">
-      <div className="w-full max-w-md p-6">
-        <div className="flex flex-col items-center mb-6">
-          <div className="size-16 bg-primary/10 flex items-center justify-center mb-3 shadow-sm rounded-xl">
-            <Terminal className="text-primary size-8" />
+    <div className="flex-1 flex items-start justify-center pt-0 -mt-8 md:-mt-12 lg:-mt-16 pb-12">
+      <div className="w-full max-w-md p-2 md:p-4">
+        <div className="flex flex-col items-center mb-4">
+          <div className="size-14 bg-primary/10 flex items-center justify-center mb-2 shadow-sm rounded-xl">
+            <Terminal className="text-primary size-7" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-900">ระบบขอพัฒนาโปรแกรม</h1>
-          <p className="text-slate-500 mt-1">IT Development Request System</p>
+          <h1 className="text-xl font-bold text-slate-900">ระบบขอพัฒนาโปรแกรม</h1>
+          <p className="text-slate-500 text-sm mt-0.5">IT Development Request System</p>
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
