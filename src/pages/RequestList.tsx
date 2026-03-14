@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAppStore, DevRequest } from '../store';
-import { FileText, Edit, Trash2, CheckCircle, XCircle, Forward, UserPlus, Eye, Calendar } from 'lucide-react';
+import { FileText, Edit, Trash2, CheckCircle, XCircle, Forward, UserPlus, UserCheck, Eye, Calendar } from 'lucide-react';
 
 export default function RequestList() {
   const { currentUser, requests, updateRequest, deleteRequest, users } = useAppStore();
@@ -172,7 +172,7 @@ export default function RequestList() {
                           <>
                             {req.status === 'accepted' && (
                               <button onClick={() => handleDevAccept(req)} className="p-1.5 text-slate-400 hover:text-emerald-600 transition-colors" title="รับงาน">
-                                <CheckCircle className="size-5" />
+                                <UserCheck className="size-5" />
                               </button>
                             )}
                             {req.status === 'in_progress' && req.developerId === currentUser.id && (
