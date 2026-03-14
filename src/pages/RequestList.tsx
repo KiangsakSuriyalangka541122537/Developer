@@ -1,6 +1,80 @@
 import { useState } from 'react';
 import { useAppStore, DevRequest } from '../store';
-import { FileText, Edit, Trash2, CheckCircle, XCircle, Forward, UserCheck, Eye, Calendar, MailOpen } from 'lucide-react';
+import { FileText, Edit, Trash2, CheckCircle, XCircle, Forward, UserCheck, Eye, Calendar, MailOpen, ChevronLeft, ChevronRight } from 'lucide-react';
+
+const THAI_MONTHS = [
+  'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+  'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+];
+
+function ThaiMonthPicker({ value, onChange, disabled, label }: { 
+  value: string; 
+  onChange: (val: string) => void; 
+  disabled?: boolean;
+  label: string;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [viewYear, setViewYear] = useState(value ? parseInt(value.split('-')[0]) : new Date().getFullYear());
+  
+  const currentYear = value ? parseInt(value.split('-')[0]) : -1;
+  const currentMonth = value ? parseInt(value.split('-')[1]) - 1 : -1;
+
+  const handleMonthSelect = (monthIndex: number) => {
+    const formattedMonth = (monthIndex + 1).toString().padStart(2, '0');
+    onChange(`${viewYear}-${formattedMonth}`);
+    setIsOpen(false);
+  };
+
+  const displayValue = value ? `${THAI_MONTHS[parseInt(value.split('-')[1]) - 1]} ${parseInt(value.split('-')[0]) + 543}` : 'เลือกเดือน/ปี';
+
+  return (
+    <div className="relative flex flex-col gap-2 w-full">
+      <label className="text-sm font-semibold text-slate-600">{label}</label>
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full rounded-xl border border-slate-200 p-3 text-left outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm bg-white disabled:bg-slate-50 disabled:text-slate-400 flex justify-between items-center transition-all cursor-pointer"
+      >
+        <span className={!value ? 'text-slate-400' : 'text-slate-900'}>{displayValue}</span>
+        <Calendar className="size-4 text-slate-400" />
+      </button>
+
+      {isOpen && !disabled && (
+        <>
+          <div className="fixed inset-0 z-[105]" onClick={() => setIsOpen(false)}></div>
+          <div className="absolute top-full left-0 mt-2 z-[110] bg-white border border-slate-200 rounded-2xl shadow-xl p-4 w-64 animate-in fade-in zoom-in duration-200">
+            <div className="flex justify-between items-center mb-4">
+              <button type="button" onClick={() => setViewYear(viewYear - 1)} className="p-1 hover:bg-slate-100 rounded-lg transition-colors">
+                <ChevronLeft className="size-4" />
+              </button>
+              <span className="font-bold text-slate-900">{viewYear + 543}</span>
+              <button type="button" onClick={() => setViewYear(viewYear + 1)} className="p-1 hover:bg-slate-100 rounded-lg transition-colors">
+                <ChevronRight className="size-4" />
+              </button>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              {THAI_MONTHS.map((month, index) => (
+                <button
+                  key={month}
+                  type="button"
+                  onClick={() => handleMonthSelect(index)}
+                  className={`py-2 text-xs rounded-lg transition-all ${
+                    currentMonth === index && currentYear === viewYear
+                      ? 'bg-primary text-white font-bold'
+                      : 'hover:bg-slate-100 text-slate-600'
+                  }`}
+                >
+                  {month.substring(0, 3)}
+                </button>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
 
 export default function RequestList() {
   const { currentUser, requests, updateRequest, deleteRequest, users } = useAppStore();
@@ -469,26 +543,18 @@ export default function RequestList() {
                     กำหนดการพัฒนา
                   </h5>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div className="flex flex-col gap-2">
-                      <label className="text-sm font-semibold text-slate-600">เริ่มพัฒนา (เดือน/ปี)</label>
-                      <input 
-                        type="month" 
-                        value={selectedReq.startMonthYear || ''}
-                        onChange={(e) => updateRequest(selectedReq.id, { startMonthYear: e.target.value })}
-                        disabled={currentUser?.role !== 'developer'}
-                        className="w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm disabled:bg-slate-50 disabled:text-slate-400 transition-all cursor-pointer"
-                      />
-                    </div>
-                    <div className="flex flex-col gap-2">
-                      <label className="text-sm font-semibold text-slate-600">คาดว่าเสร็จ (เดือน/ปี)</label>
-                      <input 
-                        type="month" 
-                        value={selectedReq.expectedFinishMonthYear || ''}
-                        onChange={(e) => updateRequest(selectedReq.id, { expectedFinishMonthYear: e.target.value })}
-                        disabled={currentUser?.role !== 'developer'}
-                        className="w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm disabled:bg-slate-50 disabled:text-slate-400 transition-all cursor-pointer"
-                      />
-                    </div>
+                    <ThaiMonthPicker 
+                      label="เริ่มพัฒนา (เดือน/ปี)"
+                      value={selectedReq.startMonthYear || ''}
+                      onChange={(val) => updateRequest(selectedReq.id, { startMonthYear: val })}
+                      disabled={currentUser?.role !== 'developer'}
+                    />
+                    <ThaiMonthPicker 
+                      label="คาดว่าเสร็จ (เดือน/ปี)"
+                      value={selectedReq.expectedFinishMonthYear || ''}
+                      onChange={(val) => updateRequest(selectedReq.id, { expectedFinishMonthYear: val })}
+                      disabled={currentUser?.role !== 'developer'}
+                    />
                   </div>
                 </div>
               )}
