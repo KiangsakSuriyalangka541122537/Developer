@@ -269,69 +269,65 @@ export default function RequestList() {
       </div>
 
       {currentUser?.role === 'approver' && (
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          <div className="xl:col-span-3">
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-              <div className="flex items-center gap-2 mb-6">
-                <Briefcase className="size-6 text-primary" />
-                <h3 className="font-bold text-xl text-slate-900">ภาพรวมภาระงานผู้พัฒนาโปรแกรม</h3>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {developerWorkload.map(dev => (
-                  <div key={dev.id} className="border border-slate-100 rounded-2xl p-5 bg-slate-50/50 flex flex-col gap-4 hover:shadow-md transition-shadow">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <span className="font-bold text-slate-900 block text-lg">{dev.name}</span>
-                        <span className="text-xs text-slate-500">{dev.position || 'ผู้พัฒนาโปรแกรม'}</span>
-                      </div>
-                      <span className="text-xs font-bold text-primary bg-primary/10 px-3 py-1 rounded-full border border-primary/20">
-                        รวม {dev.stats.accepted + dev.stats.inProgress + dev.stats.done} งาน
-                      </span>
-                    </div>
-                    
-                    <div className="grid grid-cols-3 gap-2 text-center">
-                      <div className="bg-white p-2 rounded-xl border border-slate-100 shadow-sm">
-                        <p className="text-[10px] text-slate-400 uppercase font-bold mb-1">รับงาน</p>
-                        <p className="font-bold text-blue-600">{dev.stats.accepted}</p>
-                      </div>
-                      <div className="bg-white p-2 rounded-xl border border-slate-100 shadow-sm">
-                        <p className="text-[10px] text-slate-400 uppercase font-bold mb-1">กำลังทำ</p>
-                        <p className="font-bold text-primary">{dev.stats.inProgress}</p>
-                      </div>
-                      <div className="bg-white p-2 rounded-xl border border-slate-100 shadow-sm">
-                        <p className="text-[10px] text-slate-400 uppercase font-bold mb-1">เสร็จสิ้น</p>
-                        <p className="font-bold text-emerald-600">{dev.stats.done}</p>
-                      </div>
-                    </div>
-
-                    <div className="mt-2">
-                      <p className="text-xs font-bold text-slate-500 mb-2 flex items-center gap-1">
-                        <Forward className="size-3" /> งานที่กำลังดำเนินการ:
-                      </p>
-                      <div className="space-y-2">
-                        {dev.activeRequests.length > 0 ? (
-                          dev.activeRequests.slice(0, 3).map(req => (
-                            <div key={req.id} className="text-[11px] bg-white p-2 rounded-lg border border-slate-100 flex justify-between items-center">
-                              <span className="truncate pr-2 text-slate-700 font-medium">{req.topic}</span>
-                              <span className={`shrink-0 px-2 py-0.5 rounded-full text-[9px] font-bold ${
-                                req.status === 'in_progress' ? 'bg-amber-50 text-amber-600 border border-amber-100' : 'bg-blue-50 text-blue-600 border border-blue-100'
-                              }`}>
-                                {req.status === 'in_progress' ? 'กำลังทำ' : 'รับงาน'}
-                              </span>
-                            </div>
-                          ))
-                        ) : (
-                          <p className="text-[11px] text-slate-400 italic">ไม่มีงานที่กำลังดำเนินการ</p>
-                        )}
-                        {dev.activeRequests.length > 3 && (
-                          <p className="text-[10px] text-center text-slate-400 font-medium">และอีก {dev.activeRequests.length - 3} รายการ...</p>
-                        )}
-                      </div>
-                    </div>
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8">
+          <div className="flex items-center gap-3 mb-8">
+            <Briefcase className="size-6 text-emerald-600" />
+            <h3 className="font-bold text-xl text-slate-900">ภาพรวมภาระงานผู้พัฒนาโปรแกรม</h3>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {developerWorkload.map(dev => (
+              <div key={dev.id} className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm flex flex-col gap-6 hover:shadow-md transition-shadow">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <span className="font-bold text-slate-900 block text-xl">{dev.name}</span>
+                    <span className="text-sm text-slate-500 mt-1 block">{dev.position || 'นักวิชาการคอมพิวเตอร์'}</span>
                   </div>
-                ))}
+                  <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200">
+                    รวม {dev.stats.accepted + dev.stats.inProgress + dev.stats.done} งาน
+                  </span>
+                </div>
+                
+                <div className="grid grid-cols-3 gap-3 text-center">
+                  <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
+                    <p className="text-[11px] text-slate-400 font-bold mb-1">รับงาน</p>
+                    <p className="font-bold text-blue-600 text-xl">{dev.stats.accepted}</p>
+                  </div>
+                  <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
+                    <p className="text-[11px] text-slate-400 font-bold mb-1">กำลังทำ</p>
+                    <p className="font-bold text-emerald-700 text-xl">{dev.stats.inProgress}</p>
+                  </div>
+                  <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
+                    <p className="text-[11px] text-slate-400 font-bold mb-1">เสร็จสิ้น</p>
+                    <p className="font-bold text-emerald-600 text-xl">{dev.stats.done}</p>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-xs font-bold text-slate-600 mb-3 flex items-center gap-1.5">
+                    <Forward className="size-3.5" /> งานที่กำลังดำเนินการ:
+                  </p>
+                  <div className="space-y-2">
+                    {dev.activeRequests.length > 0 ? (
+                      dev.activeRequests.slice(0, 3).map(req => (
+                        <div key={req.id} className="bg-white p-3 rounded-xl border border-slate-100 flex justify-between items-center shadow-sm">
+                          <span className="truncate pr-3 text-xs text-slate-700 font-medium">{req.topic}</span>
+                          <span className={`shrink-0 px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                            req.status === 'in_progress' ? 'bg-amber-50 text-amber-600 border border-amber-100' : 'bg-blue-50 text-blue-600 border border-blue-100'
+                          }`}>
+                            {req.status === 'in_progress' ? 'กำลังทำ' : 'รับงาน'}
+                          </span>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-xs text-slate-400 italic">ไม่มีงานที่กำลังดำเนินการ</p>
+                    )}
+                    {dev.activeRequests.length > 3 && (
+                      <p className="text-[11px] text-center text-slate-400 font-medium mt-2">และอีก {dev.activeRequests.length - 3} รายการ...</p>
+                    )}
+                  </div>
+                </div>
               </div>
-            </div>
+            ))}
           </div>
         </div>
       )}
