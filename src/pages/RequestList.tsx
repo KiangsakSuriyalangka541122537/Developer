@@ -169,13 +169,9 @@ export default function RequestList() {
         startMonthYear: editStartMonth, 
         expectedFinishMonthYear: editEndMonth 
       });
-      // Update local selectedReq to reflect changes in UI
-      setSelectedReq({
-        ...selectedReq,
-        startMonthYear: editStartMonth,
-        expectedFinishMonthYear: editEndMonth
-      });
       alert('บันทึกข้อมูลเรียบร้อยแล้ว');
+      setShowDetailsModal(false);
+      setSelectedReq(null);
     }
   };
 
@@ -594,22 +590,27 @@ export default function RequestList() {
                       disabled={currentUser?.role !== 'developer'}
                     />
                   </div>
-                  {currentUser?.role === 'developer' && (selectedReq.status === 'accepted' || selectedReq.status === 'in_progress') && (
-                    <div className="mt-6 flex justify-end">
-                      <button 
-                        onClick={handleSaveSchedule}
-                        className="bg-primary text-white px-8 py-2.5 rounded-xl font-bold hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 flex items-center gap-2"
-                      >
-                        <CheckCircle className="size-5" />
-                        บันทึกกำหนดการ
-                      </button>
-                    </div>
-                  )}
                 </div>
               )}
-            </div>
-            <div className="px-6 py-4 bg-slate-50 flex justify-end">
-              <button onClick={() => setShowDetailsModal(false)} className="px-5 py-2 rounded-lg bg-white border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-all">ปิด</button>
+
+              {/* Modal Actions */}
+              <div className="mt-8 flex justify-end gap-3 border-t border-slate-100 pt-6">
+                <button 
+                  onClick={() => setShowDetailsModal(false)}
+                  className="px-8 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-all"
+                >
+                  ปิด
+                </button>
+                {currentUser?.role === 'developer' && (selectedReq.status === 'accepted' || selectedReq.status === 'in_progress') && (
+                  <button 
+                    onClick={handleSaveSchedule}
+                    className="bg-primary text-white px-8 py-2.5 rounded-xl font-bold hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 flex items-center gap-2"
+                  >
+                    <CheckCircle className="size-5" />
+                    บันทึกกำหนดการ
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>
