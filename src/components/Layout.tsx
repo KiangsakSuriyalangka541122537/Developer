@@ -24,7 +24,7 @@ export default function Layout() {
         
         <div className="flex flex-1 justify-end gap-6 items-center">
           <nav className="hidden md:flex gap-6">
-            <Link to="/" className={`font-medium ${location.pathname === '/' ? 'text-primary' : 'text-slate-600 hover:text-primary'}`}>Dashboard ภาพรวม</Link>
+            <Link to="/" className={`font-medium ${location.pathname === '/' ? 'text-primary' : 'text-slate-600 hover:text-primary'}`}>Dashboard</Link>
             {currentUser?.role === 'department' && (
               <Link to="/request" className={`font-medium ${location.pathname === '/request' ? 'text-primary' : 'text-slate-600 hover:text-primary'}`}>ขอพัฒนาโปรแกรม</Link>
             )}
