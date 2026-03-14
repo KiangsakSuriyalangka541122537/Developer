@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { useAppStore, User, Role } from '../store';
-import { Users as UsersIcon, Plus, Edit2, Trash2, Save, XCircle } from 'lucide-react';
+import { Users as UsersIcon, Plus, Edit2, Trash2, Save, XCircle, Building2, UserCircle } from 'lucide-react';
+
+type TabType = 'department' | 'staff';
 
 export default function Users() {
   const { users, addUser, updateUser, deleteUser, currentUser } = useAppStore();
+  const [activeTab, setActiveTab] = useState<TabType>('department');
   const [showModal, setShowModal] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   
@@ -30,7 +33,7 @@ export default function Users() {
       setFormData({
         username: '',
         password: '',
-        role: 'department',
+        role: activeTab === 'department' ? 'department' : 'approver',
         name: '',
         position: ''
       });
@@ -53,10 +56,15 @@ export default function Users() {
       alert('ไม่สามารถลบบัญชีของตนเองได้');
       return;
     }
-    if (window.confirm('คุณต้องการลบบุคลากรนี้ใช่หรือไม่?')) {
+    if (window.confirm('คุณต้องการลบข้อมูลนี้ใช่หรือไม่?')) {
       await deleteUser(id);
     }
   };
+
+  const filteredUsers = users.filter(u => {
+    if (activeTab === 'department') return u.role === 'department';
+    return u.role !== 'department';
+  });
 
   return (
     <div className="space-y-8 overflow-hidden">
@@ -67,7 +75,25 @@ export default function Users() {
         </div>
         <button onClick={() => handleOpenModal()} className="flex items-center justify-center gap-2 bg-primary hover:bg-secondary text-white px-6 py-3 rounded-xl font-bold transition-all shadow-md">
           <Plus className="size-5" />
-          เพิ่มบุคลากร
+          {activeTab === 'department' ? 'เพิ่มแผนก' : 'เพิ่มผู้ใช้งาน'}
+        </button>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex gap-2 p-1 bg-slate-100 rounded-2xl w-fit">
+        <button 
+          onClick={() => setActiveTab('department')}
+          className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold transition-all ${activeTab === 'department' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+        >
+          <Building2 className="size-5" />
+          จัดการแผนก
+        </button>
+        <button 
+          onClick={() => setActiveTab('staff')}
+          className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold transition-all ${activeTab === 'staff' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+        >
+          <UserCircle className="size-5" />
+          จัดการผู้ใช้งาน
         </button>
       </div>
 
@@ -76,27 +102,29 @@ export default function Users() {
           <table className="w-full text-left">
             <thead>
               <tr className="text-slate-500 text-sm font-medium border-b border-slate-100 bg-slate-50">
-                <th className="py-4 pl-6">ชื่อแผนก</th>
+                <th className="py-4 pl-6">{activeTab === 'department' ? 'ชื่อแผนก' : 'ชื่อ-นามสกุล'}</th>
                 <th className="py-4">ชื่อผู้ใช้งาน (Username)</th>
-                <th className="py-4">บทบาท (Role)</th>
+                {activeTab === 'staff' && <th className="py-4 text-center">บทบาท (Role)</th>}
                 <th className="py-4">ตำแหน่ง</th>
                 <th className="py-4 text-right pr-6">จัดการ</th>
               </tr>
             </thead>
             <tbody className="text-sm">
-              {users.map(user => (
+              {filteredUsers.length > 0 ? filteredUsers.map(user => (
                 <tr key={user.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
                   <td className="py-4 pl-6 font-medium text-slate-900">{user.name}</td>
                   <td className="py-4 text-slate-500">{user.username}</td>
-                  <td className="py-4">
-                    <span className={`inline-flex items-center justify-center w-32 py-1 rounded-full text-xs font-medium border ${
-                      user.role === 'approver' ? 'bg-purple-50 text-purple-700 border-purple-200' :
-                      user.role === 'developer' ? 'bg-blue-50 text-blue-700 border-blue-200' :
-                      'bg-emerald-50 text-emerald-700 border-emerald-200'
-                    }`}>
-                      {user.role === 'approver' ? 'ผู้อนุมัติงาน' : user.role === 'developer' ? 'ผู้พัฒนาโปรแกรม' : 'แผนก'}
-                    </span>
-                  </td>
+                  {activeTab === 'staff' && (
+                    <td className="py-4 text-center">
+                      <span className={`inline-flex items-center justify-center w-32 py-1 rounded-full text-xs font-medium border ${
+                        user.role === 'approver' ? 'bg-purple-50 text-purple-700 border-purple-200' :
+                        user.role === 'developer' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                        'bg-emerald-50 text-emerald-700 border-emerald-200'
+                      }`}>
+                        {user.role === 'approver' ? 'ผู้อนุมัติงาน' : user.role === 'developer' ? 'ผู้พัฒนาโปรแกรม' : 'แผนก'}
+                      </span>
+                    </td>
+                  )}
                   <td className="py-4 text-slate-500">{user.position || '-'}</td>
                   <td className="py-4 text-right pr-6">
                     <div className="flex justify-end gap-2">
@@ -109,7 +137,13 @@ export default function Users() {
                     </div>
                   </td>
                 </tr>
-              ))}
+              )) : (
+                <tr>
+                  <td colSpan={activeTab === 'staff' ? 5 : 4} className="py-10 text-center text-slate-400 italic">
+                    ไม่พบข้อมูล
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -119,7 +153,10 @@ export default function Users() {
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm px-4 py-8">
           <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-slate-200">
             <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
-              <h4 className="text-lg font-bold text-slate-900">{editingUser ? 'แก้ไขข้อมูลบุคลากร' : 'เพิ่มบุคลากรใหม่'}</h4>
+              <h4 className="text-lg font-bold text-slate-900">
+                {editingUser ? 'แก้ไขข้อมูล' : 'เพิ่มข้อมูลใหม่'} 
+                ({activeTab === 'department' ? 'แผนก' : 'ผู้ใช้งาน'})
+              </h4>
               <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
                 <XCircle className="size-5" />
               </button>
@@ -127,13 +164,16 @@ export default function Users() {
             <form onSubmit={handleSubmit}>
               <div className="p-6 flex flex-col gap-4">
                 <div className="flex flex-col gap-2">
-                  <label className="text-sm font-semibold">ชื่อแผนก <span className="text-rose-500">*</span></label>
+                  <label className="text-sm font-semibold">
+                    {activeTab === 'department' ? 'ชื่อแผนก' : 'ชื่อ-นามสกุล'} <span className="text-rose-500">*</span>
+                  </label>
                   <input 
                     type="text" 
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
                     className="w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm" 
                     required
+                    placeholder={activeTab === 'department' ? 'เช่น งานเทคโนโลยีสารสนเทศ' : 'เช่น นายสมชาย ใจดี'}
                   />
                 </div>
                 <div className="flex flex-col gap-2">
@@ -156,28 +196,39 @@ export default function Users() {
                     required
                   />
                 </div>
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm font-semibold">บทบาท (Role) <span className="text-rose-500">*</span></label>
-                  <select 
-                    value={formData.role}
-                    onChange={(e) => setFormData({...formData, role: e.target.value as Role})}
-                    className="w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm" 
-                    required
-                  >
-                    <option value="department">แผนก</option>
-                    <option value="approver">ผู้อนุมัติงาน</option>
-                    <option value="developer">ผู้พัฒนาโปรแกรม</option>
-                  </select>
-                </div>
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm font-semibold">ตำแหน่ง (ถ้ามี)</label>
-                  <input 
-                    type="text" 
-                    value={formData.position}
-                    onChange={(e) => setFormData({...formData, position: e.target.value})}
-                    className="w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm" 
-                  />
-                </div>
+                
+                {activeTab === 'staff' && (
+                  <>
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm font-semibold">บทบาท (Role) <span className="text-rose-500">*</span></label>
+                      <select 
+                        value={formData.role}
+                        onChange={(e) => setFormData({...formData, role: e.target.value as Role})}
+                        className="w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm" 
+                        required
+                      >
+                        <option value="approver">ผู้อนุมัติงาน</option>
+                        <option value="developer">ผู้พัฒนาโปรแกรม</option>
+                      </select>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm font-semibold">ตำแหน่ง</label>
+                      <input 
+                        type="text" 
+                        value={formData.position}
+                        onChange={(e) => setFormData({...formData, position: e.target.value})}
+                        className="w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm" 
+                        placeholder="เช่น นักวิชาการคอมพิวเตอร์"
+                      />
+                    </div>
+                  </>
+                )}
+
+                {activeTab === 'department' && (
+                  <div className="flex flex-col gap-2">
+                    <label className="text-sm font-semibold text-slate-400 italic">หมายเหตุ: บทบาทจะถูกกำหนดเป็น 'แผนก' โดยอัตโนมัติ</label>
+                  </div>
+                )}
               </div>
               <div className="px-6 py-4 bg-slate-50 flex justify-end gap-3">
                 <button type="button" onClick={() => setShowModal(false)} className="px-5 py-2 rounded-lg text-slate-600 font-bold hover:bg-slate-100 transition-all">ยกเลิก</button>
