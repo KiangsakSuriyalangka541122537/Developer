@@ -76,7 +76,7 @@ export default function Users() {
           <table className="w-full text-left">
             <thead>
               <tr className="text-slate-500 text-sm font-medium border-b border-slate-100 bg-slate-50">
-                <th className="py-4 pl-6">ชื่อ-นามสกุล / แผนก</th>
+                <th className="py-4 pl-6">ชื่อแผนก</th>
                 <th className="py-4">ชื่อผู้ใช้งาน (Username)</th>
                 <th className="py-4">บทบาท (Role)</th>
                 <th className="py-4">ตำแหน่ง</th>
@@ -127,7 +127,7 @@ export default function Users() {
             <form onSubmit={handleSubmit}>
               <div className="p-6 flex flex-col gap-4">
                 <div className="flex flex-col gap-2">
-                  <label className="text-sm font-semibold">ชื่อ-นามสกุล / ชื่อแผนก <span className="text-rose-500">*</span></label>
+                  <label className="text-sm font-semibold">ชื่อแผนก <span className="text-rose-500">*</span></label>
                   <input 
                     type="text" 
                     value={formData.name}
