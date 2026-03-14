@@ -11,7 +11,7 @@
   --font-sans: "Kanit", sans-serif;
 }
 
-body {
+html, body {
   font-family: var(--font-sans);
   background-color: var(--color-background-light);
   color: #1e293b;
@@ -19,7 +19,7 @@ body {
   -ms-overflow-style: none; /* IE and Edge */
 }
 
-body::-webkit-scrollbar {
+html::-webkit-scrollbar, body::-webkit-scrollbar {
   display: none; /* Chrome, Safari, Opera */
 }
 

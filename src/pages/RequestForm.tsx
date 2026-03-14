@@ -161,13 +161,16 @@ export default function RequestForm() {
 
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-slate-700">แนบไฟล์ประกอบ (รูปภาพ, PDF, Word, Excel)</label>
-              <label className="border-2 border-dashed border-primary/20 rounded-xl p-8 flex flex-col items-center justify-center gap-3 bg-primary/5 hover:bg-primary/10 transition-colors cursor-pointer group">
-                <UploadCloud className="size-10 text-primary group-hover:scale-110 transition-transform" />
+              <label className={`border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center gap-3 transition-colors cursor-pointer group ${formData.file ? 'border-primary bg-primary/5' : 'border-primary/20 bg-primary/5 hover:bg-primary/10'}`}>
+                <UploadCloud className={`size-10 transition-transform ${formData.file ? 'text-primary' : 'text-primary group-hover:scale-110'}`} />
                 <div className="text-center">
                   <p className="text-slate-700 font-medium">
                     {formData.file ? formData.file.name : 'คลิกเพื่ออัปโหลด หรือลากไฟล์มาวางที่นี่'}
                   </p>
-                  <p className="text-xs text-slate-500">รองรับไฟล์ JPG, PNG, PDF, DOCX, XLSX (สูงสุด 10MB)</p>
+                  {formData.file && (
+                    <p className="text-xs text-primary font-bold mt-1">อัปโหลดไฟล์แล้ว</p>
+                  )}
+                  <p className="text-xs text-slate-500 mt-1">รองรับไฟล์ JPG, PNG, PDF, DOCX, XLSX (สูงสุด 10MB)</p>
                 </div>
                 <input type="file" className="hidden" onChange={handleFileChange} accept=".jpg,.png,.pdf,.doc,.docx,.xls,.xlsx" />
               </label>
