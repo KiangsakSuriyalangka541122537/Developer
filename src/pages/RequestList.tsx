@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAppStore, DevRequest } from '../store';
 import { FileText, Edit, Trash2, CheckCircle, XCircle, Forward, UserCheck, Eye, Calendar, MailOpen, ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -92,6 +92,8 @@ function ThaiMonthPicker({ value, onChange, disabled, label }: {
 export default function RequestList() {
   const { currentUser, requests, updateRequest, deleteRequest, users } = useAppStore();
   const [selectedReq, setSelectedReq] = useState<DevRequest | null>(null);
+  const [editStartMonth, setEditStartMonth] = useState('');
+  const [editEndMonth, setEditEndMonth] = useState('');
   const [rejectReason, setRejectReason] = useState('');
   const [projectLink, setProjectLink] = useState('');
   const [showRejectModal, setShowRejectModal] = useState(false);
@@ -108,6 +110,13 @@ export default function RequestList() {
   });
 
   const developers = users.filter(u => u.role === 'developer');
+
+  useEffect(() => {
+    if (selectedReq) {
+      setEditStartMonth(selectedReq.startMonthYear || '');
+      setEditEndMonth(selectedReq.expectedFinishMonthYear || '');
+    }
+  }, [selectedReq]);
 
   // Filter requests based on role
   let visibleRequests = requests;
@@ -151,6 +160,22 @@ export default function RequestList() {
       setShowAssignModal(false);
       setSelectedDevId('');
       setSelectedReq(null);
+    }
+  };
+
+  const handleSaveSchedule = async () => {
+    if (selectedReq) {
+      await updateRequest(selectedReq.id, { 
+        startMonthYear: editStartMonth, 
+        expectedFinishMonthYear: editEndMonth 
+      });
+      // Update local selectedReq to reflect changes in UI
+      setSelectedReq({
+        ...selectedReq,
+        startMonthYear: editStartMonth,
+        expectedFinishMonthYear: editEndMonth
+      });
+      alert('บันทึกข้อมูลเรียบร้อยแล้ว');
     }
   };
 
@@ -558,17 +583,28 @@ export default function RequestList() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <ThaiMonthPicker 
                       label="เริ่มพัฒนา (เดือน/ปี)"
-                      value={selectedReq.startMonthYear || ''}
-                      onChange={(val) => updateRequest(selectedReq.id, { startMonthYear: val })}
+                      value={editStartMonth}
+                      onChange={(val) => setEditStartMonth(val)}
                       disabled={currentUser?.role !== 'developer'}
                     />
                     <ThaiMonthPicker 
                       label="คาดว่าเสร็จ (เดือน/ปี)"
-                      value={selectedReq.expectedFinishMonthYear || ''}
-                      onChange={(val) => updateRequest(selectedReq.id, { expectedFinishMonthYear: val })}
+                      value={editEndMonth}
+                      onChange={(val) => setEditEndMonth(val)}
                       disabled={currentUser?.role !== 'developer'}
                     />
                   </div>
+                  {currentUser?.role === 'developer' && (selectedReq.status === 'accepted' || selectedReq.status === 'in_progress') && (
+                    <div className="mt-6 flex justify-end">
+                      <button 
+                        onClick={handleSaveSchedule}
+                        className="bg-primary text-white px-8 py-2.5 rounded-xl font-bold hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 flex items-center gap-2"
+                      >
+                        <CheckCircle className="size-5" />
+                        บันทึกกำหนดการ
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
