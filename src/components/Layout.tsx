@@ -23,16 +23,16 @@ export default function Layout() {
         </Link>
         
         <div className="flex flex-1 justify-end gap-6 items-center">
-          <nav className="hidden md:flex gap-6">
-            <Link to="/" className={`font-medium ${location.pathname === '/' ? 'text-primary' : 'text-slate-600 hover:text-primary'}`}>Dashboard</Link>
+          <nav className="hidden md:flex gap-2">
+            <Link to="/" className={`font-medium px-3 py-2 rounded-xl transition-all ${location.pathname === '/' ? 'text-primary bg-primary/5' : 'text-slate-600 hover:text-primary hover:bg-slate-50'}`}>Dashboard</Link>
             {currentUser?.role === 'department' && (
-              <Link to="/request" className={`font-medium ${location.pathname === '/request' ? 'text-primary' : 'text-slate-600 hover:text-primary'}`}>ขอพัฒนาโปรแกรม</Link>
+              <Link to="/request" className={`font-medium px-3 py-2 rounded-xl transition-all ${location.pathname === '/request' ? 'text-primary bg-primary/5' : 'text-slate-600 hover:text-primary hover:bg-slate-50'}`}>ขอพัฒนาโปรแกรม</Link>
             )}
             {currentUser && (
-               <Link to="/list" className={`font-medium ${location.pathname === '/list' ? 'text-primary' : 'text-slate-600 hover:text-primary'}`}>รายการคำขอ</Link>
+               <Link to="/list" className={`font-medium px-3 py-2 rounded-xl transition-all ${location.pathname === '/list' ? 'text-primary bg-primary/5' : 'text-slate-600 hover:text-primary hover:bg-slate-50'}`}>รายการคำขอ</Link>
             )}
             {currentUser?.role === 'approver' && (
-               <Link to="/users" className={`font-medium ${location.pathname === '/users' ? 'text-primary' : 'text-slate-600 hover:text-primary'}`}>จัดการบุคลากร</Link>
+               <Link to="/users" className={`font-medium px-3 py-2 rounded-xl transition-all ${location.pathname === '/users' ? 'text-primary bg-primary/5' : 'text-slate-600 hover:text-primary hover:bg-slate-50'}`}>จัดการบุคลากร</Link>
             )}
           </nav>
 
