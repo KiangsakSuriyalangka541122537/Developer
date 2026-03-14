@@ -8,6 +8,7 @@ export default function RequestForm() {
   const navigate = useNavigate();
   
   const [formData, setFormData] = useState({
+    requesterName: currentUser?.name || '',
     topic: '',
     estimatedUsers: '',
     objective: '',
@@ -27,13 +28,13 @@ export default function RequestForm() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentUser) return;
 
-    addRequest({
+    await addRequest({
       requesterId: currentUser.id,
-      requesterName: currentUser.name,
+      requesterName: formData.requesterName || currentUser.name,
       department: currentUser.name, // Assuming department name is the user's name for department role
       date: new Date().toISOString(),
       topic: formData.topic,
@@ -48,6 +49,7 @@ export default function RequestForm() {
 
   const handleReset = () => {
     setFormData({
+      requesterName: currentUser?.name || '',
       topic: '',
       estimatedUsers: '',
       objective: '',
@@ -71,9 +73,11 @@ export default function RequestForm() {
               <label className="text-sm font-medium text-slate-700">ชื่อ-นามสกุล</label>
               <input 
                 type="text" 
-                value={currentUser?.name || ''} 
-                className="bg-slate-50 border-slate-200 rounded-lg h-12 px-4 text-slate-500 cursor-not-allowed outline-none" 
-                readOnly 
+                name="requesterName"
+                value={formData.requesterName} 
+                onChange={handleChange}
+                className="bg-white border-slate-200 rounded-lg h-12 px-4 text-slate-900 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all" 
+                placeholder="ระบุชื่อ-นามสกุล"
               />
             </div>
             <div className="flex flex-col gap-2">

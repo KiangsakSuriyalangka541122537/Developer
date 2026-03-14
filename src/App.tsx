@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
@@ -22,6 +22,14 @@ function ProtectedRoute({ children, allowedRoles }: { children: React.ReactNode,
 }
 
 export default function App() {
+  const { fetchData, currentUser } = useAppStore();
+
+  useEffect(() => {
+    if (currentUser) {
+      fetchData();
+    }
+  }, [currentUser, fetchData]);
+
   return (
     <Router>
       <Routes>

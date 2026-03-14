@@ -38,23 +38,23 @@ export default function Users() {
     setShowModal(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (editingUser) {
-      updateUser(editingUser.id, formData);
+      await updateUser(editingUser.id, formData);
     } else {
-      addUser(formData);
+      await addUser(formData);
     }
     setShowModal(false);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (id === currentUser?.id) {
       alert('ไม่สามารถลบบัญชีของตนเองได้');
       return;
     }
     if (window.confirm('คุณต้องการลบบุคลากรนี้ใช่หรือไม่?')) {
-      deleteUser(id);
+      await deleteUser(id);
     }
   };
 

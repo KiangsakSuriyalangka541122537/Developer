@@ -17,10 +17,10 @@ export default function Profile() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (currentUser) {
-      updateUser(currentUser.id, formData);
+      await updateUser(currentUser.id, formData);
       setMessage('บันทึกข้อมูลสำเร็จ');
       setTimeout(() => setMessage(''), 3000);
     }

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { supabase } from './lib/supabase';
 
 export type Role = 'department' | 'approver' | 'developer';
 export type RequestStatus = 'pending' | 'accepted' | 'in_progress' | 'done' | 'rejected';
@@ -37,147 +38,191 @@ interface AppState {
   currentUser: User | null;
   users: User[];
   requests: DevRequest[];
-  login: (username: string, password: string) => boolean;
+  isLoading: boolean;
+  fetchData: () => Promise<void>;
+  login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
-  addRequest: (req: Omit<DevRequest, 'id' | 'status' | 'createdAt'>) => void;
-  updateRequest: (id: string, updates: Partial<DevRequest>) => void;
-  deleteRequest: (id: string) => void;
-  updateUser: (id: string, updates: Partial<User>) => void;
-  addUser: (user: Omit<User, 'id'>) => void;
-  deleteUser: (id: string) => void;
+  addRequest: (req: Omit<DevRequest, 'id' | 'status' | 'createdAt'>) => Promise<void>;
+  updateRequest: (id: string, updates: Partial<DevRequest>) => Promise<void>;
+  deleteRequest: (id: string) => Promise<void>;
+  updateUser: (id: string, updates: Partial<User>) => Promise<void>;
+  addUser: (user: Omit<User, 'id'>) => Promise<void>;
+  deleteUser: (id: string) => Promise<void>;
 }
-
-const initialUsers: User[] = [
-  { id: '1', username: 'it', password: 'it', role: 'department', name: 'งานเทคโนโลยีสารสนเทศ' },
-  { id: '2', username: 'fin', password: 'fin', role: 'department', name: 'งานการเงิน' },
-  { id: '3', username: 'or', password: 'or', role: 'department', name: 'งานผ่าตัด' },
-  { id: '4', username: 'tor', password: 'tor', role: 'approver', name: 'นายกิตติพงษ์ ชัยศรี', position: 'นักวิชาการคอมพิวเตอร์' },
-  { id: '5', username: 'team', password: 'team', role: 'developer', name: 'นายวิทวัส หมายมั่น', position: 'นักวิชาการคอมพิวเตอร์' },
-  { id: '6', username: 'parn', password: 'parn', role: 'developer', name: 'นางสาวนิธิพร ใสปา', position: 'นักวิชาการคอมพิวเตอร์' }
-];
-
-const initialRequests: DevRequest[] = [
-  {
-    id: 'REQ-2026-005',
-    requesterId: '2',
-    requesterName: 'งานการเงิน',
-    department: 'งานการเงิน',
-    date: new Date(Date.now() - 86400000 * 1).toISOString(),
-    topic: 'ระบบเบิกจ่ายออนไลน์',
-    estimatedUsers: '21-50',
-    objective: 'เพื่อลดการใช้กระดาษและเพิ่มความรวดเร็วในการอนุมัติการเบิกจ่าย',
-    currentSystem: 'Paper, Excel',
-    attachmentUrl: 'requirement_finance.pdf',
-    status: 'pending',
-    createdAt: new Date(Date.now() - 86400000 * 1).toISOString()
-  },
-  {
-    id: 'REQ-2026-004',
-    requesterId: '3',
-    requesterName: 'งานผ่าตัด',
-    department: 'งานผ่าตัด',
-    date: new Date(Date.now() - 86400000 * 3).toISOString(),
-    topic: 'ระบบจองคิวห้องผ่าตัด',
-    estimatedUsers: '51+',
-    objective: 'จัดการคิวห้องผ่าตัดให้มีประสิทธิภาพ ลดความซ้ำซ้อน',
-    currentSystem: 'Google Calendar',
-    status: 'accepted',
-    developerId: '5',
-    createdAt: new Date(Date.now() - 86400000 * 3).toISOString()
-  },
-  {
-    id: 'REQ-2026-003',
-    requesterId: '1',
-    requesterName: 'งานเทคโนโลยีสารสนเทศ',
-    department: 'งานเทคโนโลยีสารสนเทศ',
-    date: new Date(Date.now() - 86400000 * 7).toISOString(),
-    topic: 'ระบบแจ้งซ่อมอุปกรณ์คอมพิวเตอร์ (Helpdesk)',
-    estimatedUsers: '51+',
-    objective: 'ติดตามสถานะการแจ้งซ่อมและประเมินผลการทำงานของช่าง',
-    currentSystem: 'Line Group',
-    status: 'in_progress',
-    developerId: '6',
-    startMonthYear: '03/2026',
-    expectedFinishMonthYear: '05/2026',
-    createdAt: new Date(Date.now() - 86400000 * 7).toISOString()
-  },
-  {
-    id: 'REQ-2026-002',
-    requesterId: '2',
-    requesterName: 'งานการเงิน',
-    department: 'งานการเงิน',
-    date: new Date(Date.now() - 86400000 * 30).toISOString(),
-    topic: 'รายงานสรุปรายได้ประจำวัน',
-    estimatedUsers: '1-5',
-    objective: 'ดึงข้อมูลจากระบบ HIS มาแสดงผลในรูปแบบ Dashboard',
-    currentSystem: 'HIS Export to Excel',
-    status: 'done',
-    developerId: '5',
-    startMonthYear: '02/2026',
-    expectedFinishMonthYear: '02/2026',
-    projectLink: 'http://internal-report/finance',
-    createdAt: new Date(Date.now() - 86400000 * 30).toISOString()
-  },
-  {
-    id: 'REQ-2026-001',
-    requesterId: '3',
-    requesterName: 'งานผ่าตัด',
-    department: 'งานผ่าตัด',
-    date: new Date(Date.now() - 86400000 * 45).toISOString(),
-    topic: 'แอปพลิเคชันแจ้งเตือนหมอผ่านมือถือ',
-    estimatedUsers: '21-50',
-    objective: 'แจ้งเตือนแพทย์เมื่อถึงคิวผ่าตัด',
-    currentSystem: 'โทรศัพท์',
-    status: 'rejected',
-    rejectionReason: 'อยู่นอกเหนือขอบเขตการพัฒนาระบบภายใน ปัจจุบันมีระบบ Paging ที่ใช้งานได้ดีอยู่แล้ว',
-    createdAt: new Date(Date.now() - 86400000 * 45).toISOString()
-  }
-];
 
 export const useAppStore = create<AppState>()(
   persist(
     (set, get) => ({
       currentUser: null,
-      users: initialUsers,
-      requests: initialRequests,
-      login: (username, password) => {
-        const user = get().users.find(u => u.username === username && u.password === password);
-        if (user) {
-          set({ currentUser: user });
-          return true;
+      users: [],
+      requests: [],
+      isLoading: false,
+
+      fetchData: async () => {
+        set({ isLoading: true });
+        try {
+          const [usersRes, requestsRes] = await Promise.all([
+            supabase.from('Dev-users').select('*'),
+            supabase.from('Dev-requests').select('*').order('created_at', { ascending: false })
+          ]);
+
+          if (usersRes.data && requestsRes.data) {
+            const users = usersRes.data.map(u => ({
+              id: u.id,
+              username: u.username,
+              password: u.password,
+              role: u.role,
+              name: u.name,
+              position: u.position
+            }));
+
+            const requests = requestsRes.data.map(r => ({
+              id: r.id,
+              requesterId: r.requester_id,
+              requesterName: r.requester_name,
+              department: r.department,
+              date: r.date,
+              topic: r.topic,
+              estimatedUsers: r.estimated_users,
+              objective: r.objective,
+              currentSystem: r.current_system,
+              attachmentUrl: r.attachment_url,
+              status: r.status,
+              developerId: r.developer_id,
+              rejectionReason: r.rejection_reason,
+              startMonthYear: r.start_month_year,
+              expectedFinishMonthYear: r.expected_finish_month_year,
+              projectLink: r.project_link,
+              createdAt: r.created_at
+            }));
+
+            set({ users, requests });
+          }
+        } catch (error) {
+          console.error("Error fetching data:", error);
+        } finally {
+          set({ isLoading: false });
+        }
+      },
+
+      login: async (username, password) => {
+        try {
+          const { data, error } = await supabase
+            .from('Dev-users')
+            .select('*')
+            .eq('username', username)
+            .eq('password', password)
+            .single();
+
+          if (data && !error) {
+            const user: User = {
+              id: data.id,
+              username: data.username,
+              password: data.password,
+              role: data.role,
+              name: data.name,
+              position: data.position
+            };
+            set({ currentUser: user });
+            await get().fetchData();
+            return true;
+          }
+        } catch (error) {
+          console.error("Login error:", error);
         }
         return false;
       },
-      logout: () => set({ currentUser: null }),
-      addRequest: (reqData) => set((state) => {
-        const newId = `REQ-${new Date().getFullYear()}-${String(state.requests.length + 1).padStart(3, '0')}`;
-        const newReq: DevRequest = {
-          ...reqData,
+
+      logout: () => set({ currentUser: null, requests: [] }),
+
+      addRequest: async (reqData) => {
+        const newId = `REQ-${new Date().getFullYear()}-${String(get().requests.length + 1).padStart(3, '0')}`;
+        const newReq = {
           id: newId,
+          requester_id: reqData.requesterId,
+          requester_name: reqData.requesterName,
+          department: reqData.department,
+          date: reqData.date,
+          topic: reqData.topic,
+          estimated_users: reqData.estimatedUsers,
+          objective: reqData.objective,
+          current_system: reqData.currentSystem,
+          attachment_url: reqData.attachmentUrl || null,
           status: 'pending',
-          createdAt: new Date().toISOString()
+          created_at: new Date().toISOString()
         };
-        return { requests: [newReq, ...state.requests] };
-      }),
-      updateRequest: (id, updates) => set((state) => ({
-        requests: state.requests.map(r => r.id === id ? { ...r, ...updates } : r)
-      })),
-      deleteRequest: (id) => set((state) => ({
-        requests: state.requests.filter(r => r.id !== id)
-      })),
-      updateUser: (id, updates) => set((state) => ({
-        users: state.users.map(u => u.id === id ? { ...u, ...updates } : u),
-        currentUser: state.currentUser?.id === id ? { ...state.currentUser, ...updates } : state.currentUser
-      })),
-      addUser: (userData) => set((state) => ({
-        users: [...state.users, { ...userData, id: Date.now().toString() }]
-      })),
-      deleteUser: (id) => set((state) => ({
-        users: state.users.filter(u => u.id !== id)
-      }))
+
+        const { error } = await supabase.from('Dev-requests').insert([newReq]);
+        if (!error) {
+          await get().fetchData();
+        } else {
+          console.error("Error adding request:", error);
+        }
+      },
+
+      updateRequest: async (id, updates) => {
+        const dbUpdates: any = {};
+        if (updates.status !== undefined) dbUpdates.status = updates.status;
+        if (updates.developerId !== undefined) dbUpdates.developer_id = updates.developerId;
+        if (updates.rejectionReason !== undefined) dbUpdates.rejection_reason = updates.rejectionReason;
+        if (updates.startMonthYear !== undefined) dbUpdates.start_month_year = updates.startMonthYear;
+        if (updates.expectedFinishMonthYear !== undefined) dbUpdates.expected_finish_month_year = updates.expectedFinishMonthYear;
+        if (updates.projectLink !== undefined) dbUpdates.project_link = updates.projectLink;
+
+        const { error } = await supabase.from('Dev-requests').update(dbUpdates).eq('id', id);
+        if (!error) {
+          await get().fetchData();
+        } else {
+          console.error("Error updating request:", error);
+        }
+      },
+
+      deleteRequest: async (id) => {
+        const { error } = await supabase.from('Dev-requests').delete().eq('id', id);
+        if (!error) {
+          await get().fetchData();
+        } else {
+          console.error("Error deleting request:", error);
+        }
+      },
+
+      updateUser: async (id, updates) => {
+        const { error } = await supabase.from('Dev-users').update(updates).eq('id', id);
+        if (!error) {
+          await get().fetchData();
+          if (get().currentUser?.id === id) {
+            set({ currentUser: { ...get().currentUser!, ...updates } });
+          }
+        } else {
+          console.error("Error updating user:", error);
+        }
+      },
+
+      addUser: async (userData) => {
+        const newUser = {
+          id: Date.now().toString(),
+          ...userData
+        };
+        const { error } = await supabase.from('Dev-users').insert([newUser]);
+        if (!error) {
+          await get().fetchData();
+        } else {
+          console.error("Error adding user:", error);
+        }
+      },
+
+      deleteUser: async (id) => {
+        const { error } = await supabase.from('Dev-users').delete().eq('id', id);
+        if (!error) {
+          await get().fetchData();
+        } else {
+          console.error("Error deleting user:", error);
+        }
+      }
     }),
     {
       name: 'it-dev-request-storage',
+      partialize: (state) => ({ currentUser: state.currentUser }),
     }
   )
 );

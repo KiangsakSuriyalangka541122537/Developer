@@ -23,54 +23,54 @@ export default function RequestList() {
     visibleRequests = requests.filter(r => r.developerId === currentUser.id || r.status === 'accepted'); // Can see accepted to take them
   }
 
-  const handleDelete = (id: string, status: string) => {
+  const handleDelete = async (id: string, status: string) => {
     if (currentUser?.role === 'department' && status !== 'pending') {
       alert('ไม่สามารถลบคำขอที่ถูกรับงานไปแล้วได้');
       return;
     }
     if (window.confirm('คุณต้องการลบคำขอนี้ใช่หรือไม่?')) {
-      deleteRequest(id);
+      await deleteRequest(id);
     }
   };
 
-  const handleReject = () => {
+  const handleReject = async () => {
     if (selectedReq && rejectReason) {
-      updateRequest(selectedReq.id, { status: 'rejected', rejectionReason: rejectReason });
+      await updateRequest(selectedReq.id, { status: 'rejected', rejectionReason: rejectReason });
       setShowRejectModal(false);
       setRejectReason('');
       setSelectedReq(null);
     }
   };
 
-  const handleDone = () => {
+  const handleDone = async () => {
     if (selectedReq && projectLink) {
-      updateRequest(selectedReq.id, { status: 'done', projectLink });
+      await updateRequest(selectedReq.id, { status: 'done', projectLink });
       setShowDoneModal(false);
       setProjectLink('');
       setSelectedReq(null);
     }
   };
 
-  const handleAssign = () => {
+  const handleAssign = async () => {
     if (selectedReq && selectedDevId) {
-      updateRequest(selectedReq.id, { status: 'accepted', developerId: selectedDevId });
+      await updateRequest(selectedReq.id, { status: 'accepted', developerId: selectedDevId });
       setShowAssignModal(false);
       setSelectedDevId('');
       setSelectedReq(null);
     }
   };
 
-  const handleReassign = () => {
+  const handleReassign = async () => {
     if (selectedReq && selectedDevId) {
-      updateRequest(selectedReq.id, { developerId: selectedDevId });
+      await updateRequest(selectedReq.id, { developerId: selectedDevId });
       setShowAssignModal(false);
       setSelectedDevId('');
       setSelectedReq(null);
     }
   };
 
-  const handleDevAccept = (req: DevRequest) => {
-    updateRequest(req.id, { status: 'in_progress', developerId: currentUser?.id });
+  const handleDevAccept = async (req: DevRequest) => {
+    await updateRequest(req.id, { status: 'in_progress', developerId: currentUser?.id });
   };
 
   const getStatusBadge = (status: string) => {
