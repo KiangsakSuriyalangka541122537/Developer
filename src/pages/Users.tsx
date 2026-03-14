@@ -105,7 +105,7 @@ export default function Users() {
                 <th className="py-4 pl-6">{activeTab === 'department' ? 'ชื่อแผนก' : 'ชื่อ-นามสกุล'}</th>
                 <th className="py-4">ชื่อผู้ใช้งาน (Username)</th>
                 {activeTab === 'staff' && <th className="py-4 text-center">บทบาท (Role)</th>}
-                <th className="py-4">ตำแหน่ง</th>
+                {activeTab === 'staff' && <th className="py-4">ตำแหน่ง</th>}
                 <th className="py-4 text-right pr-6">จัดการ</th>
               </tr>
             </thead>
@@ -125,7 +125,7 @@ export default function Users() {
                       </span>
                     </td>
                   )}
-                  <td className="py-4 text-slate-500">{user.position || '-'}</td>
+                  {activeTab === 'staff' && <td className="py-4 text-slate-500">{user.position || '-'}</td>}
                   <td className="py-4 text-right pr-6">
                     <div className="flex justify-end gap-2">
                       <button onClick={() => handleOpenModal(user)} className="p-1.5 text-slate-400 hover:text-primary transition-colors" title="แก้ไข">
@@ -139,7 +139,7 @@ export default function Users() {
                 </tr>
               )) : (
                 <tr>
-                  <td colSpan={activeTab === 'staff' ? 5 : 4} className="py-10 text-center text-slate-400 italic">
+                  <td colSpan={activeTab === 'staff' ? 5 : 3} className="py-10 text-center text-slate-400 italic">
                     ไม่พบข้อมูล
                   </td>
                 </tr>
