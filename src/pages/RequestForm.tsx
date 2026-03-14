@@ -9,7 +9,7 @@ export default function RequestForm() {
   
   const [files, setFiles] = useState<File[]>([]);
   const [formData, setFormData] = useState({
-    requesterName: currentUser?.name || '',
+    requesterName: '',
     topic: '',
     estimatedUsers: '',
     objective: '',
@@ -54,7 +54,7 @@ export default function RequestForm() {
 
   const handleReset = () => {
     setFormData({
-      requesterName: currentUser?.name || '',
+      requesterName: '',
       topic: '',
       estimatedUsers: '',
       objective: '',
