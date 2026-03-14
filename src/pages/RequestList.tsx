@@ -135,13 +135,8 @@ export default function RequestList() {
     }
   }, [selectedReq]);
 
-  // Filter requests based on role
-  let visibleRequests = requests;
-  if (currentUser?.role === 'department') {
-    visibleRequests = requests.filter(r => r.requesterId === currentUser.id);
-  } else if (currentUser?.role === 'developer') {
-    visibleRequests = requests.filter(r => r.developerId === currentUser.id || r.status === 'accepted'); // Can see accepted to take them
-  }
+  // Show all requests to match Dashboard overview
+  const visibleRequests = requests;
 
   const handleDelete = async (id: string, status: string) => {
     if (currentUser?.role === 'department' && status !== 'pending') {
@@ -265,28 +260,28 @@ export default function RequestList() {
           <table className="w-full text-left">
             <thead>
               <tr className="text-slate-500 text-sm font-medium border-b border-slate-100 bg-slate-50">
-                <th className="py-4 pl-6">ลำดับ</th>
-                <th className="py-4">ชื่อโครงการ</th>
-                <th className="py-4">แผนก</th>
-                <th className="py-4">วันที่ขอ</th>
-                <th className="py-4">สถานะ</th>
-                <th className="py-4 text-right pr-6">จัดการ</th>
+                <th className="py-4 pl-12 w-20">ลำดับ</th>
+                <th className="py-4 px-6 w-1/4">ชื่อโครงการ</th>
+                <th className="py-4 px-6">แผนก</th>
+                <th className="py-4 px-6">วันที่ขอ</th>
+                <th className="py-4 px-6 text-center">สถานะ</th>
+                <th className="py-4 pl-4 pr-12 text-right w-48">จัดการ</th>
               </tr>
             </thead>
             <tbody className="text-sm">
               {visibleRequests.map((req, index) => (
                 <tr key={req.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
-                  <td className="py-4 pl-6 font-medium">{index + 1}</td>
-                  <td className="py-4">{req.topic}</td>
-                  <td className="py-4">{req.department}</td>
-                  <td className="py-4">{new Date(req.date).toLocaleDateString('th-TH')}</td>
-                  <td className="py-4">
+                  <td className="py-4 pl-12 font-medium text-slate-900">{index + 1}</td>
+                  <td className="py-4 px-6 text-slate-700">{req.topic}</td>
+                  <td className="py-4 px-6 text-slate-600">{req.department}</td>
+                  <td className="py-4 px-6 text-slate-500">{new Date(req.date).toLocaleDateString('th-TH')}</td>
+                  <td className="py-4 px-6 text-center">
                     <button onClick={() => { setSelectedReq(req); setShowDetailsModal(true); }} className="hover:opacity-80 transition-opacity">
                       {getStatusBadge(req.status)}
                     </button>
                   </td>
-                  <td className="py-4 text-right pr-6">
-                    <div className="flex justify-end items-center">
+                  <td className="py-4 pl-4 pr-12 text-right">
+                    <div className="flex justify-end items-center gap-1">
                       {/* Slot 1: View */}
                       <div className="w-10 flex justify-center">
                         <button onClick={() => { setSelectedReq(req); setShowDetailsModal(true); }} className="p-1.5 text-slate-400 hover:text-primary transition-colors" title="ดูรายละเอียด">
