@@ -32,7 +32,7 @@ export default function Layout() {
                <Link to="/list" className={`font-medium px-3 py-2 rounded-xl transition-all ${location.pathname === '/list' ? 'text-primary bg-primary/5' : 'text-slate-600 hover:text-primary hover:bg-slate-50'}`}>รายการคำขอ</Link>
             )}
             {currentUser?.role === 'approver' && (
-               <Link to="/users" className={`font-medium px-3 py-2 rounded-xl transition-all ${location.pathname === '/users' ? 'text-primary bg-primary/5' : 'text-slate-600 hover:text-primary hover:bg-slate-50'}`}>จัดการบุคลากร</Link>
+               <Link to="/users" className={`font-medium px-3 py-2 rounded-xl transition-all ${location.pathname === '/users' ? 'text-primary bg-primary/5' : 'text-slate-600 hover:text-primary hover:bg-slate-50'}`}>หน้าจัดการ</Link>
             )}
           </nav>
 

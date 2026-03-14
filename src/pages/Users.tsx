@@ -70,7 +70,7 @@ export default function Users() {
     <div className="space-y-8 overflow-hidden">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">จัดการบุคลากรและสิทธิ์</h1>
+          <h1 className="text-3xl font-bold text-slate-900">หน้าจัดการ</h1>
           <p className="text-slate-500 mt-1">เพิ่ม แก้ไข ลบรายชื่อบุคลากร และกำหนดสิทธิ์การใช้งาน</p>
         </div>
         <button onClick={() => handleOpenModal()} className="flex items-center justify-center gap-2 bg-primary hover:bg-secondary text-white px-6 py-3 rounded-xl font-bold transition-all shadow-md">
