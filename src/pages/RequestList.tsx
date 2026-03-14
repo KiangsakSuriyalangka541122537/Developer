@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAppStore, DevRequest } from '../store';
-import { FileText, Edit, Trash2, CheckCircle, XCircle, Forward, UserCheck, Eye, Calendar } from 'lucide-react';
+import { FileText, Edit, Trash2, CheckCircle, XCircle, Forward, UserPlus, Eye, Calendar } from 'lucide-react';
 
 export default function RequestList() {
   const { currentUser, requests, updateRequest, deleteRequest, users } = useAppStore();
@@ -165,7 +165,7 @@ export default function RequestList() {
                         )}
                         {currentUser?.role === 'approver' && req.status === 'pending' && (
                           <button onClick={() => { setSelectedReq(req); setShowAssignModal(true); }} className="p-1.5 text-slate-400 hover:text-blue-600 transition-colors" title="มอบหมายงาน">
-                            <UserCheck className="size-5" />
+                            <UserPlus className="size-5" />
                           </button>
                         )}
                         {currentUser?.role === 'developer' && (
