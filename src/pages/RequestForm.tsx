@@ -7,6 +7,7 @@ export default function RequestForm() {
   const { currentUser, addRequest } = useAppStore();
   const navigate = useNavigate();
   
+  const [files, setFiles] = useState<File[]>([]);
   const [formData, setFormData] = useState({
     requesterName: currentUser?.name || '',
     topic: '',
@@ -14,18 +15,22 @@ export default function RequestForm() {
     objective: '',
     currentSystem: '',
     attachmentUrl: '',
-    file: null as File | null
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setFormData(prev => ({ ...prev, file: e.target.files![0] }));
+    if (e.target.files) {
+      const newFiles = Array.from(e.target.files);
+      setFiles(prev => [...prev, ...newFiles]);
     }
+  };
+
+  const removeFile = (index: number) => {
+    setFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -35,13 +40,13 @@ export default function RequestForm() {
     await addRequest({
       requesterId: currentUser.id,
       requesterName: formData.requesterName || currentUser.name,
-      department: currentUser.name, // Assuming department name is the user's name for department role
+      department: currentUser.name,
       date: new Date().toISOString(),
       topic: formData.topic,
       estimatedUsers: formData.estimatedUsers,
       objective: formData.objective,
       currentSystem: formData.currentSystem,
-      attachmentUrl: formData.file ? formData.file.name : formData.attachmentUrl
+      attachmentUrl: files.length > 0 ? files.map(f => f.name).join(', ') : formData.attachmentUrl
     });
 
     navigate('/list');
@@ -55,12 +60,12 @@ export default function RequestForm() {
       objective: '',
       currentSystem: '',
       attachmentUrl: '',
-      file: null
     });
+    setFiles([]);
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 overflow-hidden">
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">แบบฟอร์มขอพัฒนาโปรแกรม</h1>
         <p className="text-slate-500">กรุณากรอกรายละเอียดความต้องการเพื่อให้ทีมพัฒนาตรวจสอบและดำเนินการ</p>
@@ -161,19 +166,27 @@ export default function RequestForm() {
 
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-slate-700">แนบไฟล์ประกอบ (รูปภาพ, PDF, Word, Excel)</label>
-              <label className={`border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center gap-3 transition-colors cursor-pointer group ${formData.file ? 'border-primary bg-primary/5' : 'border-primary/20 bg-primary/5 hover:bg-primary/10'}`}>
-                <UploadCloud className={`size-10 transition-transform ${formData.file ? 'text-primary' : 'text-primary group-hover:scale-110'}`} />
+              <label className={`border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center gap-3 transition-colors cursor-pointer group ${files.length > 0 ? 'border-primary bg-primary/5' : 'border-primary/20 bg-primary/5 hover:bg-primary/10'}`}>
+                <UploadCloud className={`size-10 transition-transform ${files.length > 0 ? 'text-primary' : 'text-primary group-hover:scale-110'}`} />
                 <div className="text-center">
                   <p className="text-slate-700 font-medium">
-                    {formData.file ? formData.file.name : 'คลิกเพื่ออัปโหลด หรือลากไฟล์มาวางที่นี่'}
+                    คลิกเพื่ออัปโหลด หรือลากไฟล์มาวางที่นี่
                   </p>
-                  {formData.file && (
-                    <p className="text-xs text-primary font-bold mt-1">อัปโหลดไฟล์แล้ว</p>
-                  )}
                   <p className="text-xs text-slate-500 mt-1">รองรับไฟล์ JPG, PNG, PDF, DOCX, XLSX (สูงสุด 10MB)</p>
                 </div>
-                <input type="file" className="hidden" onChange={handleFileChange} accept=".jpg,.png,.pdf,.doc,.docx,.xls,.xlsx" />
+                <input type="file" className="hidden" onChange={handleFileChange} accept=".jpg,.png,.pdf,.doc,.docx,.xls,.xlsx" multiple />
               </label>
+              
+              {files.length > 0 && (
+                <div className="mt-4 space-y-2">
+                  {files.map((file, index) => (
+                    <div key={index} className="flex items-center justify-between bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
+                      <span className="text-sm text-slate-700 truncate">{file.name}</span>
+                      <button type="button" onClick={() => removeFile(index)} className="text-rose-500 hover:text-rose-700 text-sm font-medium">ลบ</button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 

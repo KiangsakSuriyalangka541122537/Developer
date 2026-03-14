@@ -23,7 +23,7 @@ export default function Login() {
   };
 
   return (
-    <div className="flex-1 flex items-start justify-center pt-0 mt-4 md:mt-8 lg:mt-12 pb-12">
+    <div className="flex-1 flex items-start justify-center pt-0 mt-4 md:mt-8 lg:mt-12 pb-12 overflow-hidden">
       <div className="w-full max-w-md p-2 md:p-4">
         <div className="flex flex-col items-center mb-4">
           <div className="size-14 bg-primary/10 flex items-center justify-center mb-2 shadow-sm rounded-xl">

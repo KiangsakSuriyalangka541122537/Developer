@@ -29,7 +29,7 @@ export default function Profile() {
   if (!currentUser) return null;
 
   return (
-    <div className="max-w-2xl mx-auto w-full space-y-8">
+    <div className="max-w-2xl mx-auto w-full space-y-8 overflow-hidden">
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-bold text-slate-900 tracking-tight">จัดการข้อมูลส่วนตัว</h1>
         <p className="text-slate-500">แก้ไขข้อมูลชื่อและรหัสผ่านของคุณ</p>

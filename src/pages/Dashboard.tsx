@@ -23,7 +23,7 @@ export default function Dashboard() {
   });
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 overflow-hidden">
       <div>
         <h1 className="text-3xl font-bold text-slate-900">Dashboard ภาพรวม</h1>
         <p className="text-slate-500 mt-1">ภาพรวมสถานะการขอพัฒนาโปรแกรมทั้งหมดในระบบ</p>
