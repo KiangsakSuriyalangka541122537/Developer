@@ -23,10 +23,10 @@ export default function Login() {
   };
 
   return (
-    <div className="flex-1 flex items-center justify-center py-12">
+    <div className="flex-1 flex items-start justify-center pt-4 pb-12">
       <div className="w-full max-w-md p-6">
-        <div className="flex flex-col items-center mb-8">
-          <div className="size-16 bg-primary/10 flex items-center justify-center mb-4 shadow-sm rounded-xl">
+        <div className="flex flex-col items-center mb-6">
+          <div className="size-16 bg-primary/10 flex items-center justify-center mb-3 shadow-sm rounded-xl">
             <Terminal className="text-primary size-8" />
           </div>
           <h1 className="text-2xl font-bold text-slate-900">ระบบขอพัฒนาโปรแกรม</h1>
