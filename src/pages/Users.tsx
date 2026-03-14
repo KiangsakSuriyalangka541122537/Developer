@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAppStore, User, Role } from '../store';
 import { Users as UsersIcon, Plus, Edit2, Trash2, Save, XCircle, Building2, UserCircle } from 'lucide-react';
+import ConfirmModal from '../components/ConfirmModal';
 
 type TabType = 'department' | 'staff';
 
@@ -10,6 +11,23 @@ export default function Users() {
   const [showModal, setShowModal] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   
+  // Custom Modal State
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    type: 'danger' | 'warning' | 'success' | 'info';
+    onConfirm: () => void;
+    showCancel?: boolean;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'warning',
+    onConfirm: () => {},
+    showCancel: true
+  });
+
   const [formData, setFormData] = useState({
     username: '',
     password: '',
@@ -49,16 +67,41 @@ export default function Users() {
       await addUser(formData);
     }
     setShowModal(false);
+    
+    setConfirmModal({
+      isOpen: true,
+      title: 'สำเร็จ',
+      message: 'บันทึกข้อมูลเรียบร้อยแล้ว',
+      type: 'success',
+      showCancel: false,
+      onConfirm: () => setConfirmModal(prev => ({ ...prev, isOpen: false }))
+    });
   };
 
   const handleDelete = async (id: string) => {
     if (id === currentUser?.id) {
-      alert('ไม่สามารถลบบัญชีของตนเองได้');
+      setConfirmModal({
+        isOpen: true,
+        title: 'แจ้งเตือน',
+        message: 'ไม่สามารถลบบัญชีของตนเองได้',
+        type: 'danger',
+        showCancel: false,
+        onConfirm: () => setConfirmModal(prev => ({ ...prev, isOpen: false }))
+      });
       return;
     }
-    if (window.confirm('คุณต้องการลบข้อมูลนี้ใช่หรือไม่?')) {
-      await deleteUser(id);
-    }
+
+    setConfirmModal({
+      isOpen: true,
+      title: 'ยืนยันการลบ',
+      message: 'คุณต้องการลบข้อมูลนี้ใช่หรือไม่?',
+      type: 'danger',
+      showCancel: true,
+      onConfirm: async () => {
+        await deleteUser(id);
+        setConfirmModal(prev => ({ ...prev, isOpen: false }));
+      }
+    });
   };
 
   const filteredUsers = users.filter(u => {
@@ -241,6 +284,16 @@ export default function Users() {
           </div>
         </div>
       )}
+
+      <ConfirmModal 
+        isOpen={confirmModal.isOpen}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        type={confirmModal.type}
+        showCancel={confirmModal.showCancel}
+        onConfirm={confirmModal.onConfirm}
+        onCancel={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+      />
     </div>
   );
 }

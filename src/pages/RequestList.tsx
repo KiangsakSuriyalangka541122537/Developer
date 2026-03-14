@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAppStore, DevRequest } from '../store';
 import { FileText, Edit, Trash2, CheckCircle, XCircle, Forward, UserCheck, Eye, Calendar, MailOpen, ChevronLeft, ChevronRight } from 'lucide-react';
+import ConfirmModal from '../components/ConfirmModal';
 
 const THAI_MONTHS = [
   'ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.',
@@ -109,6 +110,22 @@ export default function RequestList() {
     currentSystem: ''
   });
 
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    type: 'danger' | 'warning' | 'success' | 'info';
+    onConfirm: () => void;
+    showCancel?: boolean;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'info',
+    onConfirm: () => {},
+    showCancel: true
+  });
+
   const developers = users.filter(u => u.role === 'developer');
 
   useEffect(() => {
@@ -128,12 +145,28 @@ export default function RequestList() {
 
   const handleDelete = async (id: string, status: string) => {
     if (currentUser?.role === 'department' && status !== 'pending') {
-      alert('ไม่สามารถลบคำขอที่ถูกรับงานไปแล้วได้');
+      setConfirmModal({
+        isOpen: true,
+        title: 'ไม่สามารถดำเนินการได้',
+        message: 'ไม่สามารถลบคำขอที่ถูกรับงานไปแล้วได้',
+        type: 'warning',
+        showCancel: false,
+        onConfirm: () => setConfirmModal(prev => ({ ...prev, isOpen: false }))
+      });
       return;
     }
-    if (window.confirm('คุณต้องการลบคำขอนี้ใช่หรือไม่?')) {
-      await deleteRequest(id);
-    }
+
+    setConfirmModal({
+      isOpen: true,
+      title: 'ยืนยันการลบ',
+      message: 'คุณต้องการลบคำขอนี้ใช่หรือไม่?',
+      type: 'danger',
+      showCancel: true,
+      onConfirm: async () => {
+        await deleteRequest(id);
+        setConfirmModal(prev => ({ ...prev, isOpen: false }));
+      }
+    });
   };
 
   const handleReject = async () => {
@@ -169,9 +202,19 @@ export default function RequestList() {
         startMonthYear: editStartMonth, 
         expectedFinishMonthYear: editEndMonth 
       });
-      alert('บันทึกข้อมูลเรียบร้อยแล้ว');
-      setShowDetailsModal(false);
-      setSelectedReq(null);
+      
+      setConfirmModal({
+        isOpen: true,
+        title: 'สำเร็จ',
+        message: 'บันทึกข้อมูลเรียบร้อยแล้ว',
+        type: 'success',
+        showCancel: false,
+        onConfirm: () => {
+          setConfirmModal(prev => ({ ...prev, isOpen: false }));
+          setShowDetailsModal(false);
+          setSelectedReq(null);
+        }
+      });
     }
   };
 
@@ -615,6 +658,16 @@ export default function RequestList() {
           </div>
         </div>
       )}
+
+      <ConfirmModal 
+        isOpen={confirmModal.isOpen}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        type={confirmModal.type}
+        showCancel={confirmModal.showCancel}
+        onConfirm={confirmModal.onConfirm}
+        onCancel={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+      />
     </div>
   );
 }
