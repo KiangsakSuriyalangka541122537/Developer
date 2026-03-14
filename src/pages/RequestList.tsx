@@ -3,8 +3,8 @@ import { useAppStore, DevRequest } from '../store';
 import { FileText, Edit, Trash2, CheckCircle, XCircle, Forward, UserCheck, Eye, Calendar, MailOpen, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const THAI_MONTHS = [
-  'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
-  'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+  'ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.',
+  'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'
 ];
 
 function ThaiMonthPicker({ value, onChange, disabled, label }: { 
@@ -14,10 +14,16 @@ function ThaiMonthPicker({ value, onChange, disabled, label }: {
   label: string;
 }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [viewYear, setViewYear] = useState(value ? parseInt(value.split('-')[0]) : new Date().getFullYear());
+  const [viewYear, setViewYear] = useState(() => {
+    if (value && value.includes('-')) {
+      const year = parseInt(value.split('-')[0]);
+      if (!isNaN(year)) return year;
+    }
+    return new Date().getFullYear();
+  });
   
-  const currentYear = value ? parseInt(value.split('-')[0]) : -1;
-  const currentMonth = value ? parseInt(value.split('-')[1]) - 1 : -1;
+  const currentYear = value && value.includes('-') ? parseInt(value.split('-')[0]) : -1;
+  const currentMonth = value && value.includes('-') ? parseInt(value.split('-')[1]) - 1 : -1;
 
   const handleMonthSelect = (monthIndex: number) => {
     const formattedMonth = (monthIndex + 1).toString().padStart(2, '0');
@@ -25,7 +31,14 @@ function ThaiMonthPicker({ value, onChange, disabled, label }: {
     setIsOpen(false);
   };
 
-  const displayValue = value ? `${THAI_MONTHS[parseInt(value.split('-')[1]) - 1]} ${parseInt(value.split('-')[0]) + 543}` : 'เลือกเดือน/ปี';
+  const displayValue = (() => {
+    if (!value || !value.includes('-')) return 'เลือกเดือน';
+    const parts = value.split('-');
+    const year = parseInt(parts[0]);
+    const monthIndex = parseInt(parts[1]) - 1;
+    if (isNaN(year) || isNaN(monthIndex) || !THAI_MONTHS[monthIndex]) return 'เลือกเดือน';
+    return `${THAI_MONTHS[monthIndex]} ${year + 543}`;
+  })();
 
   return (
     <div className="relative flex flex-col gap-2 w-full">
@@ -36,14 +49,14 @@ function ThaiMonthPicker({ value, onChange, disabled, label }: {
         onClick={() => setIsOpen(!isOpen)}
         className="w-full rounded-xl border border-slate-200 p-3 text-left outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm bg-white disabled:bg-slate-50 disabled:text-slate-400 flex justify-between items-center transition-all cursor-pointer"
       >
-        <span className={!value ? 'text-slate-400' : 'text-slate-900'}>{displayValue}</span>
+        <span className={(!value || !value.includes('-')) ? 'text-slate-400' : 'text-slate-900'}>{displayValue}</span>
         <Calendar className="size-4 text-slate-400" />
       </button>
 
       {isOpen && !disabled && (
         <>
           <div className="fixed inset-0 z-[105]" onClick={() => setIsOpen(false)}></div>
-          <div className="absolute top-full left-0 mt-2 z-[110] bg-white border border-slate-200 rounded-2xl shadow-xl p-4 w-64 animate-in fade-in zoom-in duration-200">
+          <div className="absolute bottom-full left-0 mb-2 z-[110] bg-white border border-slate-200 rounded-2xl shadow-xl p-4 w-64 animate-in fade-in slide-in-from-bottom-2 duration-200">
             <div className="flex justify-between items-center mb-4">
               <button type="button" onClick={() => setViewYear(viewYear - 1)} className="p-1 hover:bg-slate-100 rounded-lg transition-colors">
                 <ChevronLeft className="size-4" />
@@ -65,7 +78,7 @@ function ThaiMonthPicker({ value, onChange, disabled, label }: {
                       : 'hover:bg-slate-100 text-slate-600'
                   }`}
                 >
-                  {month.substring(0, 3)}
+                  {month}
                 </button>
               ))}
             </div>
