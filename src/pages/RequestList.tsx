@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAppStore, DevRequest } from '../store';
-import { FileText, Edit, Trash2, CheckCircle, XCircle, Forward, UserPlus, Eye, Calendar } from 'lucide-react';
+import { FileText, Edit, Trash2, CheckCircle, XCircle, Forward, UserCheck, Eye, Calendar } from 'lucide-react';
 
 export default function RequestList() {
   const { currentUser, requests, updateRequest, deleteRequest, users } = useAppStore();
@@ -135,82 +135,82 @@ export default function RequestList() {
                     </button>
                   </td>
                   <td className="py-4 text-right pr-6">
-                    <div className="flex justify-end gap-2">
-                      <button onClick={() => { setSelectedReq(req); setShowDetailsModal(true); }} className="p-1.5 text-slate-400 hover:text-primary transition-colors" title="ดูรายละเอียด">
-                        <Eye className="size-5" />
-                      </button>
+                    <div className="flex justify-end items-center">
+                      {/* Slot 1: View */}
+                      <div className="w-10 flex justify-center">
+                        <button onClick={() => { setSelectedReq(req); setShowDetailsModal(true); }} className="p-1.5 text-slate-400 hover:text-primary transition-colors" title="ดูรายละเอียด">
+                          <Eye className="size-5" />
+                        </button>
+                      </div>
 
-                      {/* Department Actions */}
-                      {currentUser?.role === 'department' && (
-                        <>
-                          {req.status === 'pending' && (
-                            <button 
-                              onClick={() => { 
-                                setSelectedReq(req); 
-                                setEditFormData({
-                                  topic: req.topic,
-                                  estimatedUsers: req.estimatedUsers,
-                                  objective: req.objective,
-                                  currentSystem: req.currentSystem || ''
-                                });
-                                setShowEditModal(true); 
-                              }} 
-                              className="p-1.5 text-slate-400 hover:text-amber-600 transition-colors" 
-                              title="แก้ไขคำขอ"
-                            >
-                              <Edit className="size-5" />
-                            </button>
-                          )}
+                      {/* Slot 2: Primary Action (Edit / Assign / Accept / Done) */}
+                      <div className="w-10 flex justify-center">
+                        {currentUser?.role === 'department' && req.status === 'pending' && (
+                          <button 
+                            onClick={() => { 
+                              setSelectedReq(req); 
+                              setEditFormData({
+                                topic: req.topic,
+                                estimatedUsers: req.estimatedUsers,
+                                objective: req.objective,
+                                currentSystem: req.currentSystem || ''
+                              });
+                              setShowEditModal(true); 
+                            }} 
+                            className="p-1.5 text-slate-400 hover:text-amber-600 transition-colors" 
+                            title="แก้ไขคำขอ"
+                          >
+                            <Edit className="size-5" />
+                          </button>
+                        )}
+                        {currentUser?.role === 'approver' && req.status === 'pending' && (
+                          <button onClick={() => { setSelectedReq(req); setShowAssignModal(true); }} className="p-1.5 text-slate-400 hover:text-blue-600 transition-colors" title="มอบหมายงาน">
+                            <UserCheck className="size-5" />
+                          </button>
+                        )}
+                        {currentUser?.role === 'developer' && (
+                          <>
+                            {req.status === 'accepted' && (
+                              <button onClick={() => handleDevAccept(req)} className="p-1.5 text-slate-400 hover:text-emerald-600 transition-colors" title="รับงาน">
+                                <CheckCircle className="size-5" />
+                              </button>
+                            )}
+                            {req.status === 'in_progress' && req.developerId === currentUser.id && (
+                              <button onClick={() => { setSelectedReq(req); setShowDoneModal(true); }} className="p-1.5 text-slate-400 hover:text-emerald-600 transition-colors" title="เสร็จสิ้น">
+                                <CheckCircle className="size-5" />
+                              </button>
+                            )}
+                          </>
+                        )}
+                      </div>
+
+                      {/* Slot 3: Secondary Action (Delete / Forward) */}
+                      <div className="w-10 flex justify-center">
+                        {(currentUser?.role === 'department' || currentUser?.role === 'approver') && (
                           <button onClick={() => handleDelete(req.id, req.status)} className="p-1.5 text-slate-400 hover:text-rose-600 transition-colors" title="ลบคำขอ">
                             <Trash2 className="size-5" />
                           </button>
-                        </>
-                      )}
-
-                      {/* Approver Actions */}
-                      {currentUser?.role === 'approver' && (
-                        <>
-                          {req.status === 'pending' && (
-                            <button onClick={() => { setSelectedReq(req); setShowAssignModal(true); }} className="p-1.5 text-slate-400 hover:text-blue-600 transition-colors" title="มอบหมายงาน">
-                              <UserPlus className="size-5" />
-                            </button>
-                          )}
-                          <button onClick={() => handleDelete(req.id, req.status)} className="p-1.5 text-slate-400 hover:text-rose-600 transition-colors" title="ลบคำขอ">
-                            <Trash2 className="size-5" />
+                        )}
+                        {currentUser?.role === 'developer' && (req.status === 'accepted' || req.status === 'in_progress') && (
+                          <button onClick={() => { setSelectedReq(req); setShowAssignModal(true); }} className="p-1.5 text-slate-400 hover:text-blue-600 transition-colors" title="ส่งต่องาน">
+                            <Forward className="size-5" />
                           </button>
-                          {req.status !== 'done' && req.status !== 'rejected' && (
-                             <button onClick={() => { setSelectedReq(req); setShowRejectModal(true); }} className="p-1.5 text-slate-400 hover:text-rose-600 transition-colors" title="ปฏิเสธ">
-                               <XCircle className="size-5" />
-                             </button>
-                          )}
-                        </>
-                      )}
+                        )}
+                      </div>
 
-                      {/* Developer Actions */}
-                      {currentUser?.role === 'developer' && (
-                        <>
-                          {req.status === 'accepted' && (
-                            <button onClick={() => handleDevAccept(req)} className="p-1.5 text-slate-400 hover:text-emerald-600 transition-colors" title="รับงาน">
-                              <CheckCircle className="size-5" />
-                            </button>
-                          )}
-                          {(req.status === 'accepted' || req.status === 'in_progress') && (
-                            <button onClick={() => { setSelectedReq(req); setShowAssignModal(true); }} className="p-1.5 text-slate-400 hover:text-blue-600 transition-colors" title="ส่งต่องาน">
-                              <Forward className="size-5" />
-                            </button>
-                          )}
-                          {req.status === 'in_progress' && req.developerId === currentUser.id && (
-                            <button onClick={() => { setSelectedReq(req); setShowDoneModal(true); }} className="p-1.5 text-slate-400 hover:text-emerald-600 transition-colors" title="เสร็จสิ้น">
-                              <CheckCircle className="size-5" />
-                            </button>
-                          )}
-                          {(req.status === 'accepted' || req.status === 'in_progress') && (
-                            <button onClick={() => { setSelectedReq(req); setShowRejectModal(true); }} className="p-1.5 text-slate-400 hover:text-rose-600 transition-colors" title="ปฏิเสธ">
-                              <XCircle className="size-5" />
-                            </button>
-                          )}
-                        </>
-                      )}
+                      {/* Slot 4: Reject Action */}
+                      <div className="w-10 flex justify-center">
+                        {currentUser?.role === 'approver' && req.status !== 'done' && req.status !== 'rejected' && (
+                           <button onClick={() => { setSelectedReq(req); setShowRejectModal(true); }} className="p-1.5 text-slate-400 hover:text-rose-600 transition-colors" title="ปฏิเสธ">
+                             <XCircle className="size-5" />
+                           </button>
+                        )}
+                        {currentUser?.role === 'developer' && (req.status === 'accepted' || req.status === 'in_progress') && (
+                          <button onClick={() => { setSelectedReq(req); setShowRejectModal(true); }} className="p-1.5 text-slate-400 hover:text-rose-600 transition-colors" title="ปฏิเสธ">
+                            <XCircle className="size-5" />
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </td>
                 </tr>
