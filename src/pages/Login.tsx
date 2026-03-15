@@ -59,7 +59,7 @@ export default function Login() {
         </div>
 
         <div className="bg-white rounded-[3rem] shadow-2xl shadow-slate-200/70 border border-slate-100 p-12">
-          <h2 className="text-3xl font-bold mb-10 text-center text-slate-800">เข้าสู่ระบบ</h2>
+          <h2 className="text-xl font-bold mb-10 text-center text-slate-500 uppercase tracking-wider">เข้าสู่ระบบ</h2>
           
           <form onSubmit={handleSubmit} className="space-y-7">
             <div className="flex flex-col gap-2.5">
@@ -109,8 +109,8 @@ export default function Login() {
               </div>
             )}
 
-            <button type="submit" className="w-full bg-primary hover:bg-secondary text-white font-bold py-5 rounded-[1.25rem] transition-all flex items-center justify-center gap-4 shadow-xl shadow-primary/30 mt-8 active:scale-[0.98] text-xl">
-              <LogIn className="size-6" />
+            <button type="submit" className="w-full bg-primary hover:bg-secondary text-white font-bold py-4.5 rounded-[1.25rem] transition-all flex items-center justify-center gap-3 shadow-xl shadow-primary/30 mt-8 active:scale-[0.98] text-lg">
+              <LogIn className="size-5" />
               เข้าสู่ระบบ
             </button>
           </form>
