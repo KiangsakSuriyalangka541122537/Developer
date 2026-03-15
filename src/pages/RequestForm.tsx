@@ -110,7 +110,7 @@ export default function RequestForm() {
         <p className="text-slate-500">กรุณากรอกรายละเอียดความต้องการเพื่อให้ทีมพัฒนาตรวจสอบและดำเนินการ</p>
       </div>
 
-      <div className="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 shadow-sm">
+      <div className="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 shadow-sm overflow-hidden">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="flex flex-col gap-2">
