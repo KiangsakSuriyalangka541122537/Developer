@@ -11,6 +11,88 @@ const THAI_MONTHS = [
   'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'
 ];
 
+function ThaiMonthPicker({ value, onChange, disabled, label }: { 
+  value: string; 
+  onChange: (val: string) => void; 
+  disabled?: boolean;
+  label: string;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [viewYear, setViewYear] = useState(() => {
+    if (value && value.includes('-')) {
+      const year = parseInt(value.split('-')[0]);
+      if (!isNaN(year)) return year;
+    }
+    return new Date().getFullYear();
+  });
+  
+  const currentYear = value && value.includes('-') ? parseInt(value.split('-')[0]) : -1;
+  const currentMonth = value && value.includes('-') ? parseInt(value.split('-')[1]) - 1 : -1;
+
+  const handleMonthSelect = (monthIndex: number) => {
+    const formattedMonth = (monthIndex + 1).toString().padStart(2, '0');
+    onChange(`${viewYear}-${formattedMonth}`);
+    setIsOpen(false);
+  };
+
+  const displayValue = (() => {
+    if (!value || !value.includes('-')) return 'เลือกเดือน';
+    const parts = value.split('-');
+    const year = parseInt(parts[0]);
+    const monthIndex = parseInt(parts[1]) - 1;
+    if (isNaN(year) || isNaN(monthIndex) || !THAI_MONTHS[monthIndex]) return 'เลือกเดือน';
+    return `${THAI_MONTHS[monthIndex]} ${year + 543}`;
+  })();
+
+  return (
+    <div className="relative flex flex-col gap-2 w-full">
+      <label className="text-sm font-semibold text-slate-600">{label}</label>
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full rounded-xl border border-slate-200 p-3 text-left outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm bg-white disabled:bg-slate-50 disabled:text-slate-400 flex justify-between items-center transition-all cursor-pointer"
+      >
+        <span className={(!value || !value.includes('-')) ? 'text-slate-400' : 'text-slate-900'}>{displayValue}</span>
+        <Calendar className="size-4 text-slate-400" />
+      </button>
+
+      {isOpen && !disabled && (
+        <>
+          <div className="fixed inset-0 z-[105]" onClick={() => setIsOpen(false)}></div>
+          <div className="absolute bottom-full left-0 mb-2 z-[110] bg-white border border-slate-200 rounded-2xl shadow-xl p-4 w-64 animate-in fade-in slide-in-from-bottom-2 duration-200">
+            <div className="flex justify-between items-center mb-4">
+              <button type="button" onClick={() => setViewYear(viewYear - 1)} className="p-1 hover:bg-slate-100 rounded-lg transition-colors">
+                <ChevronLeft className="size-4" />
+              </button>
+              <span className="font-bold text-slate-900">{viewYear + 543}</span>
+              <button type="button" onClick={() => setViewYear(viewYear + 1)} className="p-1 hover:bg-slate-100 rounded-lg transition-colors">
+                <ChevronRight className="size-4" />
+              </button>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              {THAI_MONTHS.map((month, index) => (
+                <button
+                  key={month}
+                  type="button"
+                  onClick={() => handleMonthSelect(index)}
+                  className={`py-2 text-xs rounded-lg transition-all ${
+                    currentMonth === index && currentYear === viewYear
+                      ? 'bg-primary text-white font-bold'
+                      : 'hover:bg-slate-100 text-slate-600'
+                  }`}
+                >
+                  {month}
+                </button>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 export default function RequestList() {
   const { currentUser, requests, updateRequest, deleteRequest, users, addRequest } = useAppStore();
   const [selectedReq, setSelectedReq] = useState<DevRequest | null>(null);
@@ -22,6 +104,9 @@ export default function RequestList() {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showRevisionModal, setShowRevisionModal] = useState(false);
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [scheduleStartMonth, setScheduleStartMonth] = useState('');
+  const [scheduleEndMonth, setScheduleEndMonth] = useState('');
   const [selectedDevId, setSelectedDevId] = useState('');
   const [revisionFiles, setRevisionFiles] = useState<File[]>([]);
   const [editFiles, setEditFiles] = useState<File[]>([]);
@@ -285,21 +370,34 @@ export default function RequestList() {
       });
       return;
     }
+    setSelectedReq(req);
+    setScheduleStartMonth('');
+    setScheduleEndMonth('');
+    setShowScheduleModal(true);
+  };
 
-    setConfirmModal({
-      isOpen: true,
-      title: 'ยืนยันการรับงาน',
-      message: 'คุณต้องการเริ่มดำเนินการโครงการนี้ใช่หรือไม่?',
-      type: 'info',
-      showCancel: true,
-      onConfirm: async () => {
-        await updateRequest(req.id, { 
-          status: 'in_progress', 
-          developerId: currentUser?.id 
-        });
-        setConfirmModal(prev => ({ ...prev, isOpen: false }));
-      }
+  const handleScheduleSubmit = async () => {
+    if (!selectedReq || !scheduleStartMonth || !scheduleEndMonth) {
+      setConfirmModal({
+        isOpen: true,
+        title: 'ข้อมูลไม่ครบถ้วน',
+        message: 'กรุณาระบุช่วงเวลาการพัฒนาให้ครบถ้วน',
+        type: 'warning',
+        showCancel: false,
+        onConfirm: () => setConfirmModal(prev => ({ ...prev, isOpen: false }))
+      });
+      return;
+    }
+    await updateRequest(selectedReq.id, { 
+      status: 'in_progress', 
+      developerId: currentUser?.id,
+      startMonthYear: scheduleStartMonth,
+      expectedFinishMonthYear: scheduleEndMonth
     });
+    setShowScheduleModal(false);
+    setSelectedReq(null);
+    setScheduleStartMonth('');
+    setScheduleEndMonth('');
   };
 
   const handleRevisionSubmit = async () => {
@@ -1060,6 +1158,72 @@ export default function RequestList() {
                     ขอแก้ไข/เพิ่มเติม
                   </button>
                 )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Schedule Modal */}
+      {showScheduleModal && selectedReq && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-[32px] shadow-2xl w-full max-w-lg animate-in zoom-in-95 duration-200">
+            <div className="p-8">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-2xl font-black text-slate-900">กำหนดการพัฒนา</h3>
+                <button 
+                  onClick={() => {
+                    setShowScheduleModal(false);
+                    setSelectedReq(null);
+                  }}
+                  className="p-2 hover:bg-slate-100 rounded-full transition-colors"
+                >
+                  <XCircle className="size-6 text-slate-400" />
+                </button>
+              </div>
+
+              <div className="space-y-6">
+                <div>
+                  <h5 className="text-sm font-bold text-slate-500 mb-1">หัวข้อ/ชื่อโปรแกรม</h5>
+                  <p className="text-lg font-bold text-slate-900">{selectedReq.topic}</p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <ThaiMonthPicker 
+                    label="เริ่มพัฒนา (เดือน/ปี)"
+                    value={scheduleStartMonth}
+                    onChange={(val) => setScheduleStartMonth(val)}
+                  />
+                  <ThaiMonthPicker 
+                    label="คาดว่าเสร็จ (เดือน/ปี)"
+                    value={scheduleEndMonth}
+                    onChange={(val) => setScheduleEndMonth(val)}
+                  />
+                </div>
+
+                {scheduleStartMonth && scheduleEndMonth && (
+                  <div className="p-4 bg-primary/5 rounded-2xl border border-primary/10 flex items-center justify-between">
+                    <span className="text-sm font-bold text-slate-600">ระยะเวลาดำเนินการรวม:</span>
+                    <span className="text-lg font-black text-primary">
+                      {(() => {
+                        const [y1, m1] = scheduleStartMonth.split('-').map(Number);
+                        const [y2, m2] = scheduleEndMonth.split('-').map(Number);
+                        const diff = (y2 - y1) * 12 + (m2 - m1) + 1;
+                        return diff > 0 ? `${diff} เดือน` : 'ข้อมูลไม่ถูกต้อง';
+                      })()}
+                    </span>
+                  </div>
+                )}
+
+                <div className="pt-4">
+                  <button 
+                    onClick={handleScheduleSubmit}
+                    className="w-full bg-emerald-600 text-white py-4 rounded-2xl font-bold hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-200 flex items-center justify-center gap-2"
+                  >
+                    <Save className="size-5" />
+                    บันทึกกำหนดการและเริ่มงาน
+                  </button>
+                </div>
               </div>
             </div>
           </div>
