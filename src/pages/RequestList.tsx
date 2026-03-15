@@ -403,6 +403,18 @@ export default function RequestList() {
 
   const handleRevisionSubmit = async () => {
     if (!selectedReq || !currentUser) return;
+
+    // Prevent duplicate submissions
+    const alreadyExists = requests.some(r => 
+      (r.sourceRequestId === selectedReq.id || r.topic.trim() === `[แก้ไข/เพิ่มเติม] ${selectedReq.topic.trim()}`) && 
+      r.status !== 'rejected'
+    );
+
+    if (alreadyExists) {
+      alert('มีการส่งคำขอแก้ไขสำหรับรายการนี้ไปแล้ว หรือกำลังรอการอนุมัติ');
+      return;
+    }
+
     setIsUploading(true);
 
     try {
@@ -558,7 +570,10 @@ export default function RequestList() {
 
                       {/* Slot 2: Primary Action (Edit / Assign / Accept / Done) */}
                       <div className="w-10 flex justify-center">
-                        {currentUser?.role === 'department' && req.status === 'done' && !requests.some(r => r.sourceRequestId === req.id) && (
+                        {currentUser?.role === 'department' && req.status === 'done' && !requests.some(r => 
+                          (r.sourceRequestId === req.id || r.topic.trim() === `[แก้ไข/เพิ่มเติม] ${req.topic.trim()}`) && 
+                          r.status !== 'rejected'
+                        ) && (
                           <button 
                             onClick={() => { 
                               setSelectedReq(req); 
