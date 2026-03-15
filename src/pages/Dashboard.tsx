@@ -57,29 +57,40 @@ export default function Dashboard() {
   };
 
   const handleDownloadAll = async (attachmentUrl: string, requestId: string, department: string, date: string) => {
+    if (!attachmentUrl) return;
+    
     try {
       let attachments: { name: string, url: string }[] = [];
       
+      // 1. Try to parse as JSON
       try {
         const parsed = JSON.parse(attachmentUrl);
         if (Array.isArray(parsed)) {
           attachments = parsed;
-        } else {
-          attachments = [{ name: 'attachment', url: attachmentUrl }];
+        } else if (typeof parsed === 'object' && parsed.url) {
+          attachments = [parsed];
+        } else if (typeof parsed === 'string') {
+          throw new Error('String JSON');
         }
       } catch (e) {
-        // Not a JSON string, assume it's a single URL
-        attachments = [{ name: 'attachment', url: attachmentUrl }];
+        // 2. Not JSON array, handle as comma-separated or single string
+        const parts = attachmentUrl.split(',').map(p => p.trim()).filter(p => p);
+        attachments = parts.map(p => {
+          if (p.startsWith('http')) {
+            return { name: p.split('/').pop()?.split('?')[0] || 'file', url: p };
+          } else {
+            // If it's just a filename, try to get public URL from Supabase
+            // Check if it already has 'attachments/' prefix
+            const path = p.startsWith('attachments/') ? p : `attachments/${p}`;
+            const { data: { publicUrl } } = supabase.storage.from('Dev-attachments').getPublicUrl(path);
+            return { name: p.split('/').pop() || p, url: publicUrl };
+          }
+        });
       }
 
       if (attachments.length === 0) return;
 
-      // If only one file and it's not a JSON array, just open it
-      if (attachments.length === 1 && !attachmentUrl.startsWith('[')) {
-        window.open(attachments[0].url, '_blank');
-        return;
-      }
-
+      // Always use ZIP or direct Blob download to avoid "white screen" navigation issues
       const zip = new JSZip();
       
       const d = new Date(date);
@@ -96,7 +107,7 @@ export default function Dashboard() {
           // Try to download using Supabase SDK first (better for CORS)
           const urlParts = file.url.split('Dev-attachments/');
           if (urlParts.length > 1) {
-            const path = urlParts[1];
+            const path = decodeURIComponent(urlParts[1].split('?')[0]);
             const { data, error } = await supabase.storage.from('Dev-attachments').download(path);
             if (!error && data) {
               folder?.file(file.name, data);
@@ -111,11 +122,13 @@ export default function Dashboard() {
           folder?.file(file.name, blob);
         } catch (err) {
           console.error(`Failed to download file ${file.name}:`, err);
-          // Continue with other files even if one fails
         }
       });
 
       await Promise.all(downloadPromises);
+      
+      // If only one file was successfully added to the folder, we could just save that one
+      // but generating a ZIP is more consistent for the user experience.
       const content = await zip.generateAsync({ type: 'blob' });
       saveAs(content, `attachments-${department}-${formattedDate}.zip`);
     } catch (error) {
