@@ -108,6 +108,7 @@ export default function RequestList() {
   const [showRevisionModal, setShowRevisionModal] = useState(false);
   const [selectedDevId, setSelectedDevId] = useState('');
   const [revisionFiles, setRevisionFiles] = useState<File[]>([]);
+  const [editFiles, setEditFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [editFormData, setEditFormData] = useState({
     topic: '',
@@ -259,9 +260,59 @@ export default function RequestList() {
 
   const handleEdit = async () => {
     if (selectedReq) {
-      await updateRequest(selectedReq.id, editFormData);
-      setShowEditModal(false);
-      setSelectedReq(null);
+      setIsUploading(true);
+      try {
+        let finalAttachmentUrl = selectedReq.attachmentUrl || '';
+        
+        if (editFiles.length > 0) {
+          const uploadPromises = editFiles.map(async (file) => {
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+            const filePath = `attachments/${fileName}`;
+
+            const { error: uploadError } = await supabase.storage
+              .from('Dev-attachments')
+              .upload(filePath, file);
+
+            if (uploadError) throw uploadError;
+
+            const { data: { publicUrl } } = supabase.storage
+              .from('Dev-attachments')
+              .getPublicUrl(filePath);
+
+            return { name: file.name, url: publicUrl };
+          });
+
+          const uploadedFiles = await Promise.all(uploadPromises);
+          
+          let currentFiles: any[] = [];
+          if (finalAttachmentUrl) {
+            try {
+              currentFiles = JSON.parse(finalAttachmentUrl);
+              if (!Array.isArray(currentFiles)) currentFiles = [];
+            } catch (e) {
+              // If it's not a JSON array, treat it as a single URL
+              currentFiles = [{ name: 'ไฟล์แนบเดิม', url: finalAttachmentUrl }];
+            }
+          }
+          
+          finalAttachmentUrl = JSON.stringify([...currentFiles, ...uploadedFiles]);
+        }
+
+        await updateRequest(selectedReq.id, { 
+          ...editFormData, 
+          attachmentUrl: finalAttachmentUrl 
+        });
+        
+        setShowEditModal(false);
+        setSelectedReq(null);
+        setEditFiles([]);
+      } catch (error) {
+        console.error('Error updating request:', error);
+        alert('เกิดข้อผิดพลาดในการอัปโหลดไฟล์');
+      } finally {
+        setIsUploading(false);
+      }
     }
   };
 
@@ -349,6 +400,17 @@ export default function RequestList() {
 
   const removeRevisionFile = (index: number) => {
     setRevisionFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleEditFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const newFiles = Array.from(e.target.files);
+      setEditFiles(prev => [...prev, ...newFiles]);
+    }
+  };
+
+  const removeEditFile = (index: number) => {
+    setEditFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   const getStatusBadge = (status: string) => {
@@ -658,15 +720,73 @@ export default function RequestList() {
                   required
                 ></textarea>
               </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-semibold text-slate-700">แนบไฟล์เพิ่มเติม (ถ้ามี)</label>
+                <div className="relative">
+                  <input 
+                    type="file" 
+                    multiple 
+                    onChange={handleEditFileChange}
+                    className="hidden" 
+                    id="edit-file-upload"
+                  />
+                  <label 
+                    htmlFor="edit-file-upload"
+                    className="flex items-center justify-center gap-2 w-full p-4 border-2 border-dashed border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-all cursor-pointer group"
+                  >
+                    <UploadCloud className="size-6 text-slate-400 group-hover:text-primary" />
+                    <span className="text-sm font-medium text-slate-500 group-hover:text-primary">คลิกเพื่อเลือกไฟล์ หรือลากไฟล์มาวางที่นี่</span>
+                  </label>
+                </div>
+                
+                {editFiles.length > 0 && (
+                  <div className="mt-2 space-y-2">
+                    {editFiles.map((file, index) => (
+                      <div key={index} className="flex items-center justify-between p-2 bg-slate-50 rounded-lg border border-slate-100">
+                        <div className="flex items-center gap-2 overflow-hidden">
+                          <FileText className="size-4 text-primary flex-shrink-0" />
+                          <span className="text-xs font-medium text-slate-600 truncate">{file.name}</span>
+                        </div>
+                        <button 
+                          onClick={() => removeEditFile(index)}
+                          className="text-rose-500 hover:text-rose-700 p-1"
+                        >
+                          <XCircle className="size-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
             <div className="px-6 py-4 bg-slate-50 flex justify-end gap-3">
-              <button onClick={() => setShowEditModal(false)} className="px-5 py-2 rounded-lg text-slate-600 font-bold hover:bg-slate-100 transition-all">ยกเลิก</button>
+              <button 
+                onClick={() => {
+                  setShowEditModal(false);
+                  setEditFiles([]);
+                }} 
+                className="px-5 py-2 rounded-lg text-slate-600 font-bold hover:bg-slate-100 transition-all"
+                disabled={isUploading}
+              >
+                ยกเลิก
+              </button>
               <button 
                 onClick={handleEdit} 
-                disabled={!editFormData.topic || !editFormData.estimatedUsers || !editFormData.objective} 
-                className="px-5 py-2 rounded-lg bg-primary hover:bg-secondary text-white font-bold transition-all disabled:opacity-50"
+                disabled={!editFormData.topic || !editFormData.estimatedUsers || !editFormData.objective || isUploading} 
+                className="px-5 py-2 rounded-lg bg-primary hover:bg-secondary text-white font-bold transition-all disabled:opacity-50 flex items-center gap-2"
               >
-                บันทึกการแก้ไข
+                {isUploading ? (
+                  <>
+                    <RefreshCw className="size-4 animate-spin" />
+                    กำลังบันทึก...
+                  </>
+                ) : (
+                  <>
+                    <Save className="size-4" />
+                    บันทึกการแก้ไข
+                  </>
+                )}
               </button>
             </div>
           </div>
@@ -774,9 +894,6 @@ export default function RequestList() {
                   className="px-4 py-1.5 rounded-xl bg-slate-100 text-slate-600 font-bold hover:bg-slate-200 transition-all text-sm border border-slate-200"
                 >
                   ปิด
-                </button>
-                <button onClick={() => setShowDetailsModal(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
-                  <XCircle className="size-6" />
                 </button>
               </div>
             </div>

@@ -304,9 +304,6 @@ export default function Dashboard() {
                 >
                   ปิด
                 </button>
-                <button onClick={() => setShowDetailsModal(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
-                  <XCircle className="size-6" />
-                </button>
               </div>
             </div>
             <div className="p-6 overflow-y-auto space-y-6 pb-6 scrollbar-hide">
