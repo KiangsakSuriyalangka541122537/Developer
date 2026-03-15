@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useAppStore, DevRequest } from '../store';
-import { FileText, Edit, Trash2, CheckCircle, XCircle, Forward, UserCheck, Eye, Calendar, MailOpen, ChevronLeft, ChevronRight, UploadCloud } from 'lucide-react';
+import { FileText, Edit, Trash2, CheckCircle, XCircle, Forward, UserCheck, Eye, Calendar, MailOpen, ChevronLeft, ChevronRight, UploadCloud, Download } from 'lucide-react';
 import ConfirmModal from '../components/ConfirmModal';
+import JSZip from 'jszip';
+import { saveAs } from 'file-saver';
 
 const THAI_MONTHS = [
   'ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.',
@@ -139,6 +141,29 @@ export default function RequestList() {
   const visibleRequests = currentUser?.role === 'department' 
     ? requests.filter(r => r.requesterId === currentUser.id)
     : requests;
+
+  const handleDownloadAll = async (attachmentUrl: string, requestId: string) => {
+    try {
+      const attachments = JSON.parse(attachmentUrl);
+      if (!Array.isArray(attachments)) return;
+
+      const zip = new JSZip();
+      const folder = zip.folder(`attachments-${requestId}`);
+
+      const downloadPromises = attachments.map(async (file: { name: string, url: string }) => {
+        const response = await fetch(file.url);
+        const blob = await response.blob();
+        folder?.file(file.name, blob);
+      });
+
+      await Promise.all(downloadPromises);
+      const content = await zip.generateAsync({ type: 'blob' });
+      saveAs(content, `attachments-${requestId}.zip`);
+    } catch (error) {
+      console.error('Error creating zip:', error);
+      alert('เกิดข้อผิดพลาดในการรวมไฟล์ กรุณาลองใหม่อีกครั้ง');
+    }
+  };
 
   const handleDelete = async (id: string, status: string) => {
     if (currentUser?.role === 'department' && status !== 'pending') {
@@ -594,7 +619,25 @@ export default function RequestList() {
               
               {selectedReq.attachmentUrl && (
                 <div>
-                  <h5 className="text-base font-bold text-slate-500 mb-2">เอกสารแนบ</h5>
+                  <div className="flex justify-between items-center mb-2">
+                    <h5 className="text-base font-bold text-slate-500">เอกสารแนบ</h5>
+                    {(() => {
+                      try {
+                        const attachments = JSON.parse(selectedReq.attachmentUrl);
+                        if (Array.isArray(attachments) && attachments.length > 1) {
+                          return (
+                            <button 
+                              onClick={() => handleDownloadAll(selectedReq.attachmentUrl!, selectedReq.id)}
+                              className="text-xs font-bold text-primary hover:text-secondary flex items-center gap-1 transition-colors"
+                            >
+                              <Download className="size-4" />
+                              ดาวน์โหลดทั้งหมด (ZIP)
+                            </button>
+                          );
+                        }
+                      } catch (e) { return null; }
+                    })()}
+                  </div>
                   <div className="space-y-2">
                     {(() => {
                       try {
