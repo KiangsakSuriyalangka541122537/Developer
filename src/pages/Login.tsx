@@ -14,12 +14,17 @@ export default function Login() {
   const passwordRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    // Focus username field on mount with a slight delay to ensure rendering is complete
+    // Focus username field on mount
+    if (usernameRef.current) {
+      usernameRef.current.focus();
+    }
+    
+    // Fallback for some browsers/timing issues
     const timer = setTimeout(() => {
       if (usernameRef.current) {
         usernameRef.current.focus();
       }
-    }, 100);
+    }, 0);
     return () => clearTimeout(timer);
   }, []);
 
