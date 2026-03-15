@@ -34,7 +34,7 @@ export default function Login() {
     setError('');
     const success = await login(username, password);
     if (success) {
-      navigate('/list');
+      navigate('/');
     } else {
       setError('ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง');
     }
