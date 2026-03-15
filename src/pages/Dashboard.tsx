@@ -92,10 +92,10 @@ export default function Dashboard() {
                     <td className="py-4 pl-12 font-medium text-slate-900">{index + 1}</td>
                     <td className="py-4 px-6 text-slate-700">
                       <div className="flex items-center gap-2">
-                        {isMyRequest && (
-                          <div className="size-2 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.4)]" title="งานของแผนกคุณ" />
-                        )}
                         {req.topic}
+                        {isMyRequest && (
+                          <div className="size-2 rounded-full bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.4)]" title="งานของแผนกคุณ" />
+                        )}
                       </div>
                     </td>
                     <td className="py-4 px-6 text-slate-600">{req.department}</td>
