@@ -41,18 +41,18 @@ export default function Login() {
   };
 
   return (
-    <div className="flex-1 flex items-center justify-center py-12 px-4 overflow-hidden">
+    <div className="flex-1 flex items-center justify-center py-6 px-4 overflow-hidden">
       <div className="w-full max-w-md">
-        <div className="flex flex-col items-center mb-10">
-          <div className="size-20 bg-primary/10 flex items-center justify-center mb-6 shadow-sm rounded-2xl">
-            <Terminal className="text-primary size-10" />
+        <div className="flex flex-col items-center mb-6">
+          <div className="size-16 bg-primary/10 flex items-center justify-center mb-4 shadow-sm rounded-2xl">
+            <Terminal className="text-primary size-8" />
           </div>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">ระบบขอพัฒนาโปรแกรม</h1>
           <p className="text-slate-500 text-sm mt-1 font-medium">IT Development Request System</p>
         </div>
 
-        <div className="bg-white rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100 p-10">
-          <h2 className="text-2xl font-bold mb-10 text-center text-slate-800">เข้าสู่ระบบ</h2>
+        <div className="bg-white rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100 p-8">
+          <h2 className="text-2xl font-bold mb-6 text-center text-slate-800">เข้าสู่ระบบ</h2>
           
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="flex flex-col gap-2">
@@ -106,26 +106,6 @@ export default function Login() {
               เข้าสู่ระบบ
             </button>
           </form>
-
-          <div className="relative my-10">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-slate-100"></div>
-            </div>
-            <div className="relative flex justify-center text-xs uppercase tracking-widest font-bold">
-              <span className="bg-white px-4 text-slate-300">ช่วยเหลือ</span>
-            </div>
-          </div>
-
-          <div className="text-center space-y-4">
-            <p className="text-slate-400 text-xs font-bold uppercase tracking-wider">หากเข้าใช้งานไม่ได้ ติดต่อแอดมิน:</p>
-            <div className="flex flex-col items-center gap-2 bg-slate-50/80 p-5 rounded-[1.5rem] border border-slate-100 transition-all hover:bg-slate-50">
-              <p className="text-slate-600 font-bold text-sm">กลุ่มงานเทคโนโลยีสารสนเทศ</p>
-              <div className="flex items-center gap-2 text-primary">
-                <Phone className="size-4" />
-                <span className="font-black text-lg tracking-tighter">โทร. 1037</span>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
