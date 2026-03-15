@@ -56,7 +56,6 @@ export default function Login() {
             <Terminal className="text-primary size-10" />
           </div>
           <h1 className="text-3xl font-bold text-slate-900 tracking-tight">ระบบขอพัฒนาโปรแกรม</h1>
-          <p className="text-slate-500 text-base mt-1.5 font-medium">IT Development Request System</p>
         </div>
 
         <div className="bg-white rounded-[3rem] shadow-2xl shadow-slate-200/70 border border-slate-100 p-12">
