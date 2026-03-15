@@ -142,13 +142,13 @@ export default function RequestList() {
     ? requests.filter(r => r.requesterId === currentUser.id)
     : requests;
 
-  const handleDownloadAll = async (attachmentUrl: string, requestId: string) => {
+  const handleDownloadAll = async (attachmentUrl: string, requestId: string, department: string) => {
     try {
       const attachments = JSON.parse(attachmentUrl);
       if (!Array.isArray(attachments)) return;
 
       const zip = new JSZip();
-      const folder = zip.folder(`attachments-${requestId}`);
+      const folder = zip.folder(`attachments-${department}-${requestId}`);
 
       const downloadPromises = attachments.map(async (file: { name: string, url: string }) => {
         const response = await fetch(file.url);
@@ -158,7 +158,7 @@ export default function RequestList() {
 
       await Promise.all(downloadPromises);
       const content = await zip.generateAsync({ type: 'blob' });
-      saveAs(content, `attachments-${requestId}.zip`);
+      saveAs(content, `attachments-${department}.zip`);
     } catch (error) {
       console.error('Error creating zip:', error);
       alert('เกิดข้อผิดพลาดในการรวมไฟล์ กรุณาลองใหม่อีกครั้ง');
@@ -627,7 +627,7 @@ export default function RequestList() {
                         if (Array.isArray(attachments) && attachments.length > 1) {
                           return (
                             <button 
-                              onClick={() => handleDownloadAll(selectedReq.attachmentUrl!, selectedReq.id)}
+                              onClick={() => handleDownloadAll(selectedReq.attachmentUrl!, selectedReq.id, selectedReq.department)}
                               className="text-[11px] font-bold bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white px-3 py-1.5 rounded-full flex items-center gap-1.5 transition-all shadow-sm border border-emerald-200 active:scale-95"
                             >
                               <Download className="size-3.5" />
