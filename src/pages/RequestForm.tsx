@@ -43,27 +43,29 @@ export default function RequestForm() {
 
     if (files.length > 0) {
       try {
-        const file = files[0];
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
-        const filePath = `attachments/${fileName}`;
+        const uploadPromises = files.map(async (file) => {
+          const fileExt = file.name.split('.').pop();
+          const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+          const filePath = `attachments/${fileName}`;
 
-        const { error: uploadError, data } = await supabase.storage
-          .from('Dev-attachments')
-          .upload(filePath, file);
+          const { error: uploadError } = await supabase.storage
+            .from('Dev-attachments')
+            .upload(filePath, file);
 
-        if (uploadError) {
-          throw uploadError;
-        }
+          if (uploadError) throw uploadError;
 
-        const { data: { publicUrl } } = supabase.storage
-          .from('Dev-attachments')
-          .getPublicUrl(filePath);
+          const { data: { publicUrl } } = supabase.storage
+            .from('Dev-attachments')
+            .getPublicUrl(filePath);
 
-        finalAttachmentUrl = publicUrl;
+          return { name: file.name, url: publicUrl };
+        });
+
+        const uploadedFiles = await Promise.all(uploadPromises);
+        finalAttachmentUrl = JSON.stringify(uploadedFiles);
       } catch (error) {
-        console.error('Error uploading file:', error);
-        alert('เกิดข้อผิดพลาดในการอัปโหลดไฟล์ กรุณาลองใหม่อีกครั้ง');
+        console.error('Error uploading files:', error);
+        alert('เกิดข้อผิดพลาดในการอัปโหลดไฟล์บางไฟล์ กรุณาลองใหม่อีกครั้ง');
         return;
       }
     }

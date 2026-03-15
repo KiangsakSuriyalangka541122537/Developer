@@ -595,17 +595,44 @@ export default function RequestList() {
               {selectedReq.attachmentUrl && (
                 <div>
                   <h5 className="text-base font-bold text-slate-500 mb-2">เอกสารแนบ</h5>
-                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                    <a 
-                      href={selectedReq.attachmentUrl} 
-                      target="_blank" 
-                      rel="noreferrer" 
-                      className="inline-flex items-center gap-2 text-primary hover:text-secondary font-bold transition-colors"
-                      download={`attachment-${selectedReq.id}`}
-                    >
-                      <UploadCloud className="size-5" />
-                      เปิดดูหรือดาวน์โหลดเอกสาร
-                    </a>
+                  <div className="space-y-2">
+                    {(() => {
+                      try {
+                        const attachments = JSON.parse(selectedReq.attachmentUrl);
+                        if (Array.isArray(attachments)) {
+                          return attachments.map((file: { name: string, url: string }, idx: number) => (
+                            <div key={idx} className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                              <a 
+                                href={file.url} 
+                                target="_blank" 
+                                rel="noreferrer" 
+                                className="inline-flex items-center gap-2 text-primary hover:text-secondary font-bold transition-colors"
+                                download={file.name}
+                              >
+                                <UploadCloud className="size-5" />
+                                {file.name}
+                              </a>
+                            </div>
+                          ));
+                        }
+                      } catch (e) {
+                        // Fallback for old single URL format
+                        return (
+                          <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                            <a 
+                              href={selectedReq.attachmentUrl} 
+                              target="_blank" 
+                              rel="noreferrer" 
+                              className="inline-flex items-center gap-2 text-primary hover:text-secondary font-bold transition-colors"
+                              download={`attachment-${selectedReq.id}`}
+                            >
+                              <UploadCloud className="size-5" />
+                              เปิดดูหรือดาวน์โหลดเอกสาร
+                            </a>
+                          </div>
+                        );
+                      }
+                    })()}
                   </div>
                 </div>
               )}
