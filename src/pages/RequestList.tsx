@@ -368,6 +368,17 @@ export default function RequestList() {
 
   const handleReassign = async () => {
     if (selectedReq && selectedDevId) {
+      if (selectedReq.developerId !== currentUser?.id) {
+        setConfirmModal({
+          isOpen: true,
+          title: 'ไม่สามารถดำเนินการได้',
+          message: 'คุณไม่ใช่ผู้ที่ได้รับมอบหมายงานนี้ จึงไม่สามารถส่งต่องานได้',
+          type: 'warning',
+          showCancel: false,
+          onConfirm: () => setConfirmModal(prev => ({ ...prev, isOpen: false }))
+        });
+        return;
+      }
       await updateRequest(selectedReq.id, { developerId: selectedDevId });
       setShowAssignModal(false);
       setSelectedDevId('');
@@ -607,7 +618,7 @@ export default function RequestList() {
                             <Trash2 className="size-5" />
                           </button>
                         )}
-                        {currentUser?.role === 'developer' && (req.status === 'accepted' || req.status === 'in_progress') && (
+                        {currentUser?.role === 'developer' && (req.status === 'accepted' || req.status === 'in_progress') && req.developerId === currentUser.id && (
                           <button onClick={() => { setSelectedReq(req); setShowAssignModal(true); }} className="p-1.5 text-slate-400 hover:text-blue-600 transition-colors" title="ส่งต่องาน">
                             <Forward className="size-5" />
                           </button>
@@ -634,7 +645,7 @@ export default function RequestList() {
                              <XCircle className="size-5" />
                            </button>
                         )}
-                        {currentUser?.role === 'developer' && (req.status === 'accepted' || req.status === 'in_progress') && (
+                        {currentUser?.role === 'developer' && (req.status === 'accepted' || req.status === 'in_progress') && req.developerId === currentUser.id && (
                           <button onClick={() => { setSelectedReq(req); setShowRejectModal(true); }} className="p-1.5 text-slate-400 hover:text-rose-600 transition-colors" title="ปฏิเสธ">
                             <XCircle className="size-5" />
                           </button>

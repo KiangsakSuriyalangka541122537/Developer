@@ -12,9 +12,7 @@ export default function Dashboard() {
   const [selectedReq, setSelectedReq] = useState<DevRequest | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
 
-  const visibleRequests = currentUser?.role === 'department'
-    ? requests.filter(r => r.department === currentUser.name)
-    : requests;
+  const visibleRequests = requests;
 
   const stats = {
     total: visibleRequests.length,
