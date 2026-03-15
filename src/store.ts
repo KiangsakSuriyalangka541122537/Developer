@@ -174,6 +174,13 @@ export const useAppStore = create<AppState>()(
         if (updates.startMonthYear !== undefined) dbUpdates.start_month_year = updates.startMonthYear;
         if (updates.expectedFinishMonthYear !== undefined) dbUpdates.expected_finish_month_year = updates.expectedFinishMonthYear;
         if (updates.projectLink !== undefined) dbUpdates.project_link = updates.projectLink;
+        
+        // Add missing fields for request editing
+        if (updates.topic !== undefined) dbUpdates.topic = updates.topic;
+        if (updates.estimatedUsers !== undefined) dbUpdates.estimated_users = updates.estimatedUsers;
+        if (updates.objective !== undefined) dbUpdates.objective = updates.objective;
+        if (updates.currentSystem !== undefined) dbUpdates.current_system = updates.currentSystem;
+        if (updates.attachmentUrl !== undefined) dbUpdates.attachment_url = updates.attachmentUrl;
 
         const { error } = await supabase.from('Dev-requests').update(dbUpdates).eq('id', id);
         if (!error) {

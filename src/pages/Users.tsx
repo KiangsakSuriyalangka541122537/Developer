@@ -204,9 +204,6 @@ export default function Users() {
                 {editingUser ? 'แก้ไขข้อมูล' : 'เพิ่มข้อมูลใหม่'} 
                 ({activeTab === 'department' ? 'แผนก' : 'ผู้ใช้งาน'})
               </h4>
-              <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
-                <XCircle className="size-5" />
-              </button>
             </div>
             <form onSubmit={handleSubmit}>
               <div className="p-6 flex flex-col gap-4">

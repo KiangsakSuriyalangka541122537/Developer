@@ -244,6 +244,7 @@ export default function Dashboard() {
                   <th className="py-4 px-6">ชื่อโครงการ</th>
                   <th className="py-4 px-6">แผนก</th>
                   <th className="py-4 px-6">วันที่ขอ</th>
+                  <th className="py-4 px-6 text-center">ไฟล์แนบ</th>
                   <th className="py-4 pr-8 text-center w-32">สถานะ</th>
                 </tr>
               </thead>
@@ -270,6 +271,20 @@ export default function Dashboard() {
                       </td>
                       <td className="py-4 px-6 text-slate-600 font-medium">{req.department}</td>
                       <td className="py-4 px-6 text-slate-500 font-medium">{new Date(req.date).toLocaleDateString('th-TH')}</td>
+                      <td className="py-4 px-6 text-center">
+                        {req.attachmentUrl && (
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDownloadAll(req.attachmentUrl!, req.id, req.department, req.date);
+                            }}
+                            className="p-1.5 text-slate-400 hover:text-emerald-600 transition-colors"
+                            title="ดาวน์โหลดเอกสารแนบ"
+                          >
+                            <Download className="size-5" />
+                          </button>
+                        )}
+                      </td>
                       <td className="py-4 pr-8 text-center">
                         {getStatusBadge(req.status)}
                       </td>

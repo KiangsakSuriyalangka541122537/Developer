@@ -545,7 +545,20 @@ export default function RequestList() {
                         )}
                       </div>
 
-                      {/* Slot 4: Reject Action */}
+                      {/* Slot 4: Download (if has attachments) */}
+                      <div className="w-10 flex justify-center">
+                        {req.attachmentUrl && (
+                          <button 
+                            onClick={() => handleDownloadAll(req.attachmentUrl!, req.id, req.department, req.date)}
+                            className="p-1.5 text-slate-400 hover:text-emerald-600 transition-colors"
+                            title="ดาวน์โหลดเอกสารแนบ"
+                          >
+                            <Download className="size-5" />
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Slot 5: Reject Action */}
                       <div className="w-10 flex justify-center">
                         {currentUser?.role === 'approver' && req.status !== 'done' && req.status !== 'rejected' && (
                            <button onClick={() => { setSelectedReq(req); setShowRejectModal(true); }} className="p-1.5 text-slate-400 hover:text-rose-600 transition-colors" title="ปฏิเสธ">
@@ -578,9 +591,6 @@ export default function RequestList() {
           <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-slate-200">
             <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
               <h4 className="text-lg font-bold text-slate-900">ระบุเหตุผลการปฏิเสธ</h4>
-              <button onClick={() => setShowRejectModal(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
-                <XCircle className="size-5" />
-              </button>
             </div>
             <div className="p-6 flex flex-col gap-4">
               <div className="flex flex-col gap-2">
@@ -608,9 +618,6 @@ export default function RequestList() {
           <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-slate-200">
             <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
               <h4 className="text-lg font-bold text-slate-900">ยืนยันการเสร็จสิ้นโครงการ</h4>
-              <button onClick={() => setShowDoneModal(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
-                <XCircle className="size-5" />
-              </button>
             </div>
             <div className="p-6 flex flex-col gap-4">
               <div className="flex flex-col gap-2">
@@ -638,9 +645,6 @@ export default function RequestList() {
           <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-slate-200">
             <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
               <h4 className="text-lg font-bold text-slate-900">มอบหมายงาน</h4>
-              <button onClick={() => setShowAssignModal(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
-                <XCircle className="size-5" />
-              </button>
             </div>
             <div className="p-6 flex flex-col gap-4">
               <div className="flex flex-col gap-2">
@@ -671,9 +675,6 @@ export default function RequestList() {
           <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden border border-slate-200">
             <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
               <h4 className="text-lg font-bold text-slate-900">แก้ไขคำขอ</h4>
-              <button onClick={() => setShowEditModal(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
-                <XCircle className="size-5" />
-              </button>
             </div>
             <div className="p-6 flex flex-col gap-4 max-h-[70vh] overflow-y-auto">
               <div className="flex flex-col gap-2">
@@ -799,9 +800,6 @@ export default function RequestList() {
           <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden border border-slate-200">
             <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
               <h4 className="text-lg font-bold text-slate-900">ขอแก้ไข/เพิ่มเติมโปรแกรม</h4>
-              <button onClick={() => setShowRevisionModal(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
-                <XCircle className="size-5" />
-              </button>
             </div>
             <div className="p-6 flex flex-col gap-4 max-h-[70vh] overflow-y-auto">
               <div className="bg-primary/5 p-4 rounded-xl border border-primary/10 mb-2">
