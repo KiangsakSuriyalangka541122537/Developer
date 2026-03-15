@@ -32,6 +32,7 @@ export interface DevRequest {
   expectedFinishMonthYear?: string | null;
   projectLink?: string | null;
   previousDeveloperId?: string | null;
+  sourceRequestId?: string | null;
   createdAt: string;
 }
 
@@ -95,6 +96,7 @@ export const useAppStore = create<AppState>()(
               expectedFinishMonthYear: r.expected_finish_month_year,
               projectLink: r.project_link,
               previousDeveloperId: r.previous_developer_id,
+              sourceRequestId: r.source_request_id,
               createdAt: r.created_at
             }));
 
@@ -164,12 +166,18 @@ export const useAppStore = create<AppState>()(
           newReq.previous_developer_id = (reqData as any).previousDeveloperId;
         }
 
+        // Only add source_request_id if it's provided
+        if ((reqData as any).sourceRequestId) {
+          newReq.source_request_id = (reqData as any).sourceRequestId;
+        }
+
         let { error } = await supabase.from('Dev-requests').insert([newReq]);
         
-        // If it fails and we included previous_developer_id, try again without it
-        if (error && newReq.previous_developer_id) {
-          console.warn("Failed to insert with previous_developer_id, retrying without it...", error);
+        // If it fails and we included new columns, try again without them
+        if (error && (newReq.previous_developer_id || newReq.source_request_id)) {
+          console.warn("Failed to insert with new columns, retrying without them...", error);
           delete newReq.previous_developer_id;
+          delete newReq.source_request_id;
           const retry = await supabase.from('Dev-requests').insert([newReq]);
           error = retry.error;
         }
@@ -191,6 +199,7 @@ export const useAppStore = create<AppState>()(
         if (updates.expectedFinishMonthYear !== undefined) dbUpdates.expected_finish_month_year = updates.expectedFinishMonthYear;
         if (updates.projectLink !== undefined) dbUpdates.project_link = updates.projectLink;
         if (updates.previousDeveloperId !== undefined) dbUpdates.previous_developer_id = updates.previousDeveloperId;
+        if (updates.sourceRequestId !== undefined) dbUpdates.source_request_id = updates.sourceRequestId;
         
         // Add missing fields for request editing
         if (updates.topic !== undefined) dbUpdates.topic = updates.topic;

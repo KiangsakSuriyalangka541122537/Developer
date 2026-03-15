@@ -440,7 +440,8 @@ export default function RequestList() {
         objective: revisionFormData.objective,
         currentSystem: selectedReq.topic, // Reference original topic as current system context
         attachmentUrl: attachmentUrl,
-        previousDeveloperId: selectedReq.developerId
+        previousDeveloperId: selectedReq.developerId,
+        sourceRequestId: selectedReq.id
       });
 
       setShowRevisionModal(false);
@@ -557,7 +558,7 @@ export default function RequestList() {
 
                       {/* Slot 2: Primary Action (Edit / Assign / Accept / Done) */}
                       <div className="w-10 flex justify-center">
-                        {currentUser?.role === 'department' && req.status === 'done' && (
+                        {currentUser?.role === 'department' && req.status === 'done' && !requests.some(r => r.sourceRequestId === req.id) && (
                           <button 
                             onClick={() => { 
                               setSelectedReq(req); 
