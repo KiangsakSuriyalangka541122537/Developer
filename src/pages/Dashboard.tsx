@@ -85,23 +85,33 @@ export default function Dashboard() {
               </tr>
             </thead>
             <tbody className="text-sm">
-              {requests.map((req, index) => (
-                <tr key={req.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
-                  <td className="py-4 pl-12 font-medium text-slate-900">{index + 1}</td>
-                  <td className="py-4 px-6 text-slate-700">{req.topic}</td>
-                  <td className="py-4 px-6 text-slate-600">{req.department}</td>
-                  <td className="py-4 px-6 text-slate-500">{new Date(req.date).toLocaleDateString('th-TH')}</td>
-                  <td className="py-4 pr-12 text-center">
-                    <span className={`inline-flex items-center justify-center w-28 py-1 rounded-full text-xs font-medium border status-${req.status.replace('_', '')}`}>
-                      {req.status === 'pending' && 'รออนุมัติ'}
-                      {req.status === 'accepted' && 'รับงาน'}
-                      {req.status === 'in_progress' && 'กำลังดำเนินการ'}
-                      {req.status === 'done' && 'เสร็จสิ้น'}
-                      {req.status === 'rejected' && 'ปฏิเสธ'}
-                    </span>
-                  </td>
-                </tr>
-              ))}
+              {requests.map((req, index) => {
+                const isMyRequest = currentUser?.id === req.requesterId;
+                return (
+                  <tr key={req.id} className={`border-b border-slate-50 hover:bg-slate-50 transition-colors ${isMyRequest ? 'bg-primary/[0.03]' : ''}`}>
+                    <td className="py-4 pl-12 font-medium text-slate-900">{index + 1}</td>
+                    <td className="py-4 px-6 text-slate-700">
+                      <div className="flex items-center gap-2">
+                        {req.topic}
+                        {isMyRequest && (
+                          <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">My Request</span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="py-4 px-6 text-slate-600">{req.department}</td>
+                    <td className="py-4 px-6 text-slate-500">{new Date(req.date).toLocaleDateString('th-TH')}</td>
+                    <td className="py-4 pr-12 text-center">
+                      <span className={`inline-flex items-center justify-center w-28 py-1 rounded-full text-xs font-medium border status-${req.status.replace('_', '')}`}>
+                        {req.status === 'pending' && 'รออนุมัติ'}
+                        {req.status === 'accepted' && 'รับงาน'}
+                        {req.status === 'in_progress' && 'กำลังดำเนินการ'}
+                        {req.status === 'done' && 'เสร็จสิ้น'}
+                        {req.status === 'rejected' && 'ปฏิเสธ'}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
               {requests.length === 0 && (
                 <tr>
                   <td colSpan={5} className="py-20 text-center text-slate-400 font-medium italic">ไม่มีข้อมูลคำขอในระบบ</td>
