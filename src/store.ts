@@ -31,6 +31,7 @@ export interface DevRequest {
   startMonthYear?: string | null;
   expectedFinishMonthYear?: string | null;
   projectLink?: string | null;
+  parentRequestId?: string | null;
   createdAt: string;
 }
 
@@ -93,6 +94,7 @@ export const useAppStore = create<AppState>()(
               startMonthYear: r.start_month_year,
               expectedFinishMonthYear: r.expected_finish_month_year,
               projectLink: r.project_link,
+              parentRequestId: r.parent_request_id,
               createdAt: r.created_at
             }));
 
@@ -149,6 +151,7 @@ export const useAppStore = create<AppState>()(
           current_system: reqData.currentSystem,
           attachment_url: reqData.attachmentUrl || null,
           status: 'pending',
+          parent_request_id: reqData.parentRequestId || null,
           created_at: new Date().toISOString()
         };
 
