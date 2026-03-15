@@ -100,7 +100,7 @@ export default function RequestForm() {
   return (
     <div className="space-y-8 overflow-hidden">
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">แบบฟอร์มขอพัฒนาโปรแกรม</h1>
+        <h1 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">เขียนคำขอใหม่</h1>
         <p className="text-slate-500">กรุณากรอกรายละเอียดความต้องการเพื่อให้ทีมพัฒนาตรวจสอบและดำเนินการ</p>
       </div>
 
@@ -142,7 +142,7 @@ export default function RequestForm() {
 
           <div className="space-y-6">
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium text-slate-700">หัวข้อ/ชื่อโปรแกรมที่ต้องการพัฒนา <span className="text-rose-500">*</span></label>
+              <label className="text-sm font-medium text-slate-700">หัวข้อ/ชื่อโปรแกรม <span className="text-rose-500">*</span></label>
               <input 
                 type="text" 
                 name="topic"

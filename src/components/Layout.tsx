@@ -26,9 +26,9 @@ export default function Layout() {
           <nav className="hidden md:flex gap-2">
             <Link to="/" className={`font-medium px-3 py-2 rounded-xl transition-all ${location.pathname === '/' ? 'text-primary bg-primary/5' : 'text-slate-600 hover:text-primary hover:bg-slate-50'}`}>Dashboard</Link>
             {currentUser?.role === 'department' && (
-              <Link to="/request" className={`font-medium px-3 py-2 rounded-xl transition-all ${location.pathname === '/request' ? 'text-primary bg-primary/5' : 'text-slate-600 hover:text-primary hover:bg-slate-50'}`}>ขอพัฒนาโปรแกรม</Link>
+              <Link to="/request" className={`font-medium px-3 py-2 rounded-xl transition-all ${location.pathname === '/request' ? 'text-primary bg-primary/5' : 'text-slate-600 hover:text-primary hover:bg-slate-50'}`}>เขียนคำขอ</Link>
             )}
-            {currentUser && currentUser.role !== 'department' && (
+            {currentUser && (
                <Link to="/list" className={`font-medium px-3 py-2 rounded-xl transition-all ${location.pathname === '/list' ? 'text-primary bg-primary/5' : 'text-slate-600 hover:text-primary hover:bg-slate-50'}`}>รายการคำขอ</Link>
             )}
             {currentUser && currentUser.role !== 'department' && (

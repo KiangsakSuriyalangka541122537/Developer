@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
-import { useAppStore } from '../store';
-import { BarChart, Users, CheckCircle, Clock, Briefcase, Lock, Trophy, Filter } from 'lucide-react';
+import { useAppStore, DevRequest } from '../store';
+import { BarChart, Users, CheckCircle, Clock, Briefcase, Lock, Trophy, Filter, Eye, XCircle, FileText, Download, Calendar, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import JSZip from 'jszip';
+import { saveAs } from 'file-saver';
 
 export default function Dashboard() {
   const { requests, users, currentUser } = useAppStore();
   const [filterStatus, setFilterStatus] = useState<string | null>(null);
+  const [selectedReq, setSelectedReq] = useState<DevRequest | null>(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   const stats = {
     total: requests.length,
@@ -47,12 +51,55 @@ export default function Dashboard() {
     }
   };
 
+  const handleDownloadAll = async (attachmentUrl: string, requestId: string, department: string, date: string) => {
+    try {
+      const attachments = JSON.parse(attachmentUrl);
+      if (!Array.isArray(attachments)) return;
+
+      const zip = new JSZip();
+      
+      const d = new Date(date);
+      const day = String(d.getDate()).padStart(2, '0');
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const year = d.getFullYear() + 543; 
+      const formattedDate = `${day}-${month}-${year}`;
+
+      const folderName = `attachments-${department}-${formattedDate}-${requestId}`;
+      const folder = zip.folder(folderName);
+
+      const downloadPromises = attachments.map(async (file: { name: string, url: string }) => {
+        const response = await fetch(file.url);
+        const blob = await response.blob();
+        folder?.file(file.name, blob);
+      });
+
+      await Promise.all(downloadPromises);
+      const content = await zip.generateAsync({ type: 'blob' });
+      saveAs(content, `attachments-${department}-${formattedDate}.zip`);
+    } catch (error) {
+      console.error('Error creating zip:', error);
+      alert('เกิดข้อผิดพลาดในการรวมไฟล์ กรุณาลองใหม่อีกครั้ง');
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    const badges: Record<string, { label: string, color: string }> = {
+      pending: { label: 'รออนุมัติ', color: 'status-pending' },
+      accepted: { label: 'รับงาน', color: 'status-accepted' },
+      in_progress: { label: 'กำลังดำเนินการ', color: 'status-inprogress' },
+      done: { label: 'เสร็จสิ้น', color: 'status-done' },
+      rejected: { label: 'ปฏิเสธ', color: 'status-rejected' }
+    };
+    const b = badges[status];
+    return <span className={`inline-flex items-center justify-center w-24 py-1 rounded-full text-[10px] font-bold border uppercase tracking-tighter ${b.color}`}>{b.label}</span>;
+  };
+
   return (
     <div className="space-y-8 overflow-hidden">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Dashboard</h1>
-          <p className="text-slate-500 mt-1">ภาพรวมสถานะการขอพัฒนาโปรแกรมทั้งหมดในระบบ</p>
+          <p className="text-slate-500 mt-1">ภาพรวมสถานะการขอพัฒนาโปรแกรม</p>
         </div>
         {filterStatus && (
           <button 
@@ -199,27 +246,41 @@ export default function Dashboard() {
               <tbody className="text-sm">
                 {filteredRequests.map((req, index) => {
                   const isMyRequest = currentUser?.id === req.requesterId;
+                  const hasPendingRevision = requests.some(r => r.parentRequestId === req.id && ['pending', 'accepted', 'in_progress'].includes(r.status));
+                  
                   return (
-                    <tr key={req.id} className="border-b border-slate-50 hover:bg-slate-50/80 transition-colors group">
+                    <tr 
+                      key={req.id} 
+                      className="border-b border-slate-50 hover:bg-slate-50/80 transition-colors group cursor-pointer"
+                      onClick={() => { setSelectedReq(req); setShowDetailsModal(true); }}
+                    >
                       <td className="py-4 pl-8 text-center font-bold text-slate-400 group-hover:text-primary transition-colors">{index + 1}</td>
                       <td className="py-4 px-6 text-slate-700">
-                        <div className="flex items-center gap-2 font-bold">
-                          {req.topic}
-                          {isMyRequest && (
-                            <div className="size-2 rounded-full bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.4)]" title="งานของแผนกคุณ" />
+                        <div className="flex flex-col">
+                          <div className="flex items-center gap-2 font-bold">
+                            {req.topic}
+                            {isMyRequest && (
+                              <div className="size-2 rounded-full bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.4)]" title="งานของแผนกคุณ" />
+                            )}
+                            {hasPendingRevision && (
+                              <div className="flex items-center gap-1 px-2 py-0.5 bg-amber-50 text-amber-600 rounded-full border border-amber-200 text-[9px] animate-pulse">
+                                <Clock className="size-2.5" />
+                                รอรับงานแก้ไข
+                              </div>
+                            )}
+                          </div>
+                          {req.parentRequestId && (
+                            <span className="text-[10px] text-primary font-medium flex items-center gap-1 mt-0.5">
+                              <RefreshCw className="size-2.5" />
+                              แก้ไขจาก: {req.parentRequestId}
+                            </span>
                           )}
                         </div>
                       </td>
                       <td className="py-4 px-6 text-slate-600 font-medium">{req.department}</td>
                       <td className="py-4 px-6 text-slate-500 font-medium">{new Date(req.date).toLocaleDateString('th-TH')}</td>
                       <td className="py-4 pr-8 text-center">
-                        <span className={`inline-flex items-center justify-center w-24 py-1 rounded-full text-[10px] font-bold border uppercase tracking-tighter status-${req.status.replace('_', '')}`}>
-                          {req.status === 'pending' && 'รออนุมัติ'}
-                          {req.status === 'accepted' && 'รับงาน'}
-                          {req.status === 'in_progress' && 'กำลังดำเนินการ'}
-                          {req.status === 'done' && 'เสร็จสิ้น'}
-                          {req.status === 'rejected' && 'ปฏิเสธ'}
-                        </span>
+                        {getStatusBadge(req.status)}
                       </td>
                     </tr>
                   );
@@ -239,6 +300,208 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+      {/* Details Modal */}
+      {showDetailsModal && selectedReq && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm px-4 py-8">
+          <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden border border-slate-200 max-h-full flex flex-col">
+            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center sticky top-0 bg-white z-10">
+              <h4 className="text-xl font-black text-slate-900">รายละเอียดคำขอ</h4>
+              <button onClick={() => setShowDetailsModal(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
+                <XCircle className="size-6" />
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto space-y-6 pb-6 scrollbar-hide">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-3">
+                  {getStatusBadge(selectedReq.status)}
+                  {requests.some(r => r.parentRequestId === selectedReq.id && ['pending', 'accepted', 'in_progress'].includes(r.status)) && (
+                    <div className="flex items-center gap-1.5 px-3 py-1 bg-amber-50 text-amber-600 rounded-full border border-amber-200 text-xs font-bold animate-pulse">
+                      <Clock className="size-3.5" />
+                      รอรับงานแก้ไข
+                    </div>
+                  )}
+                </div>
+                <span className="text-sm font-medium text-slate-500">วันที่ขอ: {new Date(selectedReq.date).toLocaleDateString('th-TH')}</span>
+              </div>
+              
+              <div>
+                <h5 className="text-base font-bold text-slate-500 mb-2">หัวข้อ/ชื่อโปรแกรม</h5>
+                <p className="text-black font-normal text-xl">{selectedReq.topic}</p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-4">
+                <div>
+                  <h5 className="text-base font-bold text-slate-500 mb-2">แผนกผู้ขอ</h5>
+                  <p className="text-black font-normal text-base">{selectedReq.department}</p>
+                </div>
+                <div>
+                  <h5 className="text-base font-bold text-slate-500 mb-2">ผู้ขอ</h5>
+                  <p className="text-black font-normal text-base">{selectedReq.requesterName}</p>
+                </div>
+                <div>
+                  <h5 className="text-base font-bold text-slate-500 mb-2">จำนวนผู้ใช้งาน</h5>
+                  <p className="text-black font-normal text-base">{selectedReq.estimatedUsers}</p>
+                </div>
+                {selectedReq.developerId && (
+                  <div>
+                    <h5 className="text-base font-bold text-slate-500 mb-2">ผู้รับผิดชอบ (Developer)</h5>
+                    <p className="text-black font-normal text-base">{users.find(u => u.id === selectedReq.developerId)?.name}</p>
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <h5 className="text-base font-bold text-slate-500 mb-2">วัตถุประสงค์และความต้องการ</h5>
+                <div className="bg-slate-50/80 p-4 rounded-xl text-black font-normal whitespace-pre-wrap">
+                  {selectedReq.objective}
+                </div>
+              </div>
+
+              {selectedReq.currentSystem && (
+                <div>
+                  <h5 className="text-base font-bold text-slate-500 mb-2">ระบบเดิมที่ใช้งานอยู่</h5>
+                  <p className="text-black font-normal text-base">{selectedReq.currentSystem}</p>
+                </div>
+              )}
+              
+              {selectedReq.attachmentUrl && (
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <h5 className="text-base font-bold text-slate-500">เอกสารแนบ</h5>
+                    {(() => {
+                      try {
+                        const attachments = JSON.parse(selectedReq.attachmentUrl);
+                        if (Array.isArray(attachments) && attachments.length > 1) {
+                          return (
+                            <button 
+                              onClick={() => handleDownloadAll(selectedReq.attachmentUrl!, selectedReq.id, selectedReq.department, selectedReq.date)}
+                              className="text-[11px] font-bold bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white px-3 py-1.5 rounded-full flex items-center gap-1.5 transition-all shadow-sm border border-emerald-200 active:scale-95"
+                            >
+                              <Download className="size-3.5" />
+                              ดาวน์โหลดทั้งหมด (ZIP)
+                            </button>
+                          );
+                        }
+                      } catch (e) { return null; }
+                    })()}
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {(() => {
+                      try {
+                        const attachments = JSON.parse(selectedReq.attachmentUrl);
+                        if (Array.isArray(attachments)) {
+                          return attachments.map((file: { name: string, url: string }, idx: number) => (
+                            <a 
+                              key={idx}
+                              href={file.url} 
+                              target="_blank" 
+                              rel="noreferrer" 
+                              className="flex items-center justify-between p-3 bg-white border border-slate-200 rounded-xl hover:border-emerald-200 hover:bg-emerald-50/30 transition-all group shadow-sm"
+                              title={file.name}
+                            >
+                              <div className="flex items-center gap-2.5 overflow-hidden">
+                                <div className="bg-emerald-100 p-1.5 rounded-lg text-emerald-600 group-hover:bg-emerald-200 transition-colors">
+                                  <FileText className="size-4" />
+                                </div>
+                                <span className="text-xs font-bold text-slate-600 truncate group-hover:text-emerald-700 transition-colors">
+                                  {file.name}
+                                </span>
+                              </div>
+                              <Download className="size-3.5 text-slate-300 group-hover:text-emerald-500 transition-colors flex-shrink-0" />
+                            </a>
+                          ));
+                        }
+                      } catch (e) {
+                        return (
+                          <a 
+                            href={selectedReq.attachmentUrl} 
+                            target="_blank" 
+                            rel="noreferrer" 
+                            className="flex items-center justify-between p-3 bg-white border border-slate-200 rounded-xl hover:border-emerald-200 hover:bg-emerald-50/30 transition-all group shadow-sm w-full"
+                          >
+                            <div className="flex items-center gap-2.5 overflow-hidden">
+                              <div className="bg-emerald-100 p-1.5 rounded-lg text-emerald-600 group-hover:bg-emerald-200 transition-colors">
+                                <FileText className="size-4" />
+                              </div>
+                              <span className="text-xs font-bold text-slate-600 truncate group-hover:text-emerald-700 transition-colors">
+                                เปิดดูหรือดาวน์โหลดเอกสาร
+                              </span>
+                            </div>
+                            <Download className="size-3.5 text-slate-300 group-hover:text-emerald-500 transition-colors flex-shrink-0" />
+                          </a>
+                        );
+                      }
+                    })()}
+                  </div>
+                </div>
+              )}
+
+              {selectedReq.rejectionReason && (
+                <div className="bg-rose-50 p-4 rounded-xl border border-rose-100">
+                  <h5 className="text-base font-bold text-rose-700 mb-2">เหตุผลที่ปฏิเสธ</h5>
+                  <p className="text-black font-normal">{selectedReq.rejectionReason}</p>
+                </div>
+              )}
+
+              {selectedReq.projectLink && (
+                <div className="bg-emerald-50/50 p-5 rounded-xl border border-emerald-100">
+                  <h5 className="text-base font-bold text-emerald-700 mb-2">ลิงก์โปรแกรม / คู่มือ</h5>
+                  <a href={selectedReq.projectLink} target="_blank" rel="noreferrer" className="text-black hover:underline font-normal break-all flex items-center gap-2 text-base">
+                    <FileText className="size-5" />
+                    {selectedReq.projectLink}
+                  </a>
+                </div>
+              )}
+
+              {/* Developer Time Estimation */}
+              {(selectedReq.status === 'accepted' || selectedReq.status === 'in_progress' || selectedReq.status === 'done') && (selectedReq.startMonthYear || selectedReq.expectedFinishMonthYear) && (
+                <div className="border-t border-slate-100 pt-6">
+                  <h5 className="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
+                    <Calendar className="size-5 text-primary" />
+                    กำหนดการพัฒนา
+                  </h5>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    {selectedReq.startMonthYear && (
+                      <div className="flex flex-col gap-1">
+                        <span className="text-xs font-bold text-slate-400 uppercase">เริ่มพัฒนา</span>
+                        <span className="text-sm font-bold text-slate-700">
+                          {(() => {
+                            const [y, m] = selectedReq.startMonthYear.split('-');
+                            const THAI_MONTHS = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+                            return `${THAI_MONTHS[parseInt(m)-1]} ${parseInt(y)+543}`;
+                          })()}
+                        </span>
+                      </div>
+                    )}
+                    {selectedReq.expectedFinishMonthYear && (
+                      <div className="flex flex-col gap-1">
+                        <span className="text-xs font-bold text-slate-400 uppercase">คาดว่าเสร็จ</span>
+                        <span className="text-sm font-bold text-slate-700">
+                          {(() => {
+                            const [y, m] = selectedReq.expectedFinishMonthYear.split('-');
+                            const THAI_MONTHS = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+                            return `${THAI_MONTHS[parseInt(m)-1]} ${parseInt(y)+543}`;
+                          })()}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Modal Actions */}
+              <div className="mt-8 flex justify-end gap-3 border-t border-slate-100 pt-6">
+                <button 
+                  onClick={() => setShowDetailsModal(false)}
+                  className="px-8 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-all"
+                >
+                  ปิด
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

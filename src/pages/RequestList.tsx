@@ -1,6 +1,6 @@
 import { useState, useEffect, ChangeEvent } from 'react';
 import { useAppStore, DevRequest } from '../store';
-import { FileText, Edit, Trash2, CheckCircle, XCircle, Forward, UserCheck, Eye, Calendar, MailOpen, ChevronLeft, ChevronRight, UploadCloud, Download, RefreshCw, Save } from 'lucide-react';
+import { FileText, Edit, Trash2, CheckCircle, XCircle, Forward, UserCheck, Eye, Calendar, MailOpen, ChevronLeft, ChevronRight, UploadCloud, Download, RefreshCw, Save, Clock } from 'lucide-react';
 import ConfirmModal from '../components/ConfirmModal';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
@@ -368,7 +368,7 @@ export default function RequestList() {
     <div className="space-y-8 overflow-hidden">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">รายการคำขอพัฒนาโปรแกรม</h1>
+          <h1 className="text-3xl font-bold text-slate-900">รายการคำขอ</h1>
           <p className="text-slate-500 mt-1">ติดตามและจัดการคำขอพัฒนาซอฟต์แวร์</p>
         </div>
       </div>
@@ -392,7 +392,15 @@ export default function RequestList() {
                   <td className="py-4 pl-12 font-medium text-slate-900">{index + 1}</td>
                   <td className="py-4 px-6 text-slate-700">
                     <div className="flex flex-col">
-                      <span>{req.topic}</span>
+                      <div className="flex items-center gap-2">
+                        <span>{req.topic}</span>
+                        {requests.some(r => r.parentRequestId === req.id && ['pending', 'accepted', 'in_progress'].includes(r.status)) && (
+                          <div className="flex items-center gap-1 px-2 py-0.5 bg-amber-50 text-amber-600 rounded-full border border-amber-200 text-[9px] animate-pulse">
+                            <Clock className="size-2.5" />
+                            รอรับงานแก้ไข
+                          </div>
+                        )}
+                      </div>
                       {req.parentRequestId && (
                         <span className="text-[10px] text-primary font-medium flex items-center gap-1 mt-0.5">
                           <RefreshCw className="size-2.5" />
@@ -419,7 +427,7 @@ export default function RequestList() {
 
                       {/* Slot 2: Primary Action (Edit / Assign / Accept / Done) */}
                       <div className="w-10 flex justify-center">
-                        {currentUser?.role === 'department' && req.status === 'done' && (
+                        {currentUser?.role === 'department' && req.status === 'done' && !requests.some(r => r.parentRequestId === req.id && ['pending', 'accepted', 'in_progress'].includes(r.status)) && (
                           <button 
                             onClick={() => { 
                               setSelectedReq(req); 
@@ -613,7 +621,7 @@ export default function RequestList() {
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm px-4">
           <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden border border-slate-200">
             <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
-              <h4 className="text-lg font-bold text-slate-900">แก้ไขคำขอพัฒนาโปรแกรม</h4>
+              <h4 className="text-lg font-bold text-slate-900">แก้ไขคำขอ</h4>
               <button onClick={() => setShowEditModal(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
                 <XCircle className="size-5" />
               </button>
@@ -779,7 +787,15 @@ export default function RequestList() {
             </div>
             <div className="p-6 overflow-y-auto space-y-6 pb-6 scrollbar-hide">
               <div className="flex justify-between items-center">
-                {getStatusBadge(selectedReq.status)}
+                <div className="flex items-center gap-3">
+                  {getStatusBadge(selectedReq.status)}
+                  {requests.some(r => r.parentRequestId === selectedReq.id && ['pending', 'accepted', 'in_progress'].includes(r.status)) && (
+                    <div className="flex items-center gap-1.5 px-3 py-1 bg-amber-50 text-amber-600 rounded-full border border-amber-200 text-xs font-bold animate-pulse">
+                      <Clock className="size-3.5" />
+                      รอรับงานแก้ไข
+                    </div>
+                  )}
+                </div>
                 <span className="text-sm font-medium text-slate-500">วันที่ขอ: {new Date(selectedReq.date).toLocaleDateString('th-TH')}</span>
               </div>
               
@@ -945,7 +961,7 @@ export default function RequestList() {
                 >
                   ปิด
                 </button>
-                {currentUser?.role === 'department' && selectedReq.status === 'done' && (
+                {currentUser?.role === 'department' && selectedReq.status === 'done' && !requests.some(r => r.parentRequestId === selectedReq.id && ['pending', 'accepted', 'in_progress'].includes(r.status)) && (
                   <button 
                     onClick={() => {
                       setShowDetailsModal(false);
