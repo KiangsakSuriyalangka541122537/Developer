@@ -28,7 +28,7 @@ export default function Layout() {
             {currentUser?.role === 'department' && (
               <Link to="/request" className={`font-medium px-3 py-2 rounded-xl transition-all ${location.pathname === '/request' ? 'text-primary bg-primary/5' : 'text-slate-600 hover:text-primary hover:bg-slate-50'}`}>ขอพัฒนาโปรแกรม</Link>
             )}
-            {currentUser && (
+            {currentUser && currentUser.role !== 'department' && (
                <Link to="/list" className={`font-medium px-3 py-2 rounded-xl transition-all ${location.pathname === '/list' ? 'text-primary bg-primary/5' : 'text-slate-600 hover:text-primary hover:bg-slate-50'}`}>รายการคำขอ</Link>
             )}
             {currentUser?.role === 'approver' && (
