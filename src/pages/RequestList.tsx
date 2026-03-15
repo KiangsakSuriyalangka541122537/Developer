@@ -628,9 +628,9 @@ export default function RequestList() {
                           return (
                             <button 
                               onClick={() => handleDownloadAll(selectedReq.attachmentUrl!, selectedReq.id)}
-                              className="text-xs font-bold text-primary hover:text-secondary flex items-center gap-1 transition-colors"
+                              className="text-[11px] font-bold bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white px-3 py-1.5 rounded-full flex items-center gap-1.5 transition-all shadow-sm border border-emerald-200 active:scale-95"
                             >
-                              <Download className="size-4" />
+                              <Download className="size-3.5" />
                               ดาวน์โหลดทั้งหมด (ZIP)
                             </button>
                           );
