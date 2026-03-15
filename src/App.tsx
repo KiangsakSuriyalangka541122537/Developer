@@ -10,6 +10,7 @@ import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import RequestForm from './pages/RequestForm';
 import RequestList from './pages/RequestList';
+import WorkloadOverview from './pages/WorkloadOverview';
 import Profile from './pages/Profile';
 import Users from './pages/Users';
 import { useAppStore } from './store';
@@ -44,6 +45,11 @@ export default function App() {
           <Route path="list" element={
             <ProtectedRoute allowedRoles={['approver', 'developer', 'department']}>
               <RequestList />
+            </ProtectedRoute>
+          } />
+          <Route path="workload" element={
+            <ProtectedRoute allowedRoles={['approver', 'developer', 'department']}>
+              <WorkloadOverview />
             </ProtectedRoute>
           } />
           <Route path="profile" element={
