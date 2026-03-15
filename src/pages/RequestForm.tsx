@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../store';
 import { Save, RefreshCcw, UploadCloud } from 'lucide-react';
 
+import { supabase } from '../lib/supabase';
+
 export default function RequestForm() {
   const { currentUser, addRequest } = useAppStore();
   const navigate = useNavigate();
@@ -40,15 +42,30 @@ export default function RequestForm() {
     let finalAttachmentUrl = formData.attachmentUrl;
 
     if (files.length > 0) {
-      // For this demo, we'll convert the first file to a data URL to simulate an upload
-      // In a real app, you'd upload to Supabase Storage or similar
-      const file = files[0];
-      const reader = new FileReader();
-      const dataUrl = await new Promise<string>((resolve) => {
-        reader.onload = () => resolve(reader.result as string);
-        reader.readAsDataURL(file);
-      });
-      finalAttachmentUrl = dataUrl;
+      try {
+        const file = files[0];
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+        const filePath = `attachments/${fileName}`;
+
+        const { error: uploadError, data } = await supabase.storage
+          .from('Dev-attachments')
+          .upload(filePath, file);
+
+        if (uploadError) {
+          throw uploadError;
+        }
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('Dev-attachments')
+          .getPublicUrl(filePath);
+
+        finalAttachmentUrl = publicUrl;
+      } catch (error) {
+        console.error('Error uploading file:', error);
+        alert('เกิดข้อผิดพลาดในการอัปโหลดไฟล์ กรุณาลองใหม่อีกครั้ง');
+        return;
+      }
     }
 
     await addRequest({
