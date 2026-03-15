@@ -37,7 +37,12 @@ export default function Login() {
     setError('');
     const success = await login(username, password);
     if (success) {
-      navigate('/');
+      const user = useAppStore.getState().currentUser;
+      if (user?.name === 'นายกิตติพงษ์') {
+        navigate('/list');
+      } else {
+        navigate('/');
+      }
     } else {
       setError('ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง');
     }

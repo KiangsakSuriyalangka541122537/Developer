@@ -148,8 +148,10 @@ export default function RequestList() {
     }
   }, [selectedReq]);
 
-  // Show all requests to match Dashboard overview
-  const visibleRequests = requests;
+  // Filter requests based on role
+  const visibleRequests = currentUser?.role === 'department' 
+    ? requests.filter(r => r.requesterId === currentUser.id)
+    : requests;
 
   const handleDelete = async (id: string, status: string) => {
     if (currentUser?.role === 'department' && status !== 'pending') {

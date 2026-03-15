@@ -42,7 +42,7 @@ export default function App() {
             </ProtectedRoute>
           } />
           <Route path="list" element={
-            <ProtectedRoute allowedRoles={['approver', 'developer']}>
+            <ProtectedRoute allowedRoles={['approver', 'developer', 'department']}>
               <RequestList />
             </ProtectedRoute>
           } />
