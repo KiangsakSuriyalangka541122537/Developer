@@ -958,6 +958,19 @@ export default function RequestList() {
                       disabled={currentUser?.role !== 'developer'}
                     />
                   </div>
+                  {editStartMonth && editEndMonth && (
+                    <div className="mt-4 p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
+                      <span className="text-sm font-bold text-slate-500">ระยะเวลาดำเนินการรวม:</span>
+                      <span className="text-sm font-black text-primary">
+                        {(() => {
+                          const [y1, m1] = editStartMonth.split('-').map(Number);
+                          const [y2, m2] = editEndMonth.split('-').map(Number);
+                          const diff = (y2 - y1) * 12 + (m2 - m1) + 1;
+                          return diff > 0 ? `${diff} เดือน` : 'ข้อมูลไม่ถูกต้อง';
+                        })()}
+                      </span>
+                    </div>
+                  )}
                 </div>
               )}
 
