@@ -106,6 +106,9 @@ export default function RequestList() {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showRevisionModal, setShowRevisionModal] = useState(false);
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [scheduleStartMonth, setScheduleStartMonth] = useState('');
+  const [scheduleEndMonth, setScheduleEndMonth] = useState('');
   const [selectedDevId, setSelectedDevId] = useState('');
   const [revisionFiles, setRevisionFiles] = useState<File[]>([]);
   const [editFiles, setEditFiles] = useState<File[]>([]);
@@ -398,7 +401,34 @@ export default function RequestList() {
       });
       return;
     }
-    await updateRequest(req.id, { status: 'in_progress', developerId: currentUser?.id });
+    setSelectedReq(req);
+    setScheduleStartMonth('');
+    setScheduleEndMonth('');
+    setShowScheduleModal(true);
+  };
+
+  const handleScheduleSubmit = async () => {
+    if (!selectedReq || !scheduleStartMonth || !scheduleEndMonth) {
+      setConfirmModal({
+        isOpen: true,
+        title: 'ข้อมูลไม่ครบถ้วน',
+        message: 'กรุณาระบุช่วงเวลาการพัฒนาให้ครบถ้วน',
+        type: 'warning',
+        showCancel: false,
+        onConfirm: () => setConfirmModal(prev => ({ ...prev, isOpen: false }))
+      });
+      return;
+    }
+    await updateRequest(selectedReq.id, { 
+      status: 'in_progress', 
+      developerId: currentUser?.id,
+      startMonthYear: scheduleStartMonth,
+      expectedFinishMonthYear: scheduleEndMonth
+    });
+    setShowScheduleModal(false);
+    setSelectedReq(null);
+    setScheduleStartMonth('');
+    setScheduleEndMonth('');
   };
 
   const handleRevisionSubmit = async () => {
@@ -1200,6 +1230,72 @@ export default function RequestList() {
                     บันทึกกำหนดการ
                   </button>
                 )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Schedule Modal */}
+      {showScheduleModal && selectedReq && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-[32px] shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="p-8">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-2xl font-black text-slate-900">กำหนดการพัฒนา</h3>
+                <button 
+                  onClick={() => {
+                    setShowScheduleModal(false);
+                    setSelectedReq(null);
+                  }}
+                  className="p-2 hover:bg-slate-100 rounded-full transition-colors"
+                >
+                  <XCircle className="size-6 text-slate-400" />
+                </button>
+              </div>
+
+              <div className="space-y-6">
+                <div>
+                  <h5 className="text-sm font-bold text-slate-500 mb-1">หัวข้อ/ชื่อโปรแกรม</h5>
+                  <p className="text-lg font-bold text-slate-900">{selectedReq.topic}</p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <ThaiMonthPicker 
+                    label="เริ่มพัฒนา (เดือน/ปี)"
+                    value={scheduleStartMonth}
+                    onChange={(val) => setScheduleStartMonth(val)}
+                  />
+                  <ThaiMonthPicker 
+                    label="คาดว่าเสร็จ (เดือน/ปี)"
+                    value={scheduleEndMonth}
+                    onChange={(val) => setScheduleEndMonth(val)}
+                  />
+                </div>
+
+                {scheduleStartMonth && scheduleEndMonth && (
+                  <div className="p-4 bg-primary/5 rounded-2xl border border-primary/10 flex items-center justify-between">
+                    <span className="text-sm font-bold text-slate-600">ระยะเวลาดำเนินการรวม:</span>
+                    <span className="text-lg font-black text-primary">
+                      {(() => {
+                        const [y1, m1] = scheduleStartMonth.split('-').map(Number);
+                        const [y2, m2] = scheduleEndMonth.split('-').map(Number);
+                        const diff = (y2 - y1) * 12 + (m2 - m1) + 1;
+                        return diff > 0 ? `${diff} เดือน` : 'ข้อมูลไม่ถูกต้อง';
+                      })()}
+                    </span>
+                  </div>
+                )}
+
+                <div className="pt-4">
+                  <button 
+                    onClick={handleScheduleSubmit}
+                    className="w-full bg-emerald-600 text-white py-4 rounded-2xl font-bold hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-200 flex items-center justify-center gap-2"
+                  >
+                    <Save className="size-5" />
+                    บันทึกกำหนดการและเริ่มงาน
+                  </button>
+                </div>
               </div>
             </div>
           </div>
