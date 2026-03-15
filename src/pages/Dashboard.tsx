@@ -4,6 +4,7 @@ import { BarChart, Users, CheckCircle, Clock, Briefcase, Lock, Trophy, Filter, E
 import { Link } from 'react-router-dom';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
+import { supabase } from '../lib/supabase';
 
 export default function Dashboard() {
   const { requests, users, currentUser } = useAppStore();
@@ -57,8 +58,27 @@ export default function Dashboard() {
 
   const handleDownloadAll = async (attachmentUrl: string, requestId: string, department: string, date: string) => {
     try {
-      const attachments = JSON.parse(attachmentUrl);
-      if (!Array.isArray(attachments)) return;
+      let attachments: { name: string, url: string }[] = [];
+      
+      try {
+        const parsed = JSON.parse(attachmentUrl);
+        if (Array.isArray(parsed)) {
+          attachments = parsed;
+        } else {
+          attachments = [{ name: 'attachment', url: attachmentUrl }];
+        }
+      } catch (e) {
+        // Not a JSON string, assume it's a single URL
+        attachments = [{ name: 'attachment', url: attachmentUrl }];
+      }
+
+      if (attachments.length === 0) return;
+
+      // If only one file and it's not a JSON array, just open it
+      if (attachments.length === 1 && !attachmentUrl.startsWith('[')) {
+        window.open(attachments[0].url, '_blank');
+        return;
+      }
 
       const zip = new JSZip();
       
@@ -72,9 +92,27 @@ export default function Dashboard() {
       const folder = zip.folder(folderName);
 
       const downloadPromises = attachments.map(async (file: { name: string, url: string }) => {
-        const response = await fetch(file.url);
-        const blob = await response.blob();
-        folder?.file(file.name, blob);
+        try {
+          // Try to download using Supabase SDK first (better for CORS)
+          const urlParts = file.url.split('Dev-attachments/');
+          if (urlParts.length > 1) {
+            const path = urlParts[1];
+            const { data, error } = await supabase.storage.from('Dev-attachments').download(path);
+            if (!error && data) {
+              folder?.file(file.name, data);
+              return;
+            }
+          }
+          
+          // Fallback to fetch if SDK fails or URL format is different
+          const response = await fetch(file.url);
+          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+          const blob = await response.blob();
+          folder?.file(file.name, blob);
+        } catch (err) {
+          console.error(`Failed to download file ${file.name}:`, err);
+          // Continue with other files even if one fails
+        }
       });
 
       await Promise.all(downloadPromises);
