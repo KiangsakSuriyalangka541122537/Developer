@@ -11,11 +11,12 @@ const THAI_MONTHS = [
   'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'
 ];
 
-function ThaiMonthPicker({ value, onChange, disabled, label }: { 
+function ThaiMonthPicker({ value, onChange, disabled, label, minDate }: { 
   value: string; 
   onChange: (val: string) => void; 
   disabled?: boolean;
   label: string;
+  minDate?: string;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [viewYear, setViewYear] = useState(() => {
@@ -29,7 +30,16 @@ function ThaiMonthPicker({ value, onChange, disabled, label }: {
   const currentYear = value && value.includes('-') ? parseInt(value.split('-')[0]) : -1;
   const currentMonth = value && value.includes('-') ? parseInt(value.split('-')[1]) - 1 : -1;
 
+  const isMonthDisabled = (monthIndex: number) => {
+    if (!minDate || !minDate.includes('-')) return false;
+    const [minYear, minMonth] = minDate.split('-').map(Number);
+    if (viewYear < minYear) return true;
+    if (viewYear === minYear && monthIndex < minMonth - 1) return true;
+    return false;
+  };
+
   const handleMonthSelect = (monthIndex: number) => {
+    if (isMonthDisabled(monthIndex)) return;
     const formattedMonth = (monthIndex + 1).toString().padStart(2, '0');
     onChange(`${viewYear}-${formattedMonth}`);
     setIsOpen(false);
@@ -71,20 +81,26 @@ function ThaiMonthPicker({ value, onChange, disabled, label }: {
               </button>
             </div>
             <div className="grid grid-cols-3 gap-2">
-              {THAI_MONTHS.map((month, index) => (
-                <button
-                  key={month}
-                  type="button"
-                  onClick={() => handleMonthSelect(index)}
-                  className={`py-2 text-xs rounded-lg transition-all ${
-                    currentMonth === index && currentYear === viewYear
-                      ? 'bg-primary text-white font-bold'
-                      : 'hover:bg-slate-100 text-slate-600'
-                  }`}
-                >
-                  {month}
-                </button>
-              ))}
+              {THAI_MONTHS.map((month, index) => {
+                const disabled = isMonthDisabled(index);
+                return (
+                  <button
+                    key={month}
+                    type="button"
+                    disabled={disabled}
+                    onClick={() => handleMonthSelect(index)}
+                    className={`py-2 text-xs rounded-lg transition-all ${
+                      currentMonth === index && currentYear === viewYear
+                        ? 'bg-primary text-white font-bold'
+                        : disabled
+                        ? 'bg-slate-50 text-slate-300 cursor-not-allowed'
+                        : 'hover:bg-slate-100 text-slate-600'
+                    }`}
+                  >
+                    {month}
+                  </button>
+                );
+              })}
             </div>
           </div>
         </>
@@ -1192,19 +1208,37 @@ export default function RequestList() {
                   <ThaiMonthPicker 
                     label="เริ่มพัฒนา (เดือน/ปี)"
                     value={scheduleStartMonth}
-                    onChange={(val) => setScheduleStartMonth(val)}
+                    onChange={(val) => {
+                      setScheduleStartMonth(val);
+                      // Reset end month if it becomes invalid
+                      if (scheduleEndMonth) {
+                        const [y1, m1] = val.split('-').map(Number);
+                        const [y2, m2] = scheduleEndMonth.split('-').map(Number);
+                        if (y2 < y1 || (y2 === y1 && m2 < m1)) {
+                          setScheduleEndMonth('');
+                        }
+                      }
+                    }}
                   />
                   <ThaiMonthPicker 
                     label="คาดว่าเสร็จ (เดือน/ปี)"
                     value={scheduleEndMonth}
                     onChange={(val) => setScheduleEndMonth(val)}
+                    minDate={scheduleStartMonth}
                   />
                 </div>
 
                 {scheduleStartMonth && scheduleEndMonth && (
                   <div className="p-4 bg-primary/5 rounded-2xl border border-primary/10 flex items-center justify-between">
                     <span className="text-sm font-bold text-slate-600">ระยะเวลาดำเนินการรวม:</span>
-                    <span className="text-lg font-black text-primary">
+                    <span className={`text-lg font-black ${
+                      (() => {
+                        const [y1, m1] = scheduleStartMonth.split('-').map(Number);
+                        const [y2, m2] = scheduleEndMonth.split('-').map(Number);
+                        const diff = (y2 - y1) * 12 + (m2 - m1) + 1;
+                        return diff > 0;
+                      })() ? 'text-primary' : 'text-rose-500'
+                    }`}>
                       {(() => {
                         const [y1, m1] = scheduleStartMonth.split('-').map(Number);
                         const [y2, m2] = scheduleEndMonth.split('-').map(Number);
@@ -1218,7 +1252,14 @@ export default function RequestList() {
                 <div className="pt-4">
                   <button 
                     onClick={handleScheduleSubmit}
-                    className="w-full bg-emerald-600 text-white py-4 rounded-2xl font-bold hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-200 flex items-center justify-center gap-2"
+                    disabled={(() => {
+                      if (!scheduleStartMonth || !scheduleEndMonth) return true;
+                      const [y1, m1] = scheduleStartMonth.split('-').map(Number);
+                      const [y2, m2] = scheduleEndMonth.split('-').map(Number);
+                      const diff = (y2 - y1) * 12 + (m2 - m1) + 1;
+                      return diff <= 0;
+                    })()}
+                    className="w-full bg-emerald-600 text-white py-4 rounded-2xl font-bold hover:bg-emerald-700 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed transition-all shadow-lg shadow-emerald-200 enabled:active:scale-[0.98] flex items-center justify-center gap-2"
                   >
                     <Save className="size-5" />
                     บันทึกกำหนดการและเริ่มงาน

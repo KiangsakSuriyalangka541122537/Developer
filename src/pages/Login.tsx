@@ -50,6 +50,9 @@ export default function Login() {
       }
     } else {
       setError('ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง');
+      if (usernameRef.current) {
+        usernameRef.current.focus();
+      }
     }
   };
 
@@ -100,7 +103,12 @@ export default function Login() {
                 />
                 <button 
                   type="button" 
-                  onClick={() => setShowPassword(!showPassword)}
+                  onClick={() => {
+                    setShowPassword(!showPassword);
+                    if (passwordRef.current) {
+                      passwordRef.current.focus();
+                    }
+                  }}
                   className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-colors"
                 >
                   {showPassword ? <EyeOff className="size-6" /> : <Eye className="size-6" />}
