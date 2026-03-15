@@ -1159,7 +1159,12 @@ export default function RequestList() {
               {selectedReq.projectLink && (
                 <div className="bg-emerald-50/50 p-5 rounded-xl border border-emerald-100">
                   <h5 className="text-base font-bold text-emerald-700 mb-2">ลิงก์โปรแกรม / คู่มือ</h5>
-                  <a href={selectedReq.projectLink} target="_blank" rel="noreferrer" className="text-black hover:underline font-normal break-all flex items-center gap-2 text-base">
+                  <a 
+                    href={selectedReq.projectLink.startsWith('http') ? selectedReq.projectLink : `https://${selectedReq.projectLink}`} 
+                    target="_blank" 
+                    rel="noreferrer" 
+                    className="text-black hover:underline font-normal break-all flex items-center gap-2 text-base"
+                  >
                     <FileText className="size-5" />
                     {selectedReq.projectLink}
                   </a>
