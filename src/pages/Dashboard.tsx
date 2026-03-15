@@ -88,14 +88,14 @@ export default function Dashboard() {
               {requests.map((req, index) => {
                 const isMyRequest = currentUser?.id === req.requesterId;
                 return (
-                  <tr key={req.id} className={`border-b border-slate-50 hover:bg-slate-50 transition-colors ${isMyRequest ? 'bg-primary/[0.03]' : ''}`}>
+                  <tr key={req.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
                     <td className="py-4 pl-12 font-medium text-slate-900">{index + 1}</td>
                     <td className="py-4 px-6 text-slate-700">
                       <div className="flex items-center gap-2">
-                        {req.topic}
                         {isMyRequest && (
-                          <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">My Request</span>
+                          <div className="size-2 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.4)]" title="งานของแผนกคุณ" />
                         )}
+                        {req.topic}
                       </div>
                     </td>
                     <td className="py-4 px-6 text-slate-600">{req.department}</td>
