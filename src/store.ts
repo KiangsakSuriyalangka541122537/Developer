@@ -145,7 +145,7 @@ export const useAppStore = create<AppState>()(
         const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
         const newId = `REQ-${year}-${timestamp}-${random}`;
         
-        const newReq = {
+        const newReq: any = {
           id: newId,
           requester_id: reqData.requesterId,
           requester_name: reqData.requesterName,
@@ -156,11 +156,24 @@ export const useAppStore = create<AppState>()(
           objective: reqData.objective,
           current_system: reqData.currentSystem,
           attachment_url: reqData.attachmentUrl || null,
-          previous_developer_id: (reqData as any).previousDeveloperId || null,
           status: 'pending'
         };
 
-        const { error } = await supabase.from('Dev-requests').insert([newReq]);
+        // Only add previous_developer_id if it's provided
+        if ((reqData as any).previousDeveloperId) {
+          newReq.previous_developer_id = (reqData as any).previousDeveloperId;
+        }
+
+        let { error } = await supabase.from('Dev-requests').insert([newReq]);
+        
+        // If it fails and we included previous_developer_id, try again without it
+        if (error && newReq.previous_developer_id) {
+          console.warn("Failed to insert with previous_developer_id, retrying without it...", error);
+          delete newReq.previous_developer_id;
+          const retry = await supabase.from('Dev-requests').insert([newReq]);
+          error = retry.error;
+        }
+
         if (!error) {
           await get().fetchData();
         } else {
@@ -186,7 +199,16 @@ export const useAppStore = create<AppState>()(
         if (updates.currentSystem !== undefined) dbUpdates.current_system = updates.currentSystem;
         if (updates.attachmentUrl !== undefined) dbUpdates.attachment_url = updates.attachmentUrl;
 
-        const { error } = await supabase.from('Dev-requests').update(dbUpdates).eq('id', id);
+        let { error } = await supabase.from('Dev-requests').update(dbUpdates).eq('id', id);
+        
+        // If it fails and we included previous_developer_id, try again without it
+        if (error && dbUpdates.previous_developer_id !== undefined) {
+          console.warn("Failed to update with previous_developer_id, retrying without it...", error);
+          delete dbUpdates.previous_developer_id;
+          const retry = await supabase.from('Dev-requests').update(dbUpdates).eq('id', id);
+          error = retry.error;
+        }
+
         if (!error) {
           await get().fetchData();
         } else {
