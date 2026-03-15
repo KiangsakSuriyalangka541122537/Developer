@@ -48,7 +48,7 @@ export default function App() {
             </ProtectedRoute>
           } />
           <Route path="workload" element={
-            <ProtectedRoute allowedRoles={['approver', 'developer', 'department']}>
+            <ProtectedRoute allowedRoles={['approver', 'developer']}>
               <WorkloadOverview />
             </ProtectedRoute>
           } />
