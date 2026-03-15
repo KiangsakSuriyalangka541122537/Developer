@@ -647,41 +647,51 @@ export default function RequestList() {
                       } catch (e) { return null; }
                     })()}
                   </div>
-                  <div className="space-y-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {(() => {
                       try {
                         const attachments = JSON.parse(selectedReq.attachmentUrl);
                         if (Array.isArray(attachments)) {
                           return attachments.map((file: { name: string, url: string }, idx: number) => (
-                            <div key={idx} className="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                              <a 
-                                href={file.url} 
-                                target="_blank" 
-                                rel="noreferrer" 
-                                className="inline-flex items-center gap-2 text-primary hover:text-secondary font-bold transition-colors"
-                                download={file.name}
-                              >
-                                <UploadCloud className="size-5" />
-                                {file.name}
-                              </a>
-                            </div>
+                            <a 
+                              key={idx}
+                              href={file.url} 
+                              target="_blank" 
+                              rel="noreferrer" 
+                              className="flex items-center justify-between p-3 bg-white border border-slate-200 rounded-xl hover:border-emerald-200 hover:bg-emerald-50/30 transition-all group shadow-sm"
+                              title={file.name}
+                            >
+                              <div className="flex items-center gap-2.5 overflow-hidden">
+                                <div className="bg-emerald-100 p-1.5 rounded-lg text-emerald-600 group-hover:bg-emerald-200 transition-colors">
+                                  <FileText className="size-4" />
+                                </div>
+                                <span className="text-xs font-bold text-slate-600 truncate group-hover:text-emerald-700 transition-colors">
+                                  {file.name}
+                                </span>
+                              </div>
+                              <Download className="size-3.5 text-slate-300 group-hover:text-emerald-500 transition-colors flex-shrink-0" />
+                            </a>
                           ));
                         }
                       } catch (e) {
                         // Fallback for old single URL format
                         return (
-                          <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                            <a 
-                              href={selectedReq.attachmentUrl} 
-                              target="_blank" 
-                              rel="noreferrer" 
-                              className="inline-flex items-center gap-2 text-primary hover:text-secondary font-bold transition-colors"
-                              download={`attachment-${selectedReq.id}`}
-                            >
-                              <UploadCloud className="size-5" />
-                              เปิดดูหรือดาวน์โหลดเอกสาร
-                            </a>
-                          </div>
+                          <a 
+                            href={selectedReq.attachmentUrl} 
+                            target="_blank" 
+                            rel="noreferrer" 
+                            className="flex items-center justify-between p-3 bg-white border border-slate-200 rounded-xl hover:border-emerald-200 hover:bg-emerald-50/30 transition-all group shadow-sm w-full"
+                          >
+                            <div className="flex items-center gap-2.5 overflow-hidden">
+                              <div className="bg-emerald-100 p-1.5 rounded-lg text-emerald-600 group-hover:bg-emerald-200 transition-colors">
+                                <FileText className="size-4" />
+                              </div>
+                              <span className="text-xs font-bold text-slate-600 truncate group-hover:text-emerald-700 transition-colors">
+                                เปิดดูหรือดาวน์โหลดเอกสาร
+                              </span>
+                            </div>
+                            <Download className="size-3.5 text-slate-300 group-hover:text-emerald-500 transition-colors flex-shrink-0" />
+                          </a>
                         );
                       }
                     })()}
