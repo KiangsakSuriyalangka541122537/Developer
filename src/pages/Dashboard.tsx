@@ -410,6 +410,12 @@ export default function Dashboard() {
                     <p className="text-black font-normal text-base">{users.find(u => u.id === selectedReq.developerId)?.name}</p>
                   </div>
                 )}
+                {selectedReq.previousDeveloperId && (
+                  <div>
+                    <h5 className="text-base font-bold text-orange-500 mb-2">ผู้พัฒนาเดิม (เคสต่อเนื่อง)</h5>
+                    <p className="text-black font-bold text-base">{users.find(u => u.id === selectedReq.previousDeveloperId)?.name || 'ไม่พบข้อมูล'}</p>
+                  </div>
+                )}
               </div>
 
               <div>

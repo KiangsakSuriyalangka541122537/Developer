@@ -439,7 +439,8 @@ export default function RequestList() {
         estimatedUsers: selectedReq.estimatedUsers,
         objective: revisionFormData.objective,
         currentSystem: selectedReq.topic, // Reference original topic as current system context
-        attachmentUrl: attachmentUrl
+        attachmentUrl: attachmentUrl,
+        previousDeveloperId: selectedReq.developerId
       });
 
       setShowRevisionModal(false);
@@ -1005,6 +1006,12 @@ export default function RequestList() {
                   <div>
                     <h5 className="text-base font-bold text-slate-500 mb-2">ผู้รับผิดชอบ (Developer)</h5>
                     <p className="text-black font-normal text-base">{users.find(u => u.id === selectedReq.developerId)?.name}</p>
+                  </div>
+                )}
+                {selectedReq.previousDeveloperId && (
+                  <div>
+                    <h5 className="text-base font-bold text-orange-500 mb-2">ผู้พัฒนาเดิม (เคสต่อเนื่อง)</h5>
+                    <p className="text-black font-bold text-base">{users.find(u => u.id === selectedReq.previousDeveloperId)?.name || 'ไม่พบข้อมูล'}</p>
                   </div>
                 )}
               </div>

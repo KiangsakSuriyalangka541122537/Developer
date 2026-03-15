@@ -31,6 +31,7 @@ export interface DevRequest {
   startMonthYear?: string | null;
   expectedFinishMonthYear?: string | null;
   projectLink?: string | null;
+  previousDeveloperId?: string | null;
   createdAt: string;
 }
 
