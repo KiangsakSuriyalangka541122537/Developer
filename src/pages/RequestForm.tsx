@@ -37,6 +37,20 @@ export default function RequestForm() {
     e.preventDefault();
     if (!currentUser) return;
 
+    let finalAttachmentUrl = formData.attachmentUrl;
+
+    if (files.length > 0) {
+      // For this demo, we'll convert the first file to a data URL to simulate an upload
+      // In a real app, you'd upload to Supabase Storage or similar
+      const file = files[0];
+      const reader = new FileReader();
+      const dataUrl = await new Promise<string>((resolve) => {
+        reader.onload = () => resolve(reader.result as string);
+        reader.readAsDataURL(file);
+      });
+      finalAttachmentUrl = dataUrl;
+    }
+
     await addRequest({
       requesterId: currentUser.id,
       requesterName: formData.requesterName || currentUser.name,
@@ -46,7 +60,7 @@ export default function RequestForm() {
       estimatedUsers: formData.estimatedUsers,
       objective: formData.objective,
       currentSystem: formData.currentSystem,
-      attachmentUrl: files.length > 0 ? files.map(f => f.name).join(', ') : formData.attachmentUrl
+      attachmentUrl: finalAttachmentUrl
     });
 
     navigate('/list');

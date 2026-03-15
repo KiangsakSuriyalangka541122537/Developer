@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAppStore, DevRequest } from '../store';
-import { FileText, Edit, Trash2, CheckCircle, XCircle, Forward, UserCheck, Eye, Calendar, MailOpen, ChevronLeft, ChevronRight } from 'lucide-react';
+import { FileText, Edit, Trash2, CheckCircle, XCircle, Forward, UserCheck, Eye, Calendar, MailOpen, ChevronLeft, ChevronRight, UploadCloud } from 'lucide-react';
 import ConfirmModal from '../components/ConfirmModal';
 
 const THAI_MONTHS = [
@@ -589,6 +589,24 @@ export default function RequestList() {
                 <div>
                   <h5 className="text-base font-bold text-slate-500 mb-2">ระบบเดิมที่ใช้งานอยู่</h5>
                   <p className="text-black font-normal text-base">{selectedReq.currentSystem}</p>
+                </div>
+              )}
+              
+              {selectedReq.attachmentUrl && (
+                <div>
+                  <h5 className="text-base font-bold text-slate-500 mb-2">เอกสารแนบ</h5>
+                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <a 
+                      href={selectedReq.attachmentUrl} 
+                      target="_blank" 
+                      rel="noreferrer" 
+                      className="inline-flex items-center gap-2 text-primary hover:text-secondary font-bold transition-colors"
+                      download={`attachment-${selectedReq.id}`}
+                    >
+                      <UploadCloud className="size-5" />
+                      เปิดดูหรือดาวน์โหลดเอกสาร
+                    </a>
+                  </div>
                 </div>
               )}
 
