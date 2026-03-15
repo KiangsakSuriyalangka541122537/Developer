@@ -316,8 +316,7 @@ export default function RequestList() {
         estimatedUsers: selectedReq.estimatedUsers,
         objective: revisionFormData.objective,
         currentSystem: selectedReq.topic, // Reference original topic as current system context
-        attachmentUrl: attachmentUrl,
-        parentRequestId: selectedReq.id
+        attachmentUrl: attachmentUrl
       });
 
       setShowRevisionModal(false);
@@ -394,19 +393,7 @@ export default function RequestList() {
                     <div className="flex flex-col">
                       <div className="flex items-center gap-2">
                         <span>{req.topic}</span>
-                        {requests.some(r => r.parentRequestId === req.id && ['pending', 'accepted', 'in_progress'].includes(r.status)) && (
-                          <div className="flex items-center gap-1 px-2 py-0.5 bg-amber-50 text-amber-600 rounded-full border border-amber-200 text-[9px] animate-pulse">
-                            <Clock className="size-2.5" />
-                            รอรับงานแก้ไข
-                          </div>
-                        )}
                       </div>
-                      {req.parentRequestId && (
-                        <span className="text-[10px] text-primary font-medium flex items-center gap-1 mt-0.5">
-                          <RefreshCw className="size-2.5" />
-                          แก้ไขจาก: {req.parentRequestId}
-                        </span>
-                      )}
                     </div>
                   </td>
                   <td className="py-4 px-6 text-slate-600">{req.department}</td>
@@ -427,7 +414,7 @@ export default function RequestList() {
 
                       {/* Slot 2: Primary Action (Edit / Assign / Accept / Done) */}
                       <div className="w-10 flex justify-center">
-                        {currentUser?.role === 'department' && req.status === 'done' && !requests.some(r => r.parentRequestId === req.id && ['pending', 'accepted', 'in_progress'].includes(r.status)) && (
+                        {currentUser?.role === 'department' && req.status === 'done' && (
                           <button 
                             onClick={() => { 
                               setSelectedReq(req); 
@@ -797,12 +784,6 @@ export default function RequestList() {
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-3">
                   {getStatusBadge(selectedReq.status)}
-                  {requests.some(r => r.parentRequestId === selectedReq.id && ['pending', 'accepted', 'in_progress'].includes(r.status)) && (
-                    <div className="flex items-center gap-1.5 px-3 py-1 bg-amber-50 text-amber-600 rounded-full border border-amber-200 text-xs font-bold animate-pulse">
-                      <Clock className="size-3.5" />
-                      รอรับงานแก้ไข
-                    </div>
-                  )}
                 </div>
                 <span className="text-sm font-medium text-slate-500">วันที่ขอ: {new Date(selectedReq.date).toLocaleDateString('th-TH')}</span>
               </div>
@@ -976,7 +957,7 @@ export default function RequestList() {
 
               {/* Modal Actions */}
               <div className="mt-8 flex justify-end gap-3 border-t border-slate-100 pt-6">
-                {currentUser?.role === 'department' && selectedReq.status === 'done' && !requests.some(r => r.parentRequestId === selectedReq.id && ['pending', 'accepted', 'in_progress'].includes(r.status)) && (
+                {currentUser?.role === 'department' && selectedReq.status === 'done' && (
                   <button 
                     onClick={() => {
                       setShowDetailsModal(false);

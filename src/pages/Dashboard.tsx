@@ -250,7 +250,6 @@ export default function Dashboard() {
               <tbody className="text-sm">
                 {filteredRequests.map((req, index) => {
                   const isMyRequest = currentUser?.role === 'department' ? req.department === currentUser.name : false;
-                  const hasPendingRevision = requests.some(r => r.parentRequestId === req.id && ['pending', 'accepted', 'in_progress'].includes(r.status));
                   
                   return (
                     <tr 
@@ -266,19 +265,7 @@ export default function Dashboard() {
                             {isMyRequest && (
                               <div className="size-2 rounded-full bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.4)]" title="งานของแผนกคุณ" />
                             )}
-                            {hasPendingRevision && (
-                              <div className="flex items-center gap-1 px-2 py-0.5 bg-amber-50 text-amber-600 rounded-full border border-amber-200 text-[9px] animate-pulse">
-                                <Clock className="size-2.5" />
-                                รอรับงานแก้ไข
-                              </div>
-                            )}
                           </div>
-                          {req.parentRequestId && (
-                            <span className="text-[10px] text-primary font-medium flex items-center gap-1 mt-0.5">
-                              <RefreshCw className="size-2.5" />
-                              แก้ไขจาก: {req.parentRequestId}
-                            </span>
-                          )}
                         </div>
                       </td>
                       <td className="py-4 px-6 text-slate-600 font-medium">{req.department}</td>
@@ -326,12 +313,6 @@ export default function Dashboard() {
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-3">
                   {getStatusBadge(selectedReq.status)}
-                  {requests.some(r => r.parentRequestId === selectedReq.id && ['pending', 'accepted', 'in_progress'].includes(r.status)) && (
-                    <div className="flex items-center gap-1.5 px-3 py-1 bg-amber-50 text-amber-600 rounded-full border border-amber-200 text-xs font-bold animate-pulse">
-                      <Clock className="size-3.5" />
-                      รอรับงานแก้ไข
-                    </div>
-                  )}
                 </div>
                 <span className="text-sm font-medium text-slate-500">วันที่ขอ: {new Date(selectedReq.date).toLocaleDateString('th-TH')}</span>
               </div>
