@@ -375,7 +375,18 @@ export default function RequestList() {
     }
   };
 
-  const handleDevAccept = async (req: DevRequest) => {
+   const handleDevAccept = async (req: DevRequest) => {
+    if (req.developerId !== currentUser?.id) {
+      setConfirmModal({
+        isOpen: true,
+        title: 'ไม่สามารถดำเนินการได้',
+        message: 'คุณไม่ใช่ผู้ที่ได้รับมอบหมายงานนี้',
+        type: 'warning',
+        showCancel: false,
+        onConfirm: () => setConfirmModal(prev => ({ ...prev, isOpen: false }))
+      });
+      return;
+    }
     await updateRequest(req.id, { status: 'in_progress', developerId: currentUser?.id });
   };
 
@@ -493,6 +504,7 @@ export default function RequestList() {
                 <th className="py-4 px-6 w-1/4">ชื่อโครงการ</th>
                 <th className="py-4 px-6">แผนก</th>
                 <th className="py-4 px-6">วันที่ขอ</th>
+                <th className="py-4 px-6">ผู้พัฒนา</th>
                 <th className="py-4 px-6 text-center">สถานะ</th>
                 <th className="py-4 pl-4 pr-12 text-right w-48">จัดการ</th>
               </tr>
@@ -510,6 +522,13 @@ export default function RequestList() {
                   </td>
                   <td className="py-4 px-6 text-slate-600">{req.department}</td>
                   <td className="py-4 px-6 text-slate-500">{new Date(req.date).toLocaleDateString('th-TH')}</td>
+                  <td className="py-4 px-6">
+                    {req.developerId ? (
+                      <span className="bg-slate-100 px-2 py-1 rounded text-[10px] font-bold text-slate-600">
+                        {users.find(u => u.id === req.developerId)?.name.replace(/^(นาย|นางสาว|นาง|ดร\.)\s?/, '').split(' ')[0] || '-'}
+                      </span>
+                    ) : '-'}
+                  </td>
                   <td className="py-4 px-6 text-center">
                     <button onClick={() => { setSelectedReq(req); setShowDetailsModal(true); }} className="hover:opacity-80 transition-opacity">
                       {getStatusBadge(req.status)}
@@ -567,7 +586,7 @@ export default function RequestList() {
                         )}
                         {currentUser?.role === 'developer' && (
                           <>
-                            {req.status === 'accepted' && (
+                            {req.status === 'accepted' && req.developerId === currentUser.id && (
                               <button onClick={() => handleDevAccept(req)} className="p-1.5 text-slate-400 hover:text-emerald-600 transition-colors" title="รอรับงาน">
                                 <UserCheck className="size-5" />
                               </button>
@@ -627,7 +646,7 @@ export default function RequestList() {
               ))}
               {visibleRequests.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-slate-500">ไม่มีข้อมูลคำขอ</td>
+                  <td colSpan={7} className="py-12 text-center text-slate-500">ไม่มีข้อมูลคำขอ</td>
                 </tr>
               )}
             </tbody>

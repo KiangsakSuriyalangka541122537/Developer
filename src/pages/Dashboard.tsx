@@ -295,6 +295,7 @@ export default function Dashboard() {
                   <th className="py-4 px-6">ชื่อโครงการ</th>
                   <th className="py-4 px-6">แผนก</th>
                   <th className="py-4 px-6">วันที่ขอ</th>
+                  <th className="py-4 px-6">ผู้พัฒนา</th>
                   <th className="py-4 px-6 text-center">ไฟล์แนบ</th>
                   <th className="py-4 pr-8 text-center w-32">สถานะ</th>
                 </tr>
@@ -322,6 +323,13 @@ export default function Dashboard() {
                       </td>
                       <td className="py-4 px-6 text-slate-600 font-medium">{req.department}</td>
                       <td className="py-4 px-6 text-slate-500 font-medium">{new Date(req.date).toLocaleDateString('th-TH')}</td>
+                      <td className="py-4 px-6 text-slate-600 font-medium">
+                        {req.developerId ? (
+                          <span className="bg-slate-100 px-2 py-1 rounded text-[10px] font-bold text-slate-600">
+                            {users.find(u => u.id === req.developerId)?.name.replace(/^(นาย|นางสาว|นาง|ดร\.)\s?/, '').split(' ')[0] || '-'}
+                          </span>
+                        ) : '-'}
+                      </td>
                       <td className="py-4 px-6 text-center">
                         {req.attachmentUrl && (
                           <button 
@@ -344,7 +352,7 @@ export default function Dashboard() {
                 })}
                 {filteredRequests.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="py-24 text-center text-slate-400 font-medium italic">
+                    <td colSpan={7} className="py-24 text-center text-slate-400 font-medium italic">
                       <div className="flex flex-col items-center gap-2">
                         <Filter className="size-8 text-slate-200" />
                         <span>ไม่พบข้อมูลคำขอที่ตรงตามเงื่อนไข</span>
