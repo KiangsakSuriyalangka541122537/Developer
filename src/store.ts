@@ -138,22 +138,12 @@ export const useAppStore = create<AppState>()(
       logout: () => set({ currentUser: null, requests: [] }),
 
       addRequest: async (reqData) => {
-        // Find the next ID by looking at existing requests
-        const currentYear = new Date().getFullYear();
-        const yearPrefix = `REQ-${currentYear}-`;
-        
-        const yearRequests = get().requests.filter(r => r.id.startsWith(yearPrefix));
-        let nextNumber = 1;
-        
-        if (yearRequests.length > 0) {
-          const numbers = yearRequests.map(r => {
-            const parts = r.id.split('-');
-            return parseInt(parts[parts.length - 1]) || 0;
-          });
-          nextNumber = Math.max(...numbers) + 1;
-        }
-        
-        const newId = `${yearPrefix}${String(nextNumber).padStart(3, '0')}`;
+        // Generate a more unique ID to avoid conflicts
+        const now = new Date();
+        const year = now.getFullYear();
+        const timestamp = now.getTime().toString().slice(-6); // Last 6 digits of timestamp
+        const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+        const newId = `REQ-${year}-${timestamp}-${random}`;
         
         const newReq = {
           id: newId,
@@ -167,16 +157,15 @@ export const useAppStore = create<AppState>()(
           current_system: reqData.currentSystem,
           attachment_url: reqData.attachmentUrl || null,
           status: 'pending',
-          parent_request_id: reqData.parentRequestId || null,
-          created_at: new Date().toISOString()
+          parent_request_id: reqData.parentRequestId || null
         };
 
         const { error } = await supabase.from('Dev-requests').insert([newReq]);
         if (!error) {
           await get().fetchData();
         } else {
-          console.error("Error adding request:", error);
-          throw error; // Throw error so the form can handle it
+          console.error("Supabase Insert Error:", error);
+          throw new Error(error.message || "Failed to insert request into database");
         }
       },
 

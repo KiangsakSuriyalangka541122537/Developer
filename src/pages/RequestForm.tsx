@@ -75,7 +75,7 @@ export default function RequestForm() {
         requesterId: currentUser.id,
         requesterName: formData.requesterName || currentUser.name,
         department: currentUser.name,
-        date: new Date().toISOString(),
+        date: new Date().toISOString().split('T')[0],
         topic: formData.topic,
         estimatedUsers: formData.estimatedUsers,
         objective: formData.objective,
@@ -84,9 +84,10 @@ export default function RequestForm() {
       });
 
       navigate('/list');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error adding request:', error);
-      alert('เกิดข้อผิดพลาดในการบันทึกคำขอ กรุณาลองใหม่อีกครั้ง');
+      const errorMessage = error?.message || 'ไม่ทราบสาเหตุ';
+      alert(`เกิดข้อผิดพลาดในการบันทึกคำขอ: ${errorMessage}\nกรุณาลองใหม่อีกครั้ง`);
     }
   };
 
