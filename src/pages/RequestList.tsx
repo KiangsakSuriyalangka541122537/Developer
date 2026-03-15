@@ -742,7 +742,7 @@ export default function RequestList() {
       {/* Done Modal */}
       {showDoneModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm px-4">
-          <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-slate-200">
+          <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-200">
             <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
               <h4 className="text-lg font-bold text-slate-900">ยืนยันการเสร็จสิ้นโครงการ</h4>
             </div>
@@ -769,7 +769,7 @@ export default function RequestList() {
       {/* Assign Modal */}
       {showAssignModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm px-4">
-          <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-slate-200">
+          <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-200">
             <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
               <h4 className="text-lg font-bold text-slate-900">มอบหมายงาน</h4>
             </div>
@@ -799,7 +799,7 @@ export default function RequestList() {
       {/* Edit Modal */}
       {showEditModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm px-4">
-          <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden border border-slate-200">
+          <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-slate-200">
             <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
               <h4 className="text-lg font-bold text-slate-900">แก้ไขคำขอ</h4>
             </div>
@@ -924,7 +924,7 @@ export default function RequestList() {
       {/* Revision Modal */}
       {showRevisionModal && selectedReq && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm px-4">
-          <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden border border-slate-200">
+          <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-slate-200">
             <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
               <h4 className="text-lg font-bold text-slate-900">ขอแก้ไข/เพิ่มเติมโปรแกรม</h4>
             </div>
@@ -1010,7 +1010,7 @@ export default function RequestList() {
       {/* Details Modal */}
       {showDetailsModal && selectedReq && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm px-4 py-8">
-          <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden border border-slate-200 max-h-full flex flex-col">
+          <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl border border-slate-200 max-h-full flex flex-col">
             <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center sticky top-0 bg-white z-10">
               <h4 className="text-xl font-black text-slate-900">รายละเอียดคำขอ</h4>
               <div className="flex items-center gap-2">
@@ -1244,7 +1244,7 @@ export default function RequestList() {
       {/* Schedule Modal */}
       {showScheduleModal && selectedReq && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-[32px] shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200">
+          <div className="bg-white rounded-[32px] shadow-2xl w-full max-w-lg animate-in zoom-in-95 duration-200">
             <div className="p-8">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-2xl font-black text-slate-900">กำหนดการพัฒนา</h3>
