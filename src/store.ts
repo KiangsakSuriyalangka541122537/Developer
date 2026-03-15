@@ -94,6 +94,7 @@ export const useAppStore = create<AppState>()(
               startMonthYear: r.start_month_year,
               expectedFinishMonthYear: r.expected_finish_month_year,
               projectLink: r.project_link,
+              previousDeveloperId: r.previous_developer_id,
               createdAt: r.created_at
             }));
 
@@ -155,6 +156,7 @@ export const useAppStore = create<AppState>()(
           objective: reqData.objective,
           current_system: reqData.currentSystem,
           attachment_url: reqData.attachmentUrl || null,
+          previous_developer_id: (reqData as any).previousDeveloperId || null,
           status: 'pending'
         };
 
@@ -175,6 +177,7 @@ export const useAppStore = create<AppState>()(
         if (updates.startMonthYear !== undefined) dbUpdates.start_month_year = updates.startMonthYear;
         if (updates.expectedFinishMonthYear !== undefined) dbUpdates.expected_finish_month_year = updates.expectedFinishMonthYear;
         if (updates.projectLink !== undefined) dbUpdates.project_link = updates.projectLink;
+        if (updates.previousDeveloperId !== undefined) dbUpdates.previous_developer_id = updates.previousDeveloperId;
         
         // Add missing fields for request editing
         if (updates.topic !== undefined) dbUpdates.topic = updates.topic;
