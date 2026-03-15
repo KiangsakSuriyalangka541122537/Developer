@@ -140,7 +140,7 @@ export default function Dashboard() {
   const getStatusBadge = (status: string) => {
     const badges: Record<string, { label: string, color: string }> = {
       pending: { label: 'รออนุมัติ', color: 'status-pending' },
-      accepted: { label: 'รับงาน', color: 'status-accepted' },
+      accepted: { label: 'รอรับงาน', color: 'status-accepted' },
       in_progress: { label: 'กำลังดำเนินการ', color: 'status-inprogress' },
       done: { label: 'เสร็จสิ้น', color: 'status-done' },
       rejected: { label: 'ปฏิเสธ', color: 'status-rejected' }

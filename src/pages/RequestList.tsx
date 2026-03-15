@@ -238,7 +238,7 @@ export default function RequestList() {
       setConfirmModal({
         isOpen: true,
         title: 'ไม่สามารถดำเนินการได้',
-        message: 'ไม่สามารถลบคำขอที่ถูกรับงานไปแล้วได้',
+        message: 'ไม่สามารถลบคำขอที่ถูกรอรับงานไปแล้วได้',
         type: 'warning',
         showCancel: false,
         onConfirm: () => setConfirmModal(prev => ({ ...prev, isOpen: false }))
@@ -466,7 +466,7 @@ export default function RequestList() {
   const getStatusBadge = (status: string) => {
     const badges: Record<string, { label: string, color: string }> = {
       pending: { label: 'รออนุมัติ', color: 'status-pending' },
-      accepted: { label: 'รับงาน', color: 'status-accepted' },
+      accepted: { label: 'รอรับงาน', color: 'status-accepted' },
       in_progress: { label: 'กำลังดำเนินการ', color: 'status-inprogress' },
       done: { label: 'เสร็จสิ้น', color: 'status-done' },
       rejected: { label: 'ปฏิเสธ', color: 'status-rejected' }
@@ -568,7 +568,7 @@ export default function RequestList() {
                         {currentUser?.role === 'developer' && (
                           <>
                             {req.status === 'accepted' && (
-                              <button onClick={() => handleDevAccept(req)} className="p-1.5 text-slate-400 hover:text-emerald-600 transition-colors" title="รับงาน">
+                              <button onClick={() => handleDevAccept(req)} className="p-1.5 text-slate-400 hover:text-emerald-600 transition-colors" title="รอรับงาน">
                                 <UserCheck className="size-5" />
                               </button>
                             )}

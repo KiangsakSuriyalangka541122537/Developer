@@ -46,7 +46,7 @@ export default function WorkloadOverview() {
               
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                  <p className="text-xs text-slate-400 font-bold mb-2">รับงาน</p>
+                  <p className="text-xs text-slate-400 font-bold mb-2">รอรับงาน</p>
                   <p className="font-bold text-blue-600 text-2xl">{dev.stats.accepted}</p>
                 </div>
                 <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
@@ -71,7 +71,7 @@ export default function WorkloadOverview() {
                         <span className={`shrink-0 px-3 py-1 rounded-full text-xs font-bold ${
                           req.status === 'in_progress' ? 'bg-amber-50 text-amber-600 border border-amber-100' : 'bg-blue-50 text-blue-600 border border-blue-100'
                         }`}>
-                          {req.status === 'in_progress' ? 'กำลังทำ' : 'รับงาน'}
+                          {req.status === 'in_progress' ? 'กำลังทำ' : 'รอรับงาน'}
                         </span>
                       </div>
                     ))
