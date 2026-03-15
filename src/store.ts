@@ -138,7 +138,23 @@ export const useAppStore = create<AppState>()(
       logout: () => set({ currentUser: null, requests: [] }),
 
       addRequest: async (reqData) => {
-        const newId = `REQ-${new Date().getFullYear()}-${String(get().requests.length + 1).padStart(3, '0')}`;
+        // Find the next ID by looking at existing requests
+        const currentYear = new Date().getFullYear();
+        const yearPrefix = `REQ-${currentYear}-`;
+        
+        const yearRequests = get().requests.filter(r => r.id.startsWith(yearPrefix));
+        let nextNumber = 1;
+        
+        if (yearRequests.length > 0) {
+          const numbers = yearRequests.map(r => {
+            const parts = r.id.split('-');
+            return parseInt(parts[parts.length - 1]) || 0;
+          });
+          nextNumber = Math.max(...numbers) + 1;
+        }
+        
+        const newId = `${yearPrefix}${String(nextNumber).padStart(3, '0')}`;
+        
         const newReq = {
           id: newId,
           requester_id: reqData.requesterId,
@@ -160,6 +176,7 @@ export const useAppStore = create<AppState>()(
           await get().fetchData();
         } else {
           console.error("Error adding request:", error);
+          throw error; // Throw error so the form can handle it
         }
       },
 

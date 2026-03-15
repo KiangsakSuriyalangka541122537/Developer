@@ -147,7 +147,7 @@ export default function RequestList() {
 
   // Filter requests based on role
   const visibleRequests = currentUser?.role === 'department' 
-    ? requests.filter(r => r.requesterId === currentUser.id)
+    ? requests.filter(r => r.department === currentUser.name)
     : requests;
 
   const handleDownloadAll = async (attachmentUrl: string, requestId: string, department: string, date: string) => {

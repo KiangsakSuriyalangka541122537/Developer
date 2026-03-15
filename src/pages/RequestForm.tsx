@@ -70,19 +70,24 @@ export default function RequestForm() {
       }
     }
 
-    await addRequest({
-      requesterId: currentUser.id,
-      requesterName: formData.requesterName || currentUser.name,
-      department: currentUser.name,
-      date: new Date().toISOString(),
-      topic: formData.topic,
-      estimatedUsers: formData.estimatedUsers,
-      objective: formData.objective,
-      currentSystem: formData.currentSystem,
-      attachmentUrl: finalAttachmentUrl
-    });
+    try {
+      await addRequest({
+        requesterId: currentUser.id,
+        requesterName: formData.requesterName || currentUser.name,
+        department: currentUser.name,
+        date: new Date().toISOString(),
+        topic: formData.topic,
+        estimatedUsers: formData.estimatedUsers,
+        objective: formData.objective,
+        currentSystem: formData.currentSystem,
+        attachmentUrl: finalAttachmentUrl
+      });
 
-    navigate('/list');
+      navigate('/list');
+    } catch (error) {
+      console.error('Error adding request:', error);
+      alert('เกิดข้อผิดพลาดในการบันทึกคำขอ กรุณาลองใหม่อีกครั้ง');
+    }
   };
 
   const handleReset = () => {

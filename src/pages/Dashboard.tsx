@@ -11,11 +11,15 @@ export default function Dashboard() {
   const [selectedReq, setSelectedReq] = useState<DevRequest | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
 
+  const visibleRequests = currentUser?.role === 'department'
+    ? requests.filter(r => r.department === currentUser.name)
+    : requests;
+
   const stats = {
-    total: requests.length,
-    pending: requests.filter(r => r.status === 'pending').length,
-    inProgress: requests.filter(r => r.status === 'in_progress').length,
-    done: requests.filter(r => r.status === 'done').length,
+    total: visibleRequests.length,
+    pending: visibleRequests.filter(r => r.status === 'pending').length,
+    inProgress: visibleRequests.filter(r => r.status === 'in_progress').length,
+    done: visibleRequests.filter(r => r.status === 'done').length,
   };
 
   const developers = users.filter(u => u.role === 'developer');
@@ -40,8 +44,8 @@ export default function Dashboard() {
     .slice(0, 3);
 
   const filteredRequests = filterStatus 
-    ? requests.filter(r => r.status === filterStatus)
-    : requests;
+    ? visibleRequests.filter(r => r.status === filterStatus)
+    : visibleRequests;
 
   const toggleFilter = (status: string | null) => {
     if (filterStatus === status) {
@@ -245,7 +249,7 @@ export default function Dashboard() {
               </thead>
               <tbody className="text-sm">
                 {filteredRequests.map((req, index) => {
-                  const isMyRequest = currentUser?.id === req.requesterId;
+                  const isMyRequest = currentUser?.role === 'department' ? req.department === currentUser.name : false;
                   const hasPendingRevision = requests.some(r => r.parentRequestId === req.id && ['pending', 'accepted', 'in_progress'].includes(r.status));
                   
                   return (
