@@ -180,10 +180,12 @@ export const useAppStore = create<AppState>()(
         let { error } = await supabase.from('Dev-requests').insert([newReq]);
         
         // If it fails and we included new columns, try again without them
-        if (error && (newReq.previous_developer_id || newReq.source_request_id)) {
+        if (error && (newReq.previous_developer_id || newReq.source_request_id || newReq.user_group || newReq.department_phone)) {
           console.warn("Failed to insert with new columns, retrying without them...", error);
           delete newReq.previous_developer_id;
           delete newReq.source_request_id;
+          delete newReq.user_group;
+          delete newReq.department_phone;
           const retry = await supabase.from('Dev-requests').insert([newReq]);
           error = retry.error;
         }
@@ -218,10 +220,12 @@ export const useAppStore = create<AppState>()(
 
         let { error } = await supabase.from('Dev-requests').update(dbUpdates).eq('id', id);
         
-        // If it fails and we included previous_developer_id, try again without it
-        if (error && dbUpdates.previous_developer_id !== undefined) {
-          console.warn("Failed to update with previous_developer_id, retrying without it...", error);
+        // If it fails and we included new columns, try again without them
+        if (error && (dbUpdates.previous_developer_id !== undefined || dbUpdates.user_group !== undefined || dbUpdates.department_phone !== undefined)) {
+          console.warn("Failed to update with new columns, retrying without them...", error);
           delete dbUpdates.previous_developer_id;
+          delete dbUpdates.user_group;
+          delete dbUpdates.department_phone;
           const retry = await supabase.from('Dev-requests').update(dbUpdates).eq('id', id);
           error = retry.error;
         }
