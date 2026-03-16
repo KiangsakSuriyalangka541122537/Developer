@@ -644,7 +644,7 @@ export default function RequestList() {
                 <th className="py-4 px-6">วันที่ขอ</th>
                 <th className="py-4 px-6">ผู้พัฒนา</th>
                 <th className="py-4 px-6 text-center">สถานะ</th>
-                <th className="py-4 pl-4 pr-12 text-right w-56">จัดการ</th>
+                <th className="py-4 pl-4 pr-12 text-right w-72">จัดการ</th>
               </tr>
             </thead>
             <tbody className="text-sm">
@@ -750,8 +750,8 @@ export default function RequestList() {
                         )}
                       </div>
 
-                      {/* Slot 4: Download & Print */}
-                      <div className="w-16 flex justify-center gap-1">
+                      {/* Slot 4: Download */}
+                      <div className="w-10 flex justify-center">
                         {req.attachmentUrl && (
                           <button 
                             onClick={() => handleDownloadAll(req.attachmentUrl!, req.id, req.department, req.date)}
@@ -761,6 +761,10 @@ export default function RequestList() {
                             <Download className="size-5" />
                           </button>
                         )}
+                      </div>
+
+                      {/* Slot 5: Print */}
+                      <div className="w-10 flex justify-center">
                         <button 
                           onClick={() => triggerPrint(req)}
                           className="p-1.5 text-slate-400 hover:text-indigo-600 transition-colors"
@@ -770,7 +774,7 @@ export default function RequestList() {
                         </button>
                       </div>
 
-                      {/* Slot 5: Reject Action */}
+                      {/* Slot 6: Reject Action */}
                       <div className="w-10 flex justify-center">
                         {(currentUser?.role === 'approver' || currentUser?.role === 'department') && req.status !== 'done' && req.status !== 'rejected' && (
                            <button onClick={() => { setSelectedReq(req); setShowRejectModal(true); }} className="p-1.5 text-slate-400 hover:text-rose-600 transition-colors" title="ปฏิเสธ">
