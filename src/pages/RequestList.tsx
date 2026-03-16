@@ -11,17 +11,30 @@ export default function RequestList() {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
   const [assignData, setAssignData] = useState({
     developerId: '',
     startMonthYear: '',
     expectedFinishMonthYear: ''
   });
+  const [editData, setEditData] = useState<Partial<DevRequest>>({});
 
   // Filter requests: Department sees only their own, others see all
   const visibleRequests = currentUser?.role === 'department' 
     ? requests.filter(r => r.department === currentUser?.name)
     : requests;
+
+  const handleEditSubmit = async () => {
+    if (!selectedReq) return;
+    try {
+      await updateRequest(selectedReq.id, editData);
+      setShowEditModal(false);
+    } catch (error) {
+      console.error('Error updating request:', error);
+      alert('เกิดข้อผิดพลาดในการแก้ไขข้อมูล');
+    }
+  };
 
   const handleDownloadAll = async (attachmentUrl: string, requestId: string, department: string, date: string) => {
     if (!attachmentUrl) return;
@@ -129,7 +142,7 @@ export default function RequestList() {
                 <th className="py-4 px-6">วันที่ขอ</th>
                 <th className="py-4 px-6">ผู้พัฒนา</th>
                 <th className="py-4 px-6 text-center">สถานะ</th>
-                <th className="py-4 pr-8 text-right w-32">จัดการ</th>
+                <th className="py-4 px-6 text-center w-40">จัดการ</th>
               </tr>
             </thead>
             <tbody className="text-sm">
@@ -146,72 +159,102 @@ export default function RequestList() {
                   <td className="py-4 px-6 text-center">
                     {getStatusBadge(req.status)}
                   </td>
-                  <td className="py-4 pr-8 text-right">
-                    <div className="flex justify-end gap-2">
-                      <button 
-                        onClick={() => { setSelectedReq(req); setShowDetailsModal(true); }}
-                        className="p-1.5 text-slate-400 hover:text-primary transition-colors"
-                        title="ดูรายละเอียด"
-                      >
-                        <Eye className="size-5" />
-                      </button>
-                      {currentUser?.role === 'approver' && (
-                        <button 
-                          onClick={() => { setSelectedReq(req); setShowDetailsModal(true); }}
-                          className="p-1.5 text-slate-400 hover:text-amber-600 transition-colors"
-                          title="แก้ไขข้อมูล"
-                        >
-                          <Edit className="size-5" />
-                        </button>
-                      )}
-                      {currentUser?.role === 'approver' && req.status === 'pending' && (
-                        <>
+                  <td className="py-4 px-6">
+                    <div className="flex justify-center">
+                      <div className="grid grid-cols-4 gap-1 w-fit">
+                        {/* Slot 1: View */}
+                        <div className="flex justify-center w-8">
                           <button 
-                            onClick={() => { 
-                              setSelectedReq(req); 
-                              setAssignData({
-                                developerId: '',
-                                startMonthYear: '',
-                                expectedFinishMonthYear: ''
-                              });
-                              setShowAssignModal(true); 
-                            }} 
-                            className="p-1.5 text-slate-400 hover:text-blue-600 transition-colors" 
-                            title="มอบหมายงาน"
+                            onClick={() => { setSelectedReq(req); setShowDetailsModal(true); }}
+                            className="p-1.5 text-slate-400 hover:text-primary transition-colors"
+                            title="ดูรายละเอียด"
                           >
-                            <MailOpen className="size-5" />
+                            <Eye className="size-5" />
                           </button>
-                          <button 
-                            onClick={() => { 
-                              setSelectedReq(req); 
-                              setRejectReason('');
-                              setShowRejectModal(true); 
-                            }} 
-                            className="p-1.5 text-slate-400 hover:text-rose-600 transition-colors" 
-                            title="ปฏิเสธคำขอ"
-                          >
-                            <XCircle className="size-5" />
-                          </button>
-                        </>
-                      )}
-                      {req.status === 'pending' && currentUser?.role === 'department' && (
-                        <button 
-                          onClick={() => handleDelete(req.id)}
-                          className="p-1.5 text-slate-400 hover:text-rose-600 transition-colors"
-                          title="ลบคำขอ"
-                        >
-                          <Trash2 className="size-5" />
-                        </button>
-                      )}
-                      {req.attachmentUrl && (
-                        <button 
-                          onClick={() => handleDownloadAll(req.attachmentUrl!, req.id, req.department, req.date)}
-                          className="p-1.5 text-slate-400 hover:text-emerald-600 transition-colors"
-                          title="ดาวน์โหลดไฟล์แนบ"
-                        >
-                          <Download className="size-5" />
-                        </button>
-                      )}
+                        </div>
+
+                        {/* Slot 2: Edit */}
+                        <div className="flex justify-center w-8">
+                          {currentUser?.role === 'approver' && (
+                            <button 
+                              onClick={() => { 
+                                setSelectedReq(req); 
+                                setEditData({
+                                  topic: req.topic,
+                                  objective: req.objective,
+                                  estimatedUsers: req.estimatedUsers,
+                                  currentSystem: req.currentSystem,
+                                  userGroup: req.userGroup,
+                                  departmentPhone: req.departmentPhone
+                                });
+                                setShowEditModal(true); 
+                              }}
+                              className="p-1.5 text-slate-400 hover:text-amber-600 transition-colors"
+                              title="แก้ไขข้อมูล"
+                            >
+                              <Edit className="size-5" />
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Slot 3: Assign or Download */}
+                        <div className="flex justify-center w-8">
+                          {currentUser?.role === 'approver' && req.status === 'pending' ? (
+                            <button 
+                              onClick={() => { 
+                                setSelectedReq(req); 
+                                setAssignData({
+                                  developerId: '',
+                                  startMonthYear: '',
+                                  expectedFinishMonthYear: ''
+                                });
+                                setShowAssignModal(true); 
+                              }} 
+                              className="p-1.5 text-slate-400 hover:text-blue-600 transition-colors" 
+                              title="มอบหมายงาน"
+                            >
+                              <MailOpen className="size-5" />
+                            </button>
+                          ) : (
+                            req.attachmentUrl && (
+                              <button 
+                                onClick={() => handleDownloadAll(req.attachmentUrl!, req.id, req.department, req.date)}
+                                className="p-1.5 text-slate-400 hover:text-emerald-600 transition-colors"
+                                title="ดาวน์โหลดไฟล์แนบ"
+                              >
+                                <Download className="size-5" />
+                              </button>
+                            )
+                          )}
+                        </div>
+
+                        {/* Slot 4: Reject or Delete */}
+                        <div className="flex justify-center w-8">
+                          {currentUser?.role === 'approver' && req.status === 'pending' ? (
+                            <button 
+                              onClick={() => { 
+                                setSelectedReq(req); 
+                                setRejectReason('');
+                                setShowRejectModal(true); 
+                              }} 
+                              className="p-1.5 text-slate-400 hover:text-rose-600 transition-colors" 
+                              title="ปฏิเสธคำขอ"
+                            >
+                              <XCircle className="size-5" />
+                            </button>
+                          ) : (
+                            req.status === 'pending' && currentUser?.role === 'department' && (
+                              <button 
+                                onClick={() => handleDelete(req.id)}
+                                className="p-1.5 text-slate-400 hover:text-rose-600 transition-colors"
+                                title="ลบคำขอ"
+                              >
+                                <Trash2 className="size-5" />
+                              </button>
+                            )
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </td>
                 </tr>
@@ -394,6 +437,96 @@ export default function RequestList() {
                 className="px-6 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold transition-all disabled:opacity-50 shadow-lg shadow-rose-600/20"
               >
                 ยืนยันการปฏิเสธ
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Modal */}
+      {showEditModal && selectedReq && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm px-4">
+          <div className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden border border-slate-200 animate-in fade-in zoom-in duration-200">
+            <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+              <h3 className="text-xl font-bold text-slate-900">แก้ไขข้อมูลคำขอ</h3>
+              <button onClick={() => setShowEditModal(false)} className="p-2 hover:bg-slate-200 rounded-full transition-colors">
+                <X className="size-6 text-slate-500" />
+              </button>
+            </div>
+            <div className="p-8 max-h-[70vh] overflow-y-auto custom-scrollbar space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="text-sm font-bold text-slate-700 block mb-2">หัวข้อ/ชื่อโปรแกรม</label>
+                  <input 
+                    type="text"
+                    value={editData.topic || ''}
+                    onChange={(e) => setEditData({...editData, topic: e.target.value})}
+                    className="w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-bold text-slate-700 block mb-2">กลุ่มผู้ใช้งาน</label>
+                  <input 
+                    type="text"
+                    value={editData.userGroup || ''}
+                    onChange={(e) => setEditData({...editData, userGroup: e.target.value})}
+                    className="w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm"
+                  />
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="text-sm font-bold text-slate-700 block mb-2">จำนวนผู้ใช้งานโดยประมาณ</label>
+                  <select 
+                    value={editData.estimatedUsers || ''}
+                    onChange={(e) => setEditData({...editData, estimatedUsers: e.target.value})}
+                    className="w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm"
+                  >
+                    <option value="1 - 5 คน">1 - 5 คน</option>
+                    <option value="6 - 10 คน">6 - 10 คน</option>
+                    <option value="11 - 20 คน">11 - 20 คน</option>
+                    <option value="21 - 50 คน">21 - 50 คน</option>
+                    <option value="มากกว่า 50 คน">มากกว่า 50 คน</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-sm font-bold text-slate-700 block mb-2">เบอร์โทรศัพท์แผนก</label>
+                  <input 
+                    type="text"
+                    value={editData.departmentPhone || ''}
+                    onChange={(e) => setEditData({...editData, departmentPhone: e.target.value})}
+                    className="w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-sm font-bold text-slate-700 block mb-2">ระบบเดิมที่ใช้งานอยู่ (ถ้ามี)</label>
+                <input 
+                  type="text"
+                  value={editData.currentSystem || ''}
+                  onChange={(e) => setEditData({...editData, currentSystem: e.target.value})}
+                  className="w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="text-sm font-bold text-slate-700 block mb-2">วัตถุประสงค์และความต้องการ</label>
+                <textarea 
+                  value={editData.objective || ''}
+                  onChange={(e) => setEditData({...editData, objective: e.target.value})}
+                  className="w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm min-h-[120px]"
+                />
+              </div>
+            </div>
+            <div className="px-8 py-6 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
+              <button onClick={() => setShowEditModal(false)} className="px-6 py-2.5 rounded-xl text-slate-600 font-bold hover:bg-slate-100 transition-all">ยกเลิก</button>
+              <button 
+                onClick={handleEditSubmit}
+                className="px-6 py-2.5 rounded-xl bg-primary hover:bg-secondary text-white font-bold transition-all shadow-lg shadow-primary/20"
+              >
+                บันทึกการแก้ไข
               </button>
             </div>
           </div>
