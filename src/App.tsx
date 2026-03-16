@@ -22,8 +22,6 @@ function ProtectedRoute({ children, allowedRoles }: { children: React.ReactNode,
   return <>{children}</>;
 }
 
-import { ToastProvider } from './components/Toast';
-
 export default function App() {
   const { fetchData, currentUser } = useAppStore();
 
@@ -32,41 +30,39 @@ export default function App() {
   }, [fetchData]);
 
   return (
-    <ToastProvider>
-      <Router>
-        <Routes>
-          <Route path="/" element={<Layout />}>
-            <Route index element={<Dashboard />} />
-            <Route path="login" element={<Login />} />
-            <Route path="request" element={
-              <ProtectedRoute allowedRoles={['department']}>
-                <RequestForm />
-              </ProtectedRoute>
-            } />
-            <Route path="list" element={
-              <ProtectedRoute allowedRoles={['department', 'approver', 'developer']}>
-                <RequestList />
-              </ProtectedRoute>
-            } />
-            <Route path="workload" element={
-              <ProtectedRoute allowedRoles={['approver', 'developer']}>
-                <WorkloadOverview />
-              </ProtectedRoute>
-            } />
-            <Route path="profile" element={
-              <ProtectedRoute>
-                <Profile />
-              </ProtectedRoute>
-            } />
-            <Route path="users" element={
-              <ProtectedRoute allowedRoles={['approver']}>
-                <Users />
-              </ProtectedRoute>
-            } />
-          </Route>
-        </Routes>
-      </Router>
-    </ToastProvider>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Layout />}>
+          <Route index element={<Dashboard />} />
+          <Route path="login" element={<Login />} />
+          <Route path="request" element={
+            <ProtectedRoute allowedRoles={['department']}>
+              <RequestForm />
+            </ProtectedRoute>
+          } />
+          <Route path="list" element={
+            <ProtectedRoute allowedRoles={['department', 'approver', 'developer']}>
+              <RequestList />
+            </ProtectedRoute>
+          } />
+          <Route path="workload" element={
+            <ProtectedRoute allowedRoles={['approver', 'developer']}>
+              <WorkloadOverview />
+            </ProtectedRoute>
+          } />
+          <Route path="profile" element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          } />
+          <Route path="users" element={
+            <ProtectedRoute allowedRoles={['approver']}>
+              <Users />
+            </ProtectedRoute>
+          } />
+        </Route>
+      </Routes>
+    </Router>
   );
 }
 
