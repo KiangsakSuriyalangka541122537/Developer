@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useAppStore, DevRequest } from '../store';
-import { BarChart, Users, CheckCircle, Clock, Briefcase, Lock, Trophy, Filter, Eye, XCircle, FileText, Download, Calendar, RefreshCw, FileDown } from 'lucide-react';
+import { BarChart, Users, CheckCircle, Clock, Briefcase, Lock, Trophy, Filter, Eye, XCircle, FileText, Download, Calendar, RefreshCw, FileDown, Printer, Save } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
@@ -317,9 +317,9 @@ export default function Dashboard() {
                               triggerPrint(req);
                             }}
                             className="p-1.5 text-slate-400 hover:text-indigo-600 transition-colors"
-                            title="ดาวน์โหลดบันทึกข้อความ (PDF)"
+                            title="พิมพ์เอกสาร (PDF)"
                           >
-                            <FileText className="size-5" />
+                            <Printer className="size-5" />
                           </button>
                         </div>
                       </td>
@@ -355,7 +355,7 @@ export default function Dashboard() {
                   onClick={() => triggerPrint(selectedReq)}
                   className="px-4 py-1.5 rounded-xl bg-indigo-50 text-indigo-600 font-bold hover:bg-indigo-100 transition-all text-sm border border-indigo-100 flex items-center gap-2"
                 >
-                  <FileText className="size-4" />
+                  <Printer className="size-4" />
                   พิมพ์ PDF
                 </button>
                 <button 

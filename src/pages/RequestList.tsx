@@ -768,9 +768,9 @@ export default function RequestList() {
                         <button 
                           onClick={() => triggerPrint(req)}
                           className="p-1.5 text-slate-400 hover:text-indigo-600 transition-colors"
-                          title="ดาวน์โหลดบันทึกข้อความ (PDF)"
+                          title="พิมพ์เอกสาร (PDF)"
                         >
-                          <FileText className="size-5" />
+                          <Printer className="size-5" />
                         </button>
                       </div>
 
@@ -1133,7 +1133,7 @@ export default function RequestList() {
                   onClick={() => triggerPrint(selectedReq)}
                   className="px-4 py-1.5 rounded-xl bg-indigo-50 text-indigo-600 font-bold hover:bg-indigo-100 transition-all text-sm border border-indigo-100 flex items-center gap-2"
                 >
-                  <FileText className="size-4" />
+                  <Printer className="size-4" />
                   พิมพ์ PDF
                 </button>
                 <button 
