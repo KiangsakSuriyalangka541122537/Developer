@@ -404,6 +404,14 @@ export default function Dashboard() {
                   <h5 className="text-base font-bold text-slate-500 mb-2">จำนวนผู้ใช้งาน</h5>
                   <p className="text-black font-normal text-base">{selectedReq.estimatedUsers}</p>
                 </div>
+                <div>
+                  <h5 className="text-base font-bold text-slate-500 mb-2">กลุ่มผู้ใช้งาน</h5>
+                  <p className="text-black font-normal text-base">{selectedReq.userGroup || '-'}</p>
+                </div>
+                <div>
+                  <h5 className="text-base font-bold text-slate-500 mb-2">เบอร์โทรแผนก</h5>
+                  <p className="text-black font-normal text-base">{selectedReq.departmentPhone || '-'}</p>
+                </div>
                 {selectedReq.developerId && (
                   <div>
                     <h5 className="text-base font-bold text-slate-500 mb-2">ผู้รับผิดชอบ (Developer)</h5>

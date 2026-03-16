@@ -13,6 +13,8 @@ export default function RequestForm() {
   const [formData, setFormData] = useState({
     requesterName: '',
     topic: '',
+    userGroup: '',
+    departmentPhone: '',
     estimatedUsers: '',
     objective: '',
     currentSystem: '',
@@ -21,6 +23,14 @@ export default function RequestForm() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
+    
+    // Validation for departmentPhone: only 4 digits
+    if (name === 'departmentPhone') {
+      const val = value.replace(/\D/g, '').slice(0, 4);
+      setFormData(prev => ({ ...prev, [name]: val }));
+      return;
+    }
+
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
@@ -77,6 +87,8 @@ export default function RequestForm() {
         department: currentUser.name,
         date: new Date().toISOString().split('T')[0],
         topic: formData.topic,
+        userGroup: formData.userGroup,
+        departmentPhone: formData.departmentPhone,
         estimatedUsers: formData.estimatedUsers,
         objective: formData.objective,
         currentSystem: formData.currentSystem,
@@ -95,6 +107,8 @@ export default function RequestForm() {
     setFormData({
       requesterName: '',
       topic: '',
+      userGroup: '',
+      departmentPhone: '',
       estimatedUsers: '',
       objective: '',
       currentSystem: '',
@@ -140,6 +154,31 @@ export default function RequestForm() {
                 value={currentUser?.name || ''} 
                 className="bg-slate-50 border-slate-200 rounded-lg h-12 px-4 text-slate-500 cursor-not-allowed outline-none" 
                 readOnly 
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium text-slate-700">กลุ่มผู้ใช้งาน <span className="text-rose-500">*</span></label>
+              <input 
+                type="text" 
+                name="userGroup"
+                value={formData.userGroup}
+                onChange={handleChange}
+                className="border border-slate-200 focus:ring-2 focus:ring-primary focus:border-primary rounded-lg h-12 px-4 bg-white outline-none transition-all" 
+                placeholder="IPD, OPD, เจ้าหน้าที่ หรือแผนกไหน" 
+                required
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium text-slate-700">เบอร์โทรแผนก (4 หลัก) <span className="text-rose-500">*</span></label>
+              <input 
+                type="text" 
+                name="departmentPhone"
+                value={formData.departmentPhone}
+                onChange={handleChange}
+                className="border border-slate-200 focus:ring-2 focus:ring-primary focus:border-primary rounded-lg h-12 px-4 bg-white outline-none transition-all" 
+                placeholder="ระบุเบอร์โทร 4 หลัก" 
+                maxLength={4}
+                required
               />
             </div>
           </div>

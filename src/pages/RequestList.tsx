@@ -129,6 +129,8 @@ export default function RequestList() {
   const [isUploading, setIsUploading] = useState(false);
   const [editFormData, setEditFormData] = useState({
     topic: '',
+    userGroup: '',
+    departmentPhone: '',
     estimatedUsers: '',
     objective: '',
     currentSystem: ''
@@ -463,6 +465,8 @@ export default function RequestList() {
         department: currentUser.name,
         date: new Date().toISOString(),
         topic: revisionFormData.topic,
+        userGroup: selectedReq.userGroup,
+        departmentPhone: selectedReq.departmentPhone,
         estimatedUsers: selectedReq.estimatedUsers,
         objective: revisionFormData.objective,
         currentSystem: selectedReq.topic, // Reference original topic as current system context
@@ -800,6 +804,32 @@ export default function RequestList() {
                 />
               </div>
               <div className="flex flex-col gap-2">
+                <label className="text-sm font-semibold text-slate-700">กลุ่มผู้ใช้งาน <span className="text-rose-500">*</span></label>
+                <input 
+                  type="text" 
+                  value={editFormData.userGroup}
+                  onChange={(e) => setEditFormData({...editFormData, userGroup: e.target.value})}
+                  className="w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm" 
+                  placeholder="IPD, OPD, เจ้าหน้าที่ หรือแผนกไหน"
+                  required
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-semibold text-slate-700">เบอร์โทรแผนก (4 หลัก) <span className="text-rose-500">*</span></label>
+                <input 
+                  type="text" 
+                  value={editFormData.departmentPhone}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, '').slice(0, 4);
+                    setEditFormData({...editFormData, departmentPhone: val});
+                  }}
+                  className="w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm" 
+                  placeholder="ระบุเบอร์โทร 4 หลัก"
+                  maxLength={4}
+                  required
+                />
+              </div>
+              <div className="flex flex-col gap-2">
                 <label className="text-sm font-semibold text-slate-700">จำนวนผู้ใช้งานโดยประมาณ <span className="text-rose-500">*</span></label>
                 <select 
                   value={editFormData.estimatedUsers}
@@ -1032,6 +1062,14 @@ export default function RequestList() {
                 <div>
                   <h5 className="text-base font-bold text-slate-500 mb-2">จำนวนผู้ใช้งาน</h5>
                   <p className="text-black font-normal text-base">{selectedReq.estimatedUsers}</p>
+                </div>
+                <div>
+                  <h5 className="text-base font-bold text-slate-500 mb-2">กลุ่มผู้ใช้งาน</h5>
+                  <p className="text-black font-normal text-base">{selectedReq.userGroup || '-'}</p>
+                </div>
+                <div>
+                  <h5 className="text-base font-bold text-slate-500 mb-2">เบอร์โทรแผนก</h5>
+                  <p className="text-black font-normal text-base">{selectedReq.departmentPhone || '-'}</p>
                 </div>
                 {selectedReq.developerId && (
                   <div>

@@ -33,6 +33,8 @@ export interface DevRequest {
   projectLink?: string | null;
   previousDeveloperId?: string | null;
   sourceRequestId?: string | null;
+  userGroup?: string | null;
+  departmentPhone?: string | null;
   createdAt: string;
 }
 
@@ -97,6 +99,8 @@ export const useAppStore = create<AppState>()(
               projectLink: r.project_link,
               previousDeveloperId: r.previous_developer_id,
               sourceRequestId: r.source_request_id,
+              userGroup: r.user_group,
+              departmentPhone: r.department_phone,
               createdAt: r.created_at
             }));
 
@@ -158,6 +162,8 @@ export const useAppStore = create<AppState>()(
           objective: reqData.objective,
           current_system: reqData.currentSystem,
           attachment_url: reqData.attachmentUrl || null,
+          user_group: (reqData as any).userGroup || null,
+          department_phone: (reqData as any).departmentPhone || null,
           status: 'pending'
         };
 
@@ -207,6 +213,8 @@ export const useAppStore = create<AppState>()(
         if (updates.objective !== undefined) dbUpdates.objective = updates.objective;
         if (updates.currentSystem !== undefined) dbUpdates.current_system = updates.currentSystem;
         if (updates.attachmentUrl !== undefined) dbUpdates.attachment_url = updates.attachmentUrl;
+        if (updates.userGroup !== undefined) dbUpdates.user_group = updates.userGroup;
+        if (updates.departmentPhone !== undefined) dbUpdates.department_phone = updates.departmentPhone;
 
         let { error } = await supabase.from('Dev-requests').update(dbUpdates).eq('id', id);
         
