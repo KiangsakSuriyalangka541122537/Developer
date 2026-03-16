@@ -7,10 +7,12 @@ import { saveAs } from 'file-saver';
 import { supabase } from '../lib/supabase';
 
 export default function Dashboard() {
-  const { requests, users, currentUser } = useAppStore();
+  const { requests, users, currentUser, updateRequest } = useAppStore();
   const [filterStatus, setFilterStatus] = useState<string | null>(null);
   const [selectedReq, setSelectedReq] = useState<DevRequest | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [isEditingRemark, setIsEditingRemark] = useState(false);
+  const [tempRemark, setTempRemark] = useState('');
 
   const visibleRequests = requests;
 
@@ -41,6 +43,20 @@ export default function Dashboard() {
       setFilterStatus(null);
     } else {
       setFilterStatus(status);
+    }
+  };
+
+  const handleUpdateRemark = async () => {
+    if (!selectedReq) return;
+    try {
+      await updateRequest(selectedReq.id, {
+        developerRemark: tempRemark
+      });
+      setIsEditingRemark(false);
+      // Update local selectedReq to reflect change
+      setSelectedReq({ ...selectedReq, developerRemark: tempRemark });
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -308,7 +324,10 @@ export default function Dashboard() {
               <h4 className="text-xl font-black text-slate-900">รายละเอียดคำขอ</h4>
               <div className="flex items-center gap-2">
                 <button 
-                  onClick={() => setShowDetailsModal(false)}
+                  onClick={() => {
+                    setShowDetailsModal(false);
+                    setIsEditingRemark(false);
+                  }}
                   className="px-4 py-1.5 rounded-xl bg-slate-100 text-slate-600 font-bold hover:bg-slate-200 transition-all text-sm border border-slate-200"
                 >
                   ปิด
@@ -362,6 +381,56 @@ export default function Dashboard() {
                   </div>
                 )}
               </div>
+
+              {(selectedReq.developerRemark || currentUser?.role === 'developer' || currentUser?.role === 'approver') && (
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <h5 className="text-base font-bold text-slate-500">หมายเหตุจากผู้พัฒนา</h5>
+                    {(currentUser?.role === 'developer' || currentUser?.role === 'approver') && !isEditingRemark && (
+                      <button 
+                        onClick={() => {
+                          setIsEditingRemark(true);
+                          setTempRemark(selectedReq.developerRemark || '');
+                        }}
+                        className="text-xs font-bold text-primary hover:underline flex items-center gap-1"
+                      >
+                        <RefreshCw className="size-3" />
+                        แก้ไขหมายเหตุ
+                      </button>
+                    )}
+                  </div>
+                  
+                  {isEditingRemark ? (
+                    <div className="space-y-3">
+                      <textarea 
+                        value={tempRemark}
+                        onChange={(e) => setTempRemark(e.target.value)}
+                        className="w-full rounded-xl border border-slate-200 p-4 outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm min-h-[100px]"
+                        placeholder="ระบุหมายเหตุเพิ่มเติม..."
+                      />
+                      <div className="flex justify-end gap-2">
+                        <button 
+                          onClick={() => setIsEditingRemark(false)}
+                          className="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 text-xs font-bold hover:bg-slate-200"
+                        >
+                          ยกเลิก
+                        </button>
+                        <button 
+                          onClick={handleUpdateRemark}
+                          className="px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-bold hover:bg-primary/90 flex items-center gap-1"
+                        >
+                          <RefreshCw className="size-3" />
+                          บันทึกหมายเหตุ
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="bg-blue-50/50 p-4 rounded-xl text-black font-normal border border-blue-100 italic">
+                      {selectedReq.developerRemark || <span className="text-slate-400">ไม่มีหมายเหตุ</span>}
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div>
                 <h5 className="text-base font-bold text-slate-500 mb-2">วัตถุประสงค์และความต้องการ</h5>
