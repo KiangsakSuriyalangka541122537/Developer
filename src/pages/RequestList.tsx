@@ -676,13 +676,8 @@ export default function RequestList() {
                         )}
                       </div>
 
-                      {/* Slot 3: Secondary Action (Delete / Forward) */}
+                      {/* Slot 3: Secondary Action (Forward) */}
                       <div className="w-10 flex justify-center">
-                        {(currentUser?.role === 'department' || currentUser?.role === 'approver') && (
-                          <button onClick={() => handleDelete(req.id, req.status)} className="p-1.5 text-slate-400 hover:text-rose-600 transition-colors" title="ลบคำขอ">
-                            <Trash2 className="size-5" />
-                          </button>
-                        )}
                         {currentUser?.role === 'developer' && (req.status === 'accepted' || req.status === 'in_progress') && req.developerId === currentUser.id && (
                           <button onClick={() => { setSelectedReq(req); setShowAssignModal(true); }} className="p-1.5 text-slate-400 hover:text-blue-600 transition-colors" title="ส่งต่องาน">
                             <Forward className="size-5" />
@@ -705,7 +700,7 @@ export default function RequestList() {
 
                       {/* Slot 5: Reject Action */}
                       <div className="w-10 flex justify-center">
-                        {currentUser?.role === 'approver' && req.status !== 'done' && req.status !== 'rejected' && (
+                        {(currentUser?.role === 'approver' || currentUser?.role === 'department') && req.status !== 'done' && req.status !== 'rejected' && (
                            <button onClick={() => { setSelectedReq(req); setShowRejectModal(true); }} className="p-1.5 text-slate-400 hover:text-rose-600 transition-colors" title="ปฏิเสธ">
                              <XCircle className="size-5" />
                            </button>
