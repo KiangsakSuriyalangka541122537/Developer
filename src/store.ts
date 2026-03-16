@@ -182,7 +182,7 @@ export const useAppStore = create<AppState>()(
         let { error } = await supabase.from('Dev-requests').insert([newReq]);
         
         // If it fails and we included new columns, try again without them
-        const newColumns = ['previous_developer_id', 'source_request_id', 'user_group', 'department_phone'];
+        const newColumns = ['previous_developer_id', 'source_request_id', 'user_group', 'department_phone', 'developer_remark'];
         if (error && newColumns.some(col => newReq[col] !== undefined)) {
           console.warn("Failed to insert with new columns, retrying without them...", error);
           const retryReq = { ...newReq };
