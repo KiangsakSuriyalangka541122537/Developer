@@ -14,9 +14,7 @@ export default function RequestList() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
   const [assignData, setAssignData] = useState({
-    developerId: '',
-    startMonthYear: '',
-    expectedFinishMonthYear: ''
+    developerId: ''
   });
   const [editData, setEditData] = useState<Partial<DevRequest>>({});
 
@@ -204,9 +202,7 @@ export default function RequestList() {
                               onClick={() => { 
                                 setSelectedReq(req); 
                                 setAssignData({
-                                  developerId: '',
-                                  startMonthYear: '',
-                                  expectedFinishMonthYear: ''
+                                  developerId: ''
                                 });
                                 setShowAssignModal(true); 
                               }} 
@@ -359,26 +355,6 @@ export default function RequestList() {
                   ))}
                 </select>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-bold text-slate-700 block mb-2">เดือนที่เริ่ม</label>
-                  <input 
-                    type="month"
-                    value={assignData.startMonthYear}
-                    onChange={(e) => setAssignData({...assignData, startMonthYear: e.target.value})}
-                    className="w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-bold text-slate-700 block mb-2">เดือนที่คาดว่าเสร็จ</label>
-                  <input 
-                    type="month"
-                    value={assignData.expectedFinishMonthYear}
-                    onChange={(e) => setAssignData({...assignData, expectedFinishMonthYear: e.target.value})}
-                    className="w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm"
-                  />
-                </div>
-              </div>
             </div>
             <div className="px-8 py-6 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
               <button onClick={() => setShowAssignModal(false)} className="px-6 py-2.5 rounded-xl text-slate-600 font-bold hover:bg-slate-100 transition-all">ยกเลิก</button>
@@ -387,9 +363,7 @@ export default function RequestList() {
                   if (!assignData.developerId) return;
                   await updateRequest(selectedReq.id, {
                     status: 'accepted',
-                    developerId: assignData.developerId,
-                    startMonthYear: assignData.startMonthYear,
-                    expectedFinishMonthYear: assignData.expectedFinishMonthYear
+                    developerId: assignData.developerId
                   });
                   setShowAssignModal(false);
                 }}
