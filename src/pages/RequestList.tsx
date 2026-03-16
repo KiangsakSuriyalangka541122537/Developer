@@ -241,7 +241,14 @@ export default function RequestList() {
       saveAs(content, `attachments-${department}-${formattedDate}.zip`);
     } catch (error) {
       console.error('Error creating zip:', error);
-      alert('เกิดข้อผิดพลาดในการรวมไฟล์ กรุณาลองใหม่อีกครั้ง');
+      setConfirmModal({
+        isOpen: true,
+        title: 'เกิดข้อผิดพลาด',
+        message: 'เกิดข้อผิดพลาดในการรวมไฟล์ กรุณาลองใหม่อีกครั้ง',
+        type: 'danger',
+        showCancel: false,
+        onConfirm: () => setConfirmModal(prev => ({ ...prev, isOpen: false }))
+      });
     }
   };
 
@@ -349,7 +356,14 @@ export default function RequestList() {
         setEditFiles([]);
       } catch (error) {
         console.error('Error updating request:', error);
-        alert('เกิดข้อผิดพลาดในการอัปโหลดไฟล์');
+        setConfirmModal({
+          isOpen: true,
+          title: 'เกิดข้อผิดพลาด',
+          message: 'เกิดข้อผิดพลาดในการอัปโหลดไฟล์',
+          type: 'danger',
+          showCancel: false,
+          onConfirm: () => setConfirmModal(prev => ({ ...prev, isOpen: false }))
+        });
       } finally {
         setIsUploading(false);
       }
@@ -428,7 +442,14 @@ export default function RequestList() {
     );
 
     if (alreadyExists) {
-      alert('มีการส่งคำขอแก้ไขสำหรับรายการนี้ไปแล้ว หรือกำลังรอการอนุมัติ');
+      setConfirmModal({
+        isOpen: true,
+        title: 'ไม่สามารถดำเนินการได้',
+        message: 'มีการส่งคำขอแก้ไขสำหรับรายการนี้ไปแล้ว หรือกำลังรอการอนุมัติ',
+        type: 'warning',
+        showCancel: false,
+        onConfirm: () => setConfirmModal(prev => ({ ...prev, isOpen: false }))
+      });
       return;
     }
 
@@ -463,7 +484,7 @@ export default function RequestList() {
         requesterId: currentUser.id,
         requesterName: currentUser.name,
         department: currentUser.name,
-        date: new Date().toISOString(),
+        date: new Date().toISOString().split('T')[0],
         topic: revisionFormData.topic,
         userGroup: selectedReq.userGroup,
         departmentPhone: selectedReq.departmentPhone,
@@ -488,9 +509,17 @@ export default function RequestList() {
         showCancel: false,
         onConfirm: () => setConfirmModal(prev => ({ ...prev, isOpen: false }))
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error submitting revision:', error);
-      alert('เกิดข้อผิดพลาดในการส่งคำขอ กรุณาลองใหม่อีกครั้ง');
+      const errorMessage = error?.message || 'ไม่ทราบสาเหตุ';
+      setConfirmModal({
+        isOpen: true,
+        title: 'เกิดข้อผิดพลาด',
+        message: `เกิดข้อผิดพลาดในการส่งคำขอ: ${errorMessage}\nกรุณาลองใหม่อีกครั้ง`,
+        type: 'danger',
+        showCancel: false,
+        onConfirm: () => setConfirmModal(prev => ({ ...prev, isOpen: false }))
+      });
     } finally {
       setIsUploading(false);
     }

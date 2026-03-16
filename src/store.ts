@@ -180,11 +180,12 @@ export const useAppStore = create<AppState>()(
         let { error } = await supabase.from('Dev-requests').insert([newReq]);
         
         // If it fails and we included new columns, try again without them
-        if (error && (newReq.previous_developer_id || newReq.source_request_id)) {
+        const newColumns = ['previous_developer_id', 'source_request_id', 'user_group', 'department_phone'];
+        if (error && newColumns.some(col => newReq[col] !== undefined)) {
           console.warn("Failed to insert with new columns, retrying without them...", error);
-          delete newReq.previous_developer_id;
-          delete newReq.source_request_id;
-          const retry = await supabase.from('Dev-requests').insert([newReq]);
+          const retryReq = { ...newReq };
+          newColumns.forEach(col => delete retryReq[col]);
+          const retry = await supabase.from('Dev-requests').insert([retryReq]);
           error = retry.error;
         }
 
@@ -218,11 +219,13 @@ export const useAppStore = create<AppState>()(
 
         let { error } = await supabase.from('Dev-requests').update(dbUpdates).eq('id', id);
         
-        // If it fails and we included previous_developer_id, try again without it
-        if (error && dbUpdates.previous_developer_id !== undefined) {
-          console.warn("Failed to update with previous_developer_id, retrying without it...", error);
-          delete dbUpdates.previous_developer_id;
-          const retry = await supabase.from('Dev-requests').update(dbUpdates).eq('id', id);
+        // If it fails and we included new columns, try again without them
+        const newColumns = ['previous_developer_id', 'source_request_id', 'user_group', 'department_phone'];
+        if (error && newColumns.some(col => dbUpdates[col] !== undefined)) {
+          console.warn("Failed to update with new columns, retrying without them...", error);
+          const retryUpdates = { ...dbUpdates };
+          newColumns.forEach(col => delete retryUpdates[col]);
+          const retry = await supabase.from('Dev-requests').update(retryUpdates).eq('id', id);
           error = retry.error;
         }
 
