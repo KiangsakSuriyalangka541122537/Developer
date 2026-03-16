@@ -70,7 +70,7 @@ function ThaiMonthPicker({ value, onChange, disabled, label, minDate }: {
       {isOpen && !disabled && (
         <>
           <div className="fixed inset-0 z-[105]" onClick={() => setIsOpen(false)}></div>
-          <div className="absolute bottom-full left-0 mb-2 z-[110] bg-white border border-slate-200 rounded-2xl shadow-xl p-4 w-64 animate-in fade-in slide-in-from-bottom-2 duration-200 overflow-hidden">
+          <div className="absolute bottom-full left-0 mb-2 z-[110] bg-white border border-slate-200 rounded-2xl shadow-xl p-4 w-64 animate-in fade-in slide-in-from-bottom-2 duration-200">
             <div className="flex justify-between items-center mb-4">
               <button type="button" onClick={() => setViewYear(viewYear - 1)} className="p-1 hover:bg-slate-100 rounded-lg transition-colors">
                 <ChevronLeft className="size-4" />
@@ -1245,7 +1245,7 @@ export default function RequestList() {
       {/* Schedule Modal */}
       {showScheduleModal && selectedReq && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-[32px] shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200">
+          <div className="bg-white rounded-[32px] shadow-2xl w-full max-w-lg animate-in zoom-in-95 duration-200">
             <div className="p-8">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-2xl font-black text-slate-900">กำหนดการพัฒนา</h3>
