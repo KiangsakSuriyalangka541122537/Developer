@@ -1,6 +1,6 @@
 import { useState, useEffect, ChangeEvent } from 'react';
 import { useAppStore, DevRequest } from '../store';
-import { FileText, Edit, Trash2, CheckCircle, XCircle, Forward, UserCheck, Eye, Calendar, MailOpen, ChevronLeft, ChevronRight, UploadCloud, Download, RefreshCw, Save, Clock, Printer } from 'lucide-react';
+import { FileText, Edit, Trash2, CheckCircle, XCircle, Forward, UserCheck, Eye, Calendar, MailOpen, ChevronLeft, ChevronRight, UploadCloud, Download, RefreshCw, Save, Clock, Printer, FileDown } from 'lucide-react';
 import ConfirmModal from '../components/ConfirmModal';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
@@ -756,9 +756,9 @@ export default function RequestList() {
                           <button 
                             onClick={() => handleDownloadAll(req.attachmentUrl!, req.id, req.department, req.date)}
                             className="p-1.5 text-slate-400 hover:text-emerald-600 transition-colors"
-                            title="ดาวน์โหลดเอกสารแนบ"
+                            title="ดาวน์โหลดไฟล์แนบ"
                           >
-                            <Download className="size-5" />
+                            <FileDown className="size-5" />
                           </button>
                         )}
                       </div>
@@ -768,9 +768,9 @@ export default function RequestList() {
                         <button 
                           onClick={() => triggerPrint(req)}
                           className="p-1.5 text-slate-400 hover:text-indigo-600 transition-colors"
-                          title="พิมพ์เอกสาร (PDF)"
+                          title="ดาวน์โหลดบันทึกข้อความ (PDF)"
                         >
-                          <Printer className="size-5" />
+                          <FileText className="size-5" />
                         </button>
                       </div>
 
@@ -1129,6 +1129,13 @@ export default function RequestList() {
             <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center sticky top-0 bg-white z-10">
               <h4 className="text-xl font-black text-slate-900">รายละเอียดคำขอ</h4>
               <div className="flex items-center gap-2">
+                <button 
+                  onClick={() => triggerPrint(selectedReq)}
+                  className="px-4 py-1.5 rounded-xl bg-indigo-50 text-indigo-600 font-bold hover:bg-indigo-100 transition-all text-sm border border-indigo-100 flex items-center gap-2"
+                >
+                  <FileText className="size-4" />
+                  พิมพ์ PDF
+                </button>
                 <button 
                   onClick={() => {
                     setShowDetailsModal(false);
