@@ -9,6 +9,7 @@ import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import RequestForm from './pages/RequestForm';
+import RequestList from './pages/RequestList';
 import WorkloadOverview from './pages/WorkloadOverview';
 import Profile from './pages/Profile';
 import Users from './pages/Users';
@@ -37,6 +38,11 @@ export default function App() {
           <Route path="request" element={
             <ProtectedRoute allowedRoles={['department']}>
               <RequestForm />
+            </ProtectedRoute>
+          } />
+          <Route path="list" element={
+            <ProtectedRoute allowedRoles={['department']}>
+              <RequestList />
             </ProtectedRoute>
           } />
           <Route path="workload" element={
