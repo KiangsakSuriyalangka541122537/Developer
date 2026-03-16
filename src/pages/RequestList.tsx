@@ -1202,8 +1202,8 @@ export default function RequestList() {
                       </div>
                     </div>
                   ) : (
-                    <div className="bg-blue-50/50 p-4 rounded-xl text-black font-normal border border-blue-100 italic">
-                      {selectedReq.developerRemark || <span className="text-slate-400">ไม่มีหมายเหตุ</span>}
+                    <div className="bg-blue-50/30 p-4 rounded-xl text-black font-medium border border-blue-100">
+                      {selectedReq.developerRemark || <span className="text-slate-400 italic">ไม่มีหมายเหตุ</span>}
                     </div>
                   )}
                 </div>
