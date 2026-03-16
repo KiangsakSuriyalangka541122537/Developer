@@ -26,10 +26,8 @@ export default function App() {
   const { fetchData, currentUser } = useAppStore();
 
   useEffect(() => {
-    if (currentUser) {
-      fetchData();
-    }
-  }, [currentUser, fetchData]);
+    fetchData();
+  }, [fetchData]);
 
   return (
     <Router>
@@ -42,11 +40,7 @@ export default function App() {
               <RequestForm />
             </ProtectedRoute>
           } />
-          <Route path="list" element={
-            <ProtectedRoute allowedRoles={['approver', 'developer', 'department']}>
-              <RequestList />
-            </ProtectedRoute>
-          } />
+          <Route path="list" element={<RequestList />} />
           <Route path="workload" element={
             <ProtectedRoute allowedRoles={['approver', 'developer']}>
               <WorkloadOverview />

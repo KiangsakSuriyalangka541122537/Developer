@@ -183,8 +183,6 @@ export default function RequestForm() {
             </div>
           </div>
 
-          <hr className="border-primary/5" />
-
           <div className="space-y-6">
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-slate-700">หัวข้อ/ชื่อโปรแกรม <span className="text-rose-500">*</span></label>

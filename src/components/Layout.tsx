@@ -28,9 +28,7 @@ export default function Layout() {
             {currentUser?.role === 'department' && (
               <Link to="/request" className={`font-medium px-3 py-2 rounded-xl transition-all ${location.pathname === '/request' ? 'text-primary bg-primary/5' : 'text-slate-600 hover:text-primary hover:bg-slate-50'}`}>เขียนคำขอ</Link>
             )}
-            {currentUser && (
-               <Link to="/list" className={`font-medium px-3 py-2 rounded-xl transition-all ${location.pathname === '/list' ? 'text-primary bg-primary/5' : 'text-slate-600 hover:text-primary hover:bg-slate-50'}`}>รายการคำขอ</Link>
-            )}
+            <Link to="/list" className={`font-medium px-3 py-2 rounded-xl transition-all ${location.pathname === '/list' ? 'text-primary bg-primary/5' : 'text-slate-600 hover:text-primary hover:bg-slate-50'}`}>รายการคำขอ</Link>
             {currentUser && currentUser.role !== 'department' && (
                <Link to="/workload" className={`font-medium px-3 py-2 rounded-xl transition-all ${location.pathname === '/workload' ? 'text-primary bg-primary/5' : 'text-slate-600 hover:text-primary hover:bg-slate-50'}`}>ภาระงาน</Link>
             )}

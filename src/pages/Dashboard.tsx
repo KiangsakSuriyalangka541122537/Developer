@@ -165,24 +165,7 @@ export default function Dashboard() {
         )}
       </div>
 
-      {!currentUser && (
-        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
-          <div className="flex items-center gap-4">
-            <div className="size-12 bg-amber-100 rounded-xl flex items-center justify-center text-amber-600 shrink-0">
-              <Lock className="size-6" />
-            </div>
-            <div>
-              <h3 className="font-bold text-amber-900 text-lg">กรุณาเข้าสู่ระบบเพื่อดูข้อมูล</h3>
-              <p className="text-amber-700 text-sm">คุณต้องเข้าสู่ระบบก่อนจึงจะสามารถเข้าถึงข้อมูลและสถานะการขอพัฒนาโปรแกรมทั้งหมดในระบบได้</p>
-            </div>
-          </div>
-          <Link to="/login" className="bg-amber-600 hover:bg-amber-700 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-md shadow-amber-600/20 whitespace-nowrap">
-            เข้าสู่ระบบตอนนี้
-          </Link>
-        </div>
-      )}
-
-      <div className={`space-y-8 ${!currentUser ? 'opacity-50 pointer-events-none select-none blur-[2px]' : ''}`}>
+      <div className="space-y-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <button 
             onClick={() => setFilterStatus(null)}
