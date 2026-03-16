@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAppStore, DevRequest } from '../store';
-import { FileText, Edit, Trash2, Eye, Calendar, Download, RefreshCw, X } from 'lucide-react';
+import { FileText, Edit, Trash2, Eye, Calendar, Download, RefreshCw, X, MailOpen, UserCheck, CheckCircle, XCircle, Forward } from 'lucide-react';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 import { supabase } from '../lib/supabase';
@@ -9,9 +9,19 @@ export default function RequestList() {
   const { requests, users, currentUser, deleteRequest, updateRequest } = useAppStore();
   const [selectedReq, setSelectedReq] = useState<DevRequest | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
+  const [assignData, setAssignData] = useState({
+    developerId: '',
+    startMonthYear: '',
+    expectedFinishMonthYear: ''
+  });
 
-  // Filter requests for the current department
-  const visibleRequests = requests.filter(r => r.department === currentUser?.name);
+  // Filter requests: Department sees only their own, others see all
+  const visibleRequests = currentUser?.role === 'department' 
+    ? requests.filter(r => r.department === currentUser?.name)
+    : requests;
 
   const handleDownloadAll = async (attachmentUrl: string, requestId: string, department: string, date: string) => {
     if (!attachmentUrl) return;
@@ -145,7 +155,24 @@ export default function RequestList() {
                       >
                         <Eye className="size-5" />
                       </button>
-                      {req.status === 'pending' && (
+                      {currentUser?.role === 'approver' && req.status === 'pending' && (
+                        <button 
+                          onClick={() => { 
+                            setSelectedReq(req); 
+                            setAssignData({
+                              developerId: '',
+                              startMonthYear: '',
+                              expectedFinishMonthYear: ''
+                            });
+                            setShowAssignModal(true); 
+                          }} 
+                          className="p-1.5 text-slate-400 hover:text-blue-600 transition-colors" 
+                          title="มอบหมายงาน"
+                        >
+                          <MailOpen className="size-5" />
+                        </button>
+                      )}
+                      {req.status === 'pending' && currentUser?.role === 'department' && (
                         <button 
                           onClick={() => handleDelete(req.id)}
                           className="p-1.5 text-slate-400 hover:text-rose-600 transition-colors"
@@ -237,6 +264,74 @@ export default function RequestList() {
                 className="px-8 py-3 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold hover:bg-slate-100 transition-all shadow-sm"
               >
                 ปิดหน้าต่าง
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Assign Modal */}
+      {showAssignModal && selectedReq && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm px-4">
+          <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden border border-slate-200 animate-in fade-in zoom-in duration-200">
+            <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+              <h3 className="text-xl font-bold text-slate-900">มอบหมายงาน</h3>
+              <button onClick={() => setShowAssignModal(false)} className="p-2 hover:bg-slate-200 rounded-full transition-colors">
+                <X className="size-6 text-slate-500" />
+              </button>
+            </div>
+            <div className="p-8 space-y-6">
+              <div>
+                <label className="text-sm font-bold text-slate-700 block mb-2">เลือกผู้พัฒนา</label>
+                <select 
+                  value={assignData.developerId}
+                  onChange={(e) => setAssignData({...assignData, developerId: e.target.value})}
+                  className="w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm"
+                >
+                  <option value="">-- เลือกผู้พัฒนา --</option>
+                  {users.filter(u => u.role === 'developer').map(u => (
+                    <option key={u.id} value={u.id}>{u.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-bold text-slate-700 block mb-2">เดือนที่เริ่ม</label>
+                  <input 
+                    type="month"
+                    value={assignData.startMonthYear}
+                    onChange={(e) => setAssignData({...assignData, startMonthYear: e.target.value})}
+                    className="w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-bold text-slate-700 block mb-2">เดือนที่คาดว่าเสร็จ</label>
+                  <input 
+                    type="month"
+                    value={assignData.expectedFinishMonthYear}
+                    onChange={(e) => setAssignData({...assignData, expectedFinishMonthYear: e.target.value})}
+                    className="w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm"
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="px-8 py-6 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
+              <button onClick={() => setShowAssignModal(false)} className="px-6 py-2.5 rounded-xl text-slate-600 font-bold hover:bg-slate-100 transition-all">ยกเลิก</button>
+              <button 
+                onClick={async () => {
+                  if (!assignData.developerId) return;
+                  await updateRequest(selectedReq.id, {
+                    status: 'accepted',
+                    developerId: assignData.developerId,
+                    startMonthYear: assignData.startMonthYear,
+                    expectedFinishMonthYear: assignData.expectedFinishMonthYear
+                  });
+                  setShowAssignModal(false);
+                }}
+                disabled={!assignData.developerId}
+                className="px-6 py-2.5 rounded-xl bg-primary hover:bg-secondary text-white font-bold transition-all disabled:opacity-50 shadow-lg shadow-primary/20"
+              >
+                ยืนยันการมอบหมาย
               </button>
             </div>
           </div>
