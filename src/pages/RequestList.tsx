@@ -171,7 +171,7 @@ export default function RequestList() {
                           </button>
                         </div>
 
-                        {/* Slot 2: Edit */}
+                        {/* Slot 2: Edit or Start Work */}
                         <div className="flex justify-center w-8">
                           {currentUser?.role === 'approver' && (
                             <button 
@@ -191,6 +191,15 @@ export default function RequestList() {
                               title="แก้ไขข้อมูล"
                             >
                               <Edit className="size-5" />
+                            </button>
+                          )}
+                          {currentUser?.role === 'developer' && req.status === 'accepted' && req.developerId === currentUser.id && (
+                            <button 
+                              onClick={() => updateRequest(req.id, { status: 'in_progress' })}
+                              className="p-1.5 text-slate-400 hover:text-blue-600 transition-colors"
+                              title="เริ่มดำเนินงาน"
+                            >
+                              <RefreshCw className="size-5" />
                             </button>
                           )}
                         </div>
@@ -224,7 +233,7 @@ export default function RequestList() {
                           )}
                         </div>
 
-                        {/* Slot 4: Reject or Delete */}
+                        {/* Slot 4: Reject, Delete or Complete Work */}
                         <div className="flex justify-center w-8">
                           {currentUser?.role === 'approver' && req.status === 'pending' ? (
                             <button 
@@ -237,6 +246,14 @@ export default function RequestList() {
                               title="ปฏิเสธคำขอ"
                             >
                               <XCircle className="size-5" />
+                            </button>
+                          ) : currentUser?.role === 'developer' && req.status === 'in_progress' && req.developerId === currentUser.id ? (
+                            <button 
+                              onClick={() => updateRequest(req.id, { status: 'done' })}
+                              className="p-1.5 text-slate-400 hover:text-emerald-600 transition-colors"
+                              title="เสร็จสิ้นงาน"
+                            >
+                              <CheckCircle className="size-5" />
                             </button>
                           ) : (
                             req.status === 'pending' && currentUser?.role === 'department' && (
