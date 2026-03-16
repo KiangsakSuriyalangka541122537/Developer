@@ -8,6 +8,9 @@ import { supabase } from '../lib/supabase';
 import { useReactToPrint } from 'react-to-print';
 import { PrintableRequest } from '../components/PrintableRequest';
 import { useRef } from 'react';
+import { useToast } from '../components/Toast';
+// @ts-ignore
+import html2pdf from 'html2pdf.js';
 
 const THAI_MONTHS = [
   'ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.',
@@ -114,6 +117,7 @@ function ThaiMonthPicker({ value, onChange, disabled, label, minDate }: {
 
 export default function RequestList() {
   const { currentUser, requests, updateRequest, deleteRequest, users, addRequest } = useAppStore();
+  const { showToast } = useToast();
   const [selectedReq, setSelectedReq] = useState<DevRequest | null>(null);
   const [rejectReason, setRejectReason] = useState('');
   const [projectLink, setProjectLink] = useState('');
@@ -155,6 +159,32 @@ export default function RequestList() {
     setTimeout(() => {
       handlePrint();
     }, 100);
+  };
+
+  const handleDownloadPDF = async (req: DevRequest) => {
+    setPrintingReq(req);
+    const toastId = showToast('กำลังเตรียมไฟล์ PDF...', 'loading');
+    
+    setTimeout(async () => {
+      if (printRef.current) {
+        const element = printRef.current;
+        const opt = {
+          margin: 10,
+          filename: `บันทึกข้อความ_${req.topic}.pdf`,
+          image: { type: 'jpeg' as const, quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' as const }
+        };
+
+        try {
+          await html2pdf().set(opt).from(element).save();
+          showToast('ดาวน์โหลด PDF สำเร็จ', 'success');
+        } catch (error) {
+          console.error('PDF Error:', error);
+          showToast('เกิดข้อผิดพลาดในการสร้าง PDF', 'error');
+        }
+      }
+    }, 500);
   };
   const [revisionFormData, setRevisionFormData] = useState({
     topic: '',
@@ -681,7 +711,31 @@ export default function RequestList() {
                         </button>
                       </div>
 
-                      {/* Slot 2: Primary Action (Edit / Assign / Accept / Done) */}
+                      {/* Slot 2: Print */}
+                      <div className="w-10 flex justify-center">
+                        <button 
+                          onClick={() => handleDownloadPDF(req)}
+                          className="p-1.5 text-slate-400 hover:text-indigo-600 transition-colors"
+                          title="ดาวน์โหลด PDF"
+                        >
+                          <Printer className="size-5" />
+                        </button>
+                      </div>
+
+                      {/* Slot 3: Download */}
+                      <div className="w-10 flex justify-center">
+                        {req.attachmentUrl && (
+                          <button 
+                            onClick={() => handleDownloadAll(req.attachmentUrl!, req.id, req.department, req.date)}
+                            className="p-1.5 text-slate-400 hover:text-emerald-600 transition-colors"
+                            title="ดาวน์โหลดไฟล์แนบ"
+                          >
+                            <FileDown className="size-5" />
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Slot 4: Primary Action (Edit / Assign / Accept / Done) */}
                       <div className="w-10 flex justify-center">
                         {currentUser?.role === 'department' && req.status === 'done' && !requests.some(r => 
                           (r.sourceRequestId === req.id || r.topic.trim() === `[แก้ไข/เพิ่มเติม] ${req.topic.trim()}`) && 
@@ -741,37 +795,13 @@ export default function RequestList() {
                         )}
                       </div>
 
-                      {/* Slot 3: Secondary Action (Forward) */}
+                      {/* Slot 5: Secondary Action (Forward) */}
                       <div className="w-10 flex justify-center">
                         {currentUser?.role === 'developer' && (req.status === 'accepted' || req.status === 'in_progress') && req.developerId === currentUser.id && (
                           <button onClick={() => { setSelectedReq(req); setShowAssignModal(true); }} className="p-1.5 text-slate-400 hover:text-blue-600 transition-colors" title="ส่งต่องาน">
                             <Forward className="size-5" />
                           </button>
                         )}
-                      </div>
-
-                      {/* Slot 4: Download */}
-                      <div className="w-10 flex justify-center">
-                        {req.attachmentUrl && (
-                          <button 
-                            onClick={() => handleDownloadAll(req.attachmentUrl!, req.id, req.department, req.date)}
-                            className="p-1.5 text-slate-400 hover:text-emerald-600 transition-colors"
-                            title="ดาวน์โหลดไฟล์แนบ"
-                          >
-                            <FileDown className="size-5" />
-                          </button>
-                        )}
-                      </div>
-
-                      {/* Slot 5: Print */}
-                      <div className="w-10 flex justify-center">
-                        <button 
-                          onClick={() => triggerPrint(req)}
-                          className="p-1.5 text-slate-400 hover:text-indigo-600 transition-colors"
-                          title="พิมพ์เอกสาร (PDF)"
-                        >
-                          <Printer className="size-5" />
-                        </button>
                       </div>
 
                       {/* Slot 6: Reject Action */}
@@ -1130,11 +1160,11 @@ export default function RequestList() {
               <h4 className="text-xl font-black text-slate-900">รายละเอียดคำขอ</h4>
               <div className="flex items-center gap-2">
                 <button 
-                  onClick={() => triggerPrint(selectedReq)}
+                  onClick={() => handleDownloadPDF(selectedReq)}
                   className="px-4 py-1.5 rounded-xl bg-indigo-50 text-indigo-600 font-bold hover:bg-indigo-100 transition-all text-sm border border-indigo-100 flex items-center gap-2"
                 >
                   <Printer className="size-4" />
-                  พิมพ์ PDF
+                  ดาวน์โหลด PDF
                 </button>
                 <button 
                   onClick={() => {

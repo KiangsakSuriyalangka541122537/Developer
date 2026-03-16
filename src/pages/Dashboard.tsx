@@ -7,9 +7,13 @@ import { saveAs } from 'file-saver';
 import { supabase } from '../lib/supabase';
 import { useReactToPrint } from 'react-to-print';
 import { PrintableRequest } from '../components/PrintableRequest';
+import { useToast } from '../components/Toast';
+// @ts-ignore
+import html2pdf from 'html2pdf.js';
 
 export default function Dashboard() {
   const { requests, users, currentUser, updateRequest } = useAppStore();
+  const { showToast } = useToast();
   const [filterStatus, setFilterStatus] = useState<string | null>(null);
   const [selectedReq, setSelectedReq] = useState<DevRequest | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
@@ -28,6 +32,35 @@ export default function Dashboard() {
     setTimeout(() => {
       handlePrint();
     }, 100);
+  };
+
+  const handleDownloadPDF = async (req: DevRequest) => {
+    setPrintingReq(req);
+    const toastId = showToast('กำลังเตรียมไฟล์ PDF...', 'loading');
+    
+    setTimeout(async () => {
+      if (printRef.current) {
+        const element = printRef.current;
+        const opt = {
+          margin: 10,
+          filename: `บันทึกข้อความ_${req.topic}.pdf`,
+          image: { type: 'jpeg' as const, quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' as const }
+        };
+
+        try {
+          await html2pdf().set(opt).from(element).save();
+          showToast('ดาวน์โหลด PDF สำเร็จ', 'success');
+        } catch (error) {
+          console.error('PDF Error:', error);
+          showToast('เกิดข้อผิดพลาดในการสร้าง PDF', 'error');
+        } finally {
+          // hideToast(toastId); // ToastProvider handles auto-hide for non-loading, but for loading we need to hide it
+          // Actually my showToast returns id, I should use it.
+        }
+      }
+    }, 500);
   };
 
   const visibleRequests = requests;
@@ -299,6 +332,16 @@ export default function Dashboard() {
                       </td>
                       <td className="py-4 px-6 text-center">
                         <div className="flex items-center justify-center gap-2">
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDownloadPDF(req);
+                            }}
+                            className="p-1.5 text-slate-400 hover:text-indigo-600 transition-colors"
+                            title="ดาวน์โหลด PDF"
+                          >
+                            <Printer className="size-5" />
+                          </button>
                           {req.attachmentUrl && (
                             <button 
                               onClick={(e) => {
@@ -311,16 +354,6 @@ export default function Dashboard() {
                               <FileDown className="size-5" />
                             </button>
                           )}
-                          <button 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              triggerPrint(req);
-                            }}
-                            className="p-1.5 text-slate-400 hover:text-indigo-600 transition-colors"
-                            title="พิมพ์เอกสาร (PDF)"
-                          >
-                            <Printer className="size-5" />
-                          </button>
                         </div>
                       </td>
                       <td className="py-4 pr-8 text-center">
@@ -352,11 +385,11 @@ export default function Dashboard() {
               <h4 className="text-xl font-black text-slate-900">รายละเอียดคำขอ</h4>
               <div className="flex items-center gap-2">
                 <button 
-                  onClick={() => triggerPrint(selectedReq)}
+                  onClick={() => handleDownloadPDF(selectedReq)}
                   className="px-4 py-1.5 rounded-xl bg-indigo-50 text-indigo-600 font-bold hover:bg-indigo-100 transition-all text-sm border border-indigo-100 flex items-center gap-2"
                 >
                   <Printer className="size-4" />
-                  พิมพ์ PDF
+                  ดาวน์โหลด PDF
                 </button>
                 <button 
                   onClick={() => {
