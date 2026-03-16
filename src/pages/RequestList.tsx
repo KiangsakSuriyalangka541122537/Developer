@@ -159,6 +159,27 @@ export default function RequestList() {
 
   const developers = users.filter(u => u.role === 'developer');
 
+  const getProjectDevelopers = (req: DevRequest) => {
+    const devIds = new Set<string>();
+    
+    // Helper to trace back
+    const traceBack = (currentReqId: string | null | undefined) => {
+      if (!currentReqId) return;
+      const r = requests.find(item => item.id === currentReqId);
+      if (r) {
+        if (r.developerId) devIds.add(r.developerId);
+        if (r.sourceRequestId) traceBack(r.sourceRequestId);
+      }
+    };
+
+    // Trace back from current
+    if (req.developerId) devIds.add(req.developerId);
+    if (req.previousDeveloperId) devIds.add(req.previousDeveloperId);
+    if (req.sourceRequestId) traceBack(req.sourceRequestId);
+
+    return Array.from(devIds).map(id => users.find(u => u.id === id)?.name).filter(Boolean);
+  };
+
   // Filter requests based on role
   const visibleRequests = currentUser?.role === 'department' 
     ? requests.filter(r => r.department === currentUser.name)
@@ -1121,6 +1142,23 @@ export default function RequestList() {
                 </div>
               )}
 
+              {selectedReq.topic.includes('[แก้ไข/เพิ่มเติม]') && (
+                <div>
+                  <h5 className="text-base font-bold text-slate-500 mb-2">Developer ที่เคยทำ Project นี้</h5>
+                  <div className="flex flex-wrap gap-2">
+                    {getProjectDevelopers(selectedReq).length > 0 ? (
+                      getProjectDevelopers(selectedReq).map((name, i) => (
+                        <span key={i} className="bg-slate-100 px-3 py-1 rounded-full text-sm font-bold text-slate-600 border border-slate-200">
+                          {name}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-slate-400 italic text-sm">ไม่มีข้อมูล</span>
+                    )}
+                  </div>
+                </div>
+              )}
+
               <div>
                 <h5 className="text-base font-bold text-slate-500 mb-2">วัตถุประสงค์และความต้องการ</h5>
                 <div className="bg-slate-50/80 p-4 rounded-xl text-black font-normal whitespace-pre-wrap">
@@ -1277,6 +1315,23 @@ export default function RequestList() {
                   <h5 className="text-sm font-bold text-slate-500 mb-1">หัวข้อ/ชื่อโปรแกรม</h5>
                   <p className="text-lg font-bold text-slate-900">{selectedReq.topic}</p>
                 </div>
+
+                {selectedReq.topic.includes('[แก้ไข/เพิ่มเติม]') && (
+                  <div className="p-4 bg-orange-50 rounded-2xl border border-orange-100">
+                    <h5 className="text-xs font-bold text-orange-600 mb-2 uppercase tracking-wider">Developer ที่เคยทำ Project นี้</h5>
+                    <div className="flex flex-wrap gap-2">
+                      {getProjectDevelopers(selectedReq).length > 0 ? (
+                        getProjectDevelopers(selectedReq).map((name, i) => (
+                          <span key={i} className="bg-white px-3 py-1 rounded-lg text-xs font-bold text-orange-700 border border-orange-200 shadow-sm">
+                            {name}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-orange-400 italic text-xs">ไม่มีข้อมูล</span>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <ThaiMonthPicker 

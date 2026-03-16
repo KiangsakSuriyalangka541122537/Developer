@@ -32,16 +32,6 @@ export default function Dashboard() {
     };
   });
 
-  // Calculate department statistics
-  const deptStats = requests.reduce((acc: Record<string, number>, curr) => {
-    acc[curr.department] = (acc[curr.department] || 0) + 1;
-    return acc;
-  }, {});
-
-  const topDepartments = Object.entries(deptStats)
-    .sort(([, a], [, b]) => b - a)
-    .slice(0, 3);
-
   const filteredRequests = filterStatus 
     ? visibleRequests.filter(r => r.status === filterStatus)
     : visibleRequests;
@@ -219,42 +209,6 @@ export default function Dashboard() {
             <p className="text-3xl font-bold text-slate-900">{stats.done}</p>
           </button>
         </div>
-
-        {(currentUser?.role === 'approver' || currentUser?.role === 'developer') && (
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-            <div className="flex items-center gap-2 mb-6">
-              <Trophy className="size-5 text-amber-500" />
-              <h3 className="font-bold text-lg text-slate-900">สถิติแผนกที่ขอมากที่สุด</h3>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-              {topDepartments.map(([dept, count], idx) => (
-                <div key={dept} className="group">
-                  <div className="flex justify-between items-center mb-2.5">
-                    <div className="flex items-center gap-3">
-                      <span className={`size-6 flex items-center justify-center rounded-full text-xs font-bold shadow-sm ${idx === 0 ? 'bg-amber-100 text-amber-600 ring-1 ring-amber-200' : idx === 1 ? 'bg-slate-100 text-slate-600 ring-1 ring-slate-200' : 'bg-orange-50 text-orange-600 ring-1 ring-orange-100'}`}>
-                        {idx + 1}
-                      </span>
-                      <span className="text-base font-bold text-slate-700 group-hover:text-primary transition-colors truncate max-w-[200px]" title={dept}>{dept}</span>
-                    </div>
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-lg font-black text-slate-900">{count}</span>
-                      <span className="text-[10px] font-bold text-slate-400 uppercase">คำขอ</span>
-                    </div>
-                  </div>
-                  <div className="h-3 bg-slate-100 rounded-full overflow-hidden p-0.5 ring-1 ring-slate-200/50">
-                    <div 
-                      className={`h-full rounded-full transition-all duration-1000 shadow-sm ${idx === 0 ? 'bg-gradient-to-r from-amber-400 to-amber-500' : idx === 1 ? 'bg-gradient-to-r from-slate-400 to-slate-500' : 'bg-gradient-to-r from-orange-400 to-orange-500'}`} 
-                      style={{ width: `${(count / (topDepartments[0][1] || 1)) * 100}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
-              {topDepartments.length === 0 && (
-                <p className="col-span-full text-center text-slate-400 text-sm italic py-4">ยังไม่มีข้อมูลสถิติ</p>
-              )}
-            </div>
-          </div>
-        )}
 
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
           <div className="px-8 py-6 border-b border-slate-100 flex items-center justify-between bg-white sticky top-0 z-10">
