@@ -1,12 +1,10 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { useAppStore, DevRequest } from '../store';
-import { BarChart, Users, CheckCircle, Clock, Briefcase, Lock, Trophy, Filter, Eye, XCircle, FileText, Download, Calendar, RefreshCw, FileDown, Printer, Save } from 'lucide-react';
+import { BarChart, Users, CheckCircle, Clock, Briefcase, Lock, Trophy, Filter, Eye, XCircle, FileText, Download, Calendar, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 import { supabase } from '../lib/supabase';
-import { useReactToPrint } from 'react-to-print';
-import { PrintableRequest } from '../components/PrintableRequest';
 
 export default function Dashboard() {
   const { requests, users, currentUser, updateRequest } = useAppStore();
@@ -15,20 +13,6 @@ export default function Dashboard() {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [isEditingRemark, setIsEditingRemark] = useState(false);
   const [tempRemark, setTempRemark] = useState('');
-  const [printingReq, setPrintingReq] = useState<DevRequest | null>(null);
-  const printRef = useRef<HTMLDivElement>(null);
-
-  const handlePrint = useReactToPrint({
-    contentRef: printRef,
-    documentTitle: printingReq ? `บันทึกข้อความ_${printingReq.topic}` : 'document',
-  });
-
-  const triggerPrint = (req: DevRequest) => {
-    setPrintingReq(req);
-    setTimeout(() => {
-      handlePrint();
-    }, 100);
-  };
 
   const visibleRequests = requests;
 
@@ -298,30 +282,18 @@ export default function Dashboard() {
                         ) : '-'}
                       </td>
                       <td className="py-4 px-6 text-center">
-                        <div className="flex items-center justify-center gap-2">
-                          {req.attachmentUrl && (
-                            <button 
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDownloadAll(req.attachmentUrl!, req.id, req.department, req.date);
-                              }}
-                              className="p-1.5 text-slate-400 hover:text-emerald-600 transition-colors"
-                              title="ดาวน์โหลดไฟล์แนบ"
-                            >
-                              <FileDown className="size-5" />
-                            </button>
-                          )}
+                        {req.attachmentUrl && (
                           <button 
                             onClick={(e) => {
                               e.stopPropagation();
-                              triggerPrint(req);
+                              handleDownloadAll(req.attachmentUrl!, req.id, req.department, req.date);
                             }}
-                            className="p-1.5 text-slate-400 hover:text-indigo-600 transition-colors"
-                            title="พิมพ์เอกสาร (PDF)"
+                            className="p-1.5 text-slate-400 hover:text-emerald-600 transition-colors"
+                            title="ดาวน์โหลดเอกสารแนบ"
                           >
-                            <Printer className="size-5" />
+                            <Download className="size-5" />
                           </button>
-                        </div>
+                        )}
                       </td>
                       <td className="py-4 pr-8 text-center">
                         {getStatusBadge(req.status)}
@@ -351,13 +323,6 @@ export default function Dashboard() {
             <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center sticky top-0 bg-white z-10">
               <h4 className="text-xl font-black text-slate-900">รายละเอียดคำขอ</h4>
               <div className="flex items-center gap-2">
-                <button 
-                  onClick={() => triggerPrint(selectedReq)}
-                  className="px-4 py-1.5 rounded-xl bg-indigo-50 text-indigo-600 font-bold hover:bg-indigo-100 transition-all text-sm border border-indigo-100 flex items-center gap-2"
-                >
-                  <Printer className="size-4" />
-                  พิมพ์ PDF
-                </button>
                 <button 
                   onClick={() => {
                     setShowDetailsModal(false);
@@ -631,10 +596,6 @@ export default function Dashboard() {
           </div>
         </div>
       )}
-      {/* Hidden Printable Component */}
-      <div className="hidden">
-        {printingReq && <PrintableRequest request={printingReq} ref={printRef} />}
-      </div>
     </div>
   );
 }
