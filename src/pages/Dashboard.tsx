@@ -419,7 +419,7 @@ export default function Dashboard() {
                           onClick={handleUpdateRemark}
                           className="px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-bold hover:bg-primary/90 flex items-center gap-1"
                         >
-                          <RefreshCw className="size-3" />
+                          <Save className="size-3" />
                           บันทึกหมายเหตุ
                         </button>
                       </div>

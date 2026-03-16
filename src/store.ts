@@ -236,6 +236,7 @@ export const useAppStore = create<AppState>()(
           await get().fetchData();
         } else {
           console.error("Error updating request:", error);
+          throw new Error(error.message || "Failed to update request");
         }
       },
 
