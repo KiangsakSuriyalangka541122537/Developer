@@ -40,11 +40,7 @@ export default function App() {
               <RequestForm />
             </ProtectedRoute>
           } />
-          <Route path="list" element={
-            <ProtectedRoute allowedRoles={['department', 'approver', 'developer']}>
-              <RequestList />
-            </ProtectedRoute>
-          } />
+          <Route path="list" element={<RequestList />} />
           <Route path="workload" element={
             <ProtectedRoute allowedRoles={['approver', 'developer']}>
               <WorkloadOverview />
