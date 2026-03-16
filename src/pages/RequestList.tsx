@@ -123,6 +123,7 @@ export default function RequestList() {
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [scheduleStartMonth, setScheduleStartMonth] = useState('');
   const [scheduleEndMonth, setScheduleEndMonth] = useState('');
+  const [developerRemark, setDeveloperRemark] = useState('');
   const [selectedDevId, setSelectedDevId] = useState('');
   const [revisionFiles, setRevisionFiles] = useState<File[]>([]);
   const [editFiles, setEditFiles] = useState<File[]>([]);
@@ -424,12 +425,14 @@ export default function RequestList() {
       status: 'in_progress', 
       developerId: currentUser?.id,
       startMonthYear: scheduleStartMonth,
-      expectedFinishMonthYear: scheduleEndMonth
+      expectedFinishMonthYear: scheduleEndMonth,
+      developerRemark: developerRemark
     });
     setShowScheduleModal(false);
     setSelectedReq(null);
     setScheduleStartMonth('');
     setScheduleEndMonth('');
+    setDeveloperRemark('');
   };
 
   const handleRevisionSubmit = async () => {
@@ -1109,6 +1112,15 @@ export default function RequestList() {
                 )}
               </div>
 
+              {selectedReq.developerRemark && (
+                <div>
+                  <h5 className="text-base font-bold text-slate-500 mb-2">หมายเหตุจากผู้พัฒนา</h5>
+                  <div className="bg-blue-50/50 p-4 rounded-xl text-black font-normal border border-blue-100 italic">
+                    {selectedReq.developerRemark}
+                  </div>
+                </div>
+              )}
+
               <div>
                 <h5 className="text-base font-bold text-slate-500 mb-2">วัตถุประสงค์และความต้องการ</h5>
                 <div className="bg-slate-50/80 p-4 rounded-xl text-black font-normal whitespace-pre-wrap">
@@ -1310,6 +1322,16 @@ export default function RequestList() {
                     </span>
                   </div>
                 )}
+
+                <div>
+                  <h5 className="text-sm font-bold text-slate-500 mb-2">หมายเหตุเพิ่มเติม (ถ้ามี)</h5>
+                  <textarea 
+                    value={developerRemark}
+                    onChange={(e) => setDeveloperRemark(e.target.value)}
+                    className="w-full rounded-2xl border border-slate-200 p-4 outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm min-h-[100px]"
+                    placeholder="ระบุหมายเหตุหรือข้อความที่ต้องการแจ้งแผนก..."
+                  />
+                </div>
 
                 <div className="pt-4">
                   <button 

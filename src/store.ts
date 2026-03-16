@@ -35,6 +35,7 @@ export interface DevRequest {
   sourceRequestId?: string | null;
   userGroup?: string | null;
   departmentPhone?: string | null;
+  developerRemark?: string | null;
   createdAt: string;
 }
 
@@ -164,6 +165,7 @@ export const useAppStore = create<AppState>()(
           attachment_url: reqData.attachmentUrl || null,
           user_group: (reqData as any).userGroup || null,
           department_phone: (reqData as any).departmentPhone || null,
+          developer_remark: (reqData as any).developerRemark || null,
           status: 'pending'
         };
 
@@ -216,11 +218,12 @@ export const useAppStore = create<AppState>()(
         if (updates.attachmentUrl !== undefined) dbUpdates.attachment_url = updates.attachmentUrl;
         if (updates.userGroup !== undefined) dbUpdates.user_group = updates.userGroup;
         if (updates.departmentPhone !== undefined) dbUpdates.department_phone = updates.departmentPhone;
+        if (updates.developerRemark !== undefined) dbUpdates.developer_remark = updates.developerRemark;
 
         let { error } = await supabase.from('Dev-requests').update(dbUpdates).eq('id', id);
         
         // If it fails and we included new columns, try again without them
-        const newColumns = ['previous_developer_id', 'source_request_id', 'user_group', 'department_phone'];
+        const newColumns = ['previous_developer_id', 'source_request_id', 'user_group', 'department_phone', 'developer_remark'];
         if (error && newColumns.some(col => dbUpdates[col] !== undefined)) {
           console.warn("Failed to update with new columns, retrying without them...", error);
           const retryUpdates = { ...dbUpdates };
