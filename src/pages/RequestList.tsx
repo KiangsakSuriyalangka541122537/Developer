@@ -155,22 +155,44 @@ export default function RequestList() {
                       >
                         <Eye className="size-5" />
                       </button>
-                      {currentUser?.role === 'approver' && req.status === 'pending' && (
+                      {currentUser?.role === 'approver' && (
                         <button 
-                          onClick={() => { 
-                            setSelectedReq(req); 
-                            setAssignData({
-                              developerId: '',
-                              startMonthYear: '',
-                              expectedFinishMonthYear: ''
-                            });
-                            setShowAssignModal(true); 
-                          }} 
-                          className="p-1.5 text-slate-400 hover:text-blue-600 transition-colors" 
-                          title="มอบหมายงาน"
+                          onClick={() => { setSelectedReq(req); setShowDetailsModal(true); }}
+                          className="p-1.5 text-slate-400 hover:text-amber-600 transition-colors"
+                          title="แก้ไขข้อมูล"
                         >
-                          <MailOpen className="size-5" />
+                          <Edit className="size-5" />
                         </button>
+                      )}
+                      {currentUser?.role === 'approver' && req.status === 'pending' && (
+                        <>
+                          <button 
+                            onClick={() => { 
+                              setSelectedReq(req); 
+                              setAssignData({
+                                developerId: '',
+                                startMonthYear: '',
+                                expectedFinishMonthYear: ''
+                              });
+                              setShowAssignModal(true); 
+                            }} 
+                            className="p-1.5 text-slate-400 hover:text-blue-600 transition-colors" 
+                            title="มอบหมายงาน"
+                          >
+                            <MailOpen className="size-5" />
+                          </button>
+                          <button 
+                            onClick={() => { 
+                              setSelectedReq(req); 
+                              setRejectReason('');
+                              setShowRejectModal(true); 
+                            }} 
+                            className="p-1.5 text-slate-400 hover:text-rose-600 transition-colors" 
+                            title="ปฏิเสธคำขอ"
+                          >
+                            <XCircle className="size-5" />
+                          </button>
+                        </>
                       )}
                       {req.status === 'pending' && currentUser?.role === 'department' && (
                         <button 
@@ -332,6 +354,46 @@ export default function RequestList() {
                 className="px-6 py-2.5 rounded-xl bg-primary hover:bg-secondary text-white font-bold transition-all disabled:opacity-50 shadow-lg shadow-primary/20"
               >
                 ยืนยันการมอบหมาย
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reject Modal */}
+      {showRejectModal && selectedReq && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm px-4">
+          <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden border border-slate-200 animate-in fade-in zoom-in duration-200">
+            <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+              <h3 className="text-xl font-bold text-slate-900">ปฏิเสธคำขอ</h3>
+              <button onClick={() => setShowRejectModal(false)} className="p-2 hover:bg-slate-200 rounded-full transition-colors">
+                <X className="size-6 text-slate-500" />
+              </button>
+            </div>
+            <div className="p-8 space-y-4">
+              <p className="text-sm text-slate-600">กรุณาระบุเหตุผลในการปฏิเสธคำขอพัฒนาโปรแกรมนี้</p>
+              <textarea 
+                value={rejectReason}
+                onChange={(e) => setRejectReason(e.target.value)}
+                placeholder="ระบุเหตุผล..."
+                className="w-full rounded-xl border border-slate-200 p-4 outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 text-sm min-h-[120px]"
+              />
+            </div>
+            <div className="px-8 py-6 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
+              <button onClick={() => setShowRejectModal(false)} className="px-6 py-2.5 rounded-xl text-slate-600 font-bold hover:bg-slate-100 transition-all">ยกเลิก</button>
+              <button 
+                onClick={async () => {
+                  if (!rejectReason.trim()) return;
+                  await updateRequest(selectedReq.id, {
+                    status: 'rejected',
+                    rejectionReason: rejectReason
+                  });
+                  setShowRejectModal(false);
+                }}
+                disabled={!rejectReason.trim()}
+                className="px-6 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold transition-all disabled:opacity-50 shadow-lg shadow-rose-600/20"
+              >
+                ยืนยันการปฏิเสธ
               </button>
             </div>
           </div>
