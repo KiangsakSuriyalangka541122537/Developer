@@ -13,6 +13,7 @@ import RequestList from './pages/RequestList';
 import WorkloadOverview from './pages/WorkloadOverview';
 import Profile from './pages/Profile';
 import Users from './pages/Users';
+import DocumentGenerator from './pages/DocumentGenerator';
 import { useAppStore } from './store';
 
 function ProtectedRoute({ children, allowedRoles }: { children: React.ReactNode, allowedRoles?: string[] }) {
@@ -58,6 +59,11 @@ export default function App() {
           <Route path="users" element={
             <ProtectedRoute allowedRoles={['approver']}>
               <Users />
+            </ProtectedRoute>
+          } />
+          <Route path="generator" element={
+            <ProtectedRoute>
+              <DocumentGenerator />
             </ProtectedRoute>
           } />
         </Route>
