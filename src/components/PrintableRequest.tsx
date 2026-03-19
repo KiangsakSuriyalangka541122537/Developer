@@ -29,12 +29,14 @@ export const PrintableRequest = forwardRef<HTMLDivElement, PrintableRequestProps
       <div ref={ref} className="p-16 bg-white text-black" style={{ width: '210mm', minHeight: '297mm', margin: '0 auto', fontFamily: '"Sarabun", "TH Sarabun New", "TH Sarabun PSK", sans-serif' }}>
         {/* Header */}
         <div className="flex items-start mb-8 relative">
-          {/* Garuda Logo Placeholder (Using a simple SVG to avoid external loading issues during print) */}
-          <div className="absolute left-0 top-0 w-16 h-16 flex items-center justify-center border border-gray-300 rounded-full bg-gray-50">
-             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400">
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-             </svg>
-             <span className="sr-only">ตราครุฑ</span>
+          {/* Garuda Logo */}
+          <div className="absolute left-0 top-0 w-16 h-16">
+            <img 
+              src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Seal_of_the_Government_of_Thailand.svg/120px-Seal_of_the_Government_of_Thailand.svg.png" 
+              alt="ตราครุฑ" 
+              className="w-full h-full object-contain grayscale"
+              referrerPolicy="no-referrer"
+            />
           </div>
           {/* Title */}
           <div className="w-full text-center pt-4">
