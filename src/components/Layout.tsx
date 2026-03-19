@@ -29,9 +29,6 @@ export default function Layout() {
               <Link to="/request" className={`font-medium px-3 py-2 rounded-xl transition-all ${location.pathname === '/request' ? 'text-primary bg-primary/5' : 'text-slate-600 hover:text-primary hover:bg-slate-50'}`}>เขียนคำขอ</Link>
             )}
             {currentUser && (
-              <Link to="/generator" className={`font-medium px-3 py-2 rounded-xl transition-all ${location.pathname === '/generator' ? 'text-primary bg-primary/5' : 'text-slate-600 hover:text-primary hover:bg-slate-50'}`}>สร้างหนังสือราชการ</Link>
-            )}
-            {currentUser && (
               <Link to="/list" className={`font-medium px-3 py-2 rounded-xl transition-all ${location.pathname === '/list' ? 'text-primary bg-primary/5' : 'text-slate-600 hover:text-primary hover:bg-slate-50'}`}>รายการคำขอ</Link>
             )}
             {currentUser && currentUser.role !== 'department' && (
