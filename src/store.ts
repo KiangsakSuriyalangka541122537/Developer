@@ -102,6 +102,7 @@ export const useAppStore = create<AppState>()(
               sourceRequestId: r.source_request_id,
               userGroup: r.user_group,
               departmentPhone: r.department_phone,
+              developerRemark: r.developer_remark,
               createdAt: r.created_at
             }));
 

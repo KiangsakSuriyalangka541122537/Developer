@@ -1238,7 +1238,7 @@ export default function RequestList() {
                 </div>
               )}
 
-              {selectedReq.topic.includes('[แก้ไข/เพิ่มเติม]') && (
+              {(selectedReq.topic?.includes('[แก้ไข/เพิ่มเติม]')) && (
                 <div>
                   <h5 className="text-base font-bold text-slate-500 mb-2">Developer ที่เคยทำ Project นี้</h5>
                   <div className="flex flex-wrap gap-2">
@@ -1399,6 +1399,9 @@ export default function RequestList() {
                   onClick={() => {
                     setShowScheduleModal(false);
                     setSelectedReq(null);
+                    setScheduleStartMonth('');
+                    setScheduleEndMonth('');
+                    setDeveloperRemark('');
                   }}
                   className="p-2 hover:bg-slate-100 rounded-full transition-colors"
                 >
@@ -1412,7 +1415,7 @@ export default function RequestList() {
                   <p className="text-lg font-bold text-slate-900">{selectedReq.topic}</p>
                 </div>
 
-                {selectedReq.topic.includes('[แก้ไข/เพิ่มเติม]') && (
+                {selectedReq.topic?.includes('[แก้ไข/เพิ่มเติม]') && (
                   <div className="p-4 bg-orange-50 rounded-2xl border border-orange-100">
                     <h5 className="text-xs font-bold text-orange-600 mb-2 uppercase tracking-wider">Developer ที่เคยทำ Project นี้</h5>
                     <div className="flex flex-wrap gap-2">
