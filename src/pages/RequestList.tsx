@@ -1,6 +1,6 @@
 import { useState, useEffect, ChangeEvent } from 'react';
 import { useAppStore, DevRequest } from '../store';
-import { FileText, Edit, Trash2, CheckCircle, XCircle, Forward, UserCheck, Eye, Calendar, MailOpen, ChevronLeft, ChevronRight, UploadCloud, Download, RefreshCw, Save, Clock, Printer, FileDown } from 'lucide-react';
+import { FileText, Edit, Trash2, CheckCircle, XCircle, Forward, UserCheck, Eye, Calendar, MailOpen, ChevronLeft, ChevronRight, UploadCloud, Download, RefreshCw, Save, Clock, Printer } from 'lucide-react';
 import ConfirmModal from '../components/ConfirmModal';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
@@ -8,10 +8,6 @@ import { supabase } from '../lib/supabase';
 import { useReactToPrint } from 'react-to-print';
 import { PrintableRequest } from '../components/PrintableRequest';
 import { useRef } from 'react';
-import { useToast } from '../components/Toast';
-import { PdfIcon } from '../components/PdfIcon';
-// @ts-ignore
-import html2pdf from 'html2pdf.js/dist/html2pdf.js';
 
 const THAI_MONTHS = [
   'ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.',
@@ -118,7 +114,6 @@ function ThaiMonthPicker({ value, onChange, disabled, label, minDate }: {
 
 export default function RequestList() {
   const { currentUser, requests, updateRequest, deleteRequest, users, addRequest } = useAppStore();
-  const { showToast } = useToast();
   const [selectedReq, setSelectedReq] = useState<DevRequest | null>(null);
   const [rejectReason, setRejectReason] = useState('');
   const [projectLink, setProjectLink] = useState('');
@@ -160,32 +155,6 @@ export default function RequestList() {
     setTimeout(() => {
       handlePrint();
     }, 100);
-  };
-
-  const handleDownloadPDF = async (req: DevRequest) => {
-    setPrintingReq(req);
-    const toastId = showToast('กำลังเตรียมไฟล์ PDF...', 'loading');
-    
-    setTimeout(async () => {
-      if (printRef.current) {
-        const element = printRef.current;
-        const opt = {
-          margin: 10,
-          filename: `บันทึกข้อความ_${req.topic}.pdf`,
-          image: { type: 'jpeg' as const, quality: 0.98 },
-          html2canvas: { scale: 2, useCORS: true, letterRendering: true },
-          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' as const }
-        };
-
-        try {
-          await html2pdf().set(opt).from(element).save();
-          showToast('ดาวน์โหลด PDF สำเร็จ', 'success');
-        } catch (error) {
-          console.error('PDF Error:', error);
-          showToast('เกิดข้อผิดพลาดในการสร้าง PDF', 'error');
-        }
-      }
-    }, 500);
   };
   const [revisionFormData, setRevisionFormData] = useState({
     topic: '',
@@ -533,7 +502,7 @@ export default function RequestList() {
 
     // Prevent duplicate submissions
     const alreadyExists = requests.some(r => 
-      (r.sourceRequestId === selectedReq.id || r.topic.trim() === `[แก้ไข/เพิ่มเติม] ${selectedReq.topic.trim()}`) && 
+      (r.sourceRequestId === selectedReq.id || (r.topic || '').trim() === `[แก้ไข/เพิ่มเติม] ${(selectedReq.topic || '').trim()}`) && 
       r.status !== 'rejected'
     );
 
@@ -704,105 +673,120 @@ export default function RequestList() {
                     </button>
                   </td>
                   <td className="py-4 pl-4 pr-12 text-right">
-                    <div className="flex justify-end items-center gap-0.5">
-                      {/* Group 1: Info & Output */}
-                      <button onClick={() => { setSelectedReq(req); setShowDetailsModal(true); }} className="p-1.5 text-slate-400 hover:text-primary transition-colors" title="ดูรายละเอียด">
-                        <Eye className="size-5" />
-                      </button>
-                      
-                      <button 
-                        onClick={() => handleDownloadPDF(req)}
-                        className="p-1.5 text-slate-400 hover:text-indigo-600 transition-colors"
-                        title="ดาวน์โหลด PDF"
-                      >
-                        <PdfIcon className="size-5" />
-                      </button>
+                    <div className="flex justify-end items-center gap-1">
+                      {/* Slot 1: View */}
+                      <div className="w-10 flex justify-center">
+                        <button onClick={() => { setSelectedReq(req); setShowDetailsModal(true); }} className="p-1.5 text-slate-400 hover:text-primary transition-colors" title="ดูรายละเอียด">
+                          <Eye className="size-5" />
+                        </button>
+                      </div>
 
-                      {req.attachmentUrl && (
+                      {/* Slot 2: Primary Action (Edit / Assign / Accept / Done) */}
+                      <div className="w-10 flex justify-center">
+                        {currentUser?.role === 'department' && req.status === 'done' && !requests.some(r => 
+                          (r.sourceRequestId === req.id || (r.topic || '').trim() === `[แก้ไข/เพิ่มเติม] ${(req.topic || '').trim()}`) && 
+                          r.status !== 'rejected'
+                        ) && (
+                          <button 
+                            onClick={() => { 
+                              setSelectedReq(req); 
+                              setRevisionFormData({
+                                topic: `[แก้ไข/เพิ่มเติม] ${req.topic}`,
+                                objective: ''
+                              });
+                              setShowRevisionModal(true); 
+                            }} 
+                            className="p-1.5 text-slate-400 hover:text-primary transition-colors" 
+                            title="ขอแก้ไข/เพิ่มเติม"
+                          >
+                            <RefreshCw className="size-5" />
+                          </button>
+                        )}
+                        {currentUser?.role === 'department' && req.status === 'pending' && (
+                          <button 
+                            onClick={() => { 
+                              setSelectedReq(req); 
+                              setEditFormData({
+                                topic: req.topic,
+                                estimatedUsers: req.estimatedUsers,
+                                objective: req.objective,
+                                currentSystem: req.currentSystem || ''
+                              });
+                              setShowEditModal(true); 
+                            }} 
+                            className="p-1.5 text-slate-400 hover:text-amber-600 transition-colors" 
+                            title="แก้ไขคำขอ"
+                          >
+                            <Edit className="size-5" />
+                          </button>
+                        )}
+                        {currentUser?.role === 'approver' && req.status === 'pending' && (
+                          <button onClick={() => { setSelectedReq(req); setShowAssignModal(true); }} className="p-1.5 text-slate-400 hover:text-blue-600 transition-colors" title="มอบหมายงาน">
+                            <MailOpen className="size-5" />
+                          </button>
+                        )}
+                        {currentUser?.role === 'developer' && (
+                          <>
+                            {req.status === 'accepted' && req.developerId === currentUser.id && (
+                              <button onClick={() => handleDevAccept(req)} className="p-1.5 text-slate-400 hover:text-emerald-600 transition-colors" title="รอรับงาน">
+                                <UserCheck className="size-5" />
+                              </button>
+                            )}
+                            {req.status === 'in_progress' && req.developerId === currentUser.id && (
+                              <button onClick={() => { setSelectedReq(req); setShowDoneModal(true); }} className="p-1.5 text-slate-400 hover:text-emerald-600 transition-colors" title="เสร็จสิ้น">
+                                <CheckCircle className="size-5" />
+                              </button>
+                            )}
+                          </>
+                        )}
+                      </div>
+
+                      {/* Slot 3: Secondary Action (Forward) */}
+                      <div className="w-10 flex justify-center">
+                        {currentUser?.role === 'developer' && (req.status === 'accepted' || req.status === 'in_progress') && req.developerId === currentUser.id && (
+                          <button onClick={() => { setSelectedReq(req); setShowAssignModal(true); }} className="p-1.5 text-slate-400 hover:text-blue-600 transition-colors" title="ส่งต่องาน">
+                            <Forward className="size-5" />
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Slot 4: Download */}
+                      <div className="w-10 flex justify-center">
+                        {req.attachmentUrl && (
+                          <button 
+                            onClick={() => handleDownloadAll(req.attachmentUrl!, req.id, req.department, req.date)}
+                            className="p-1.5 text-slate-400 hover:text-emerald-600 transition-colors"
+                            title="ดาวน์โหลดเอกสารแนบ"
+                          >
+                            <Download className="size-5" />
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Slot 5: Print */}
+                      <div className="w-10 flex justify-center">
                         <button 
-                          onClick={() => handleDownloadAll(req.attachmentUrl!, req.id, req.department, req.date)}
-                          className="p-1.5 text-slate-400 hover:text-emerald-600 transition-colors"
-                          title="ดาวน์โหลดไฟล์แนบ"
+                          onClick={() => triggerPrint(req)}
+                          className="p-1.5 text-slate-400 hover:text-indigo-600 transition-colors"
+                          title="พิมพ์เอกสาร (PDF)"
                         >
-                          <FileDown className="size-5" />
+                          <Printer className="size-5" />
                         </button>
-                      )}
+                      </div>
 
-                      <div className="w-px h-4 bg-slate-200 mx-1"></div>
-
-                      {/* Group 2: Workflow Actions */}
-                      {currentUser?.role === 'department' && req.status === 'done' && !requests.some(r => 
-                        (r.sourceRequestId === req.id || r.topic.trim() === `[แก้ไข/เพิ่มเติม] ${req.topic.trim()}`) && 
-                        r.status !== 'rejected'
-                      ) && (
-                        <button 
-                          onClick={() => { 
-                            setSelectedReq(req); 
-                            setRevisionFormData({
-                              topic: `[แก้ไข/เพิ่มเติม] ${req.topic}`,
-                              objective: ''
-                            });
-                            setShowRevisionModal(true); 
-                          }} 
-                          className="p-1.5 text-slate-400 hover:text-primary transition-colors" 
-                          title="ขอแก้ไข/เพิ่มเติม"
-                        >
-                          <RefreshCw className="size-5" />
-                        </button>
-                      )}
-                      {currentUser?.role === 'department' && req.status === 'pending' && (
-                        <button 
-                          onClick={() => { 
-                            setSelectedReq(req); 
-                            setEditFormData({
-                              topic: req.topic,
-                              estimatedUsers: req.estimatedUsers,
-                              objective: req.objective,
-                              currentSystem: req.currentSystem || ''
-                            });
-                            setShowEditModal(true); 
-                          }} 
-                          className="p-1.5 text-slate-400 hover:text-amber-600 transition-colors" 
-                          title="แก้ไขคำขอ"
-                        >
-                          <Edit className="size-5" />
-                        </button>
-                      )}
-                      {currentUser?.role === 'approver' && req.status === 'pending' && (
-                        <button onClick={() => { setSelectedReq(req); setShowAssignModal(true); }} className="p-1.5 text-slate-400 hover:text-blue-600 transition-colors" title="มอบหมายงาน">
-                          <MailOpen className="size-5" />
-                        </button>
-                      )}
-                      {currentUser?.role === 'developer' && (
-                        <>
-                          {req.status === 'accepted' && req.developerId === currentUser.id && (
-                            <button onClick={() => handleDevAccept(req)} className="p-1.5 text-slate-400 hover:text-emerald-600 transition-colors" title="รอรับงาน">
-                              <UserCheck className="size-5" />
-                            </button>
-                          )}
-                          {req.status === 'in_progress' && req.developerId === currentUser.id && (
-                            <button onClick={() => { setSelectedReq(req); setShowDoneModal(true); }} className="p-1.5 text-slate-400 hover:text-emerald-600 transition-colors" title="เสร็จสิ้น">
-                              <CheckCircle className="size-5" />
-                            </button>
-                          )}
-                        </>
-                      )}
-                      {currentUser?.role === 'developer' && (req.status === 'accepted' || req.status === 'in_progress') && req.developerId === currentUser.id && (
-                        <button onClick={() => { setSelectedReq(req); setShowAssignModal(true); }} className="p-1.5 text-slate-400 hover:text-blue-600 transition-colors" title="ส่งต่องาน">
-                          <Forward className="size-5" />
-                        </button>
-                      )}
-
-                      {/* Group 3: Danger/Reject */}
-                      {((currentUser?.role === 'approver' || currentUser?.role === 'department') && req.status !== 'done' && req.status !== 'rejected') ||
-                       (currentUser?.role === 'developer' && (req.status === 'accepted' || req.status === 'in_progress') && req.developerId === currentUser.id) ? (
-                         <>
-                           <div className="w-px h-4 bg-slate-200 mx-1"></div>
+                      {/* Slot 6: Reject Action */}
+                      <div className="w-10 flex justify-center">
+                        {(currentUser?.role === 'approver' || currentUser?.role === 'department') && req.status !== 'done' && req.status !== 'rejected' && (
                            <button onClick={() => { setSelectedReq(req); setShowRejectModal(true); }} className="p-1.5 text-slate-400 hover:text-rose-600 transition-colors" title="ปฏิเสธ">
                              <XCircle className="size-5" />
                            </button>
-                         </>
-                      ) : null}
+                        )}
+                        {currentUser?.role === 'developer' && (req.status === 'accepted' || req.status === 'in_progress') && req.developerId === currentUser.id && (
+                          <button onClick={() => { setSelectedReq(req); setShowRejectModal(true); }} className="p-1.5 text-slate-400 hover:text-rose-600 transition-colors" title="ปฏิเสธ">
+                            <XCircle className="size-5" />
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </td>
                 </tr>
@@ -1145,13 +1129,6 @@ export default function RequestList() {
             <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center sticky top-0 bg-white z-10">
               <h4 className="text-xl font-black text-slate-900">รายละเอียดคำขอ</h4>
               <div className="flex items-center gap-2">
-                <button 
-                  onClick={() => handleDownloadPDF(selectedReq)}
-                  className="px-4 py-1.5 rounded-xl bg-indigo-50 text-indigo-600 font-bold hover:bg-indigo-100 transition-all text-sm border border-indigo-100 flex items-center gap-2"
-                >
-                  <PdfIcon className="size-4" />
-                  ดาวน์โหลด PDF
-                </button>
                 <button 
                   onClick={() => {
                     setShowDetailsModal(false);
