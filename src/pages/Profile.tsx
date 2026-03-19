@@ -6,6 +6,7 @@ export default function Profile() {
   const { currentUser, updateUser } = useAppStore();
   
   const [formData, setFormData] = useState({
+    username: currentUser?.username || '',
     name: currentUser?.name || '',
     password: currentUser?.password || ''
   });
@@ -32,7 +33,7 @@ export default function Profile() {
     <div className="max-w-2xl mx-auto w-full space-y-8 overflow-hidden">
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-bold text-slate-900 tracking-tight">จัดการข้อมูลส่วนตัว</h1>
-        <p className="text-slate-500">แก้ไขข้อมูลชื่อและรหัสผ่านของคุณ</p>
+        <p className="text-slate-500">แก้ไขข้อมูลชื่อผู้ใช้งาน ชื่อ และรหัสผ่านของคุณ</p>
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 shadow-sm">
@@ -53,6 +54,18 @@ export default function Profile() {
               type="text" 
               name="name"
               value={formData.name}
+              onChange={handleChange}
+              className="border border-slate-200 focus:ring-2 focus:ring-primary focus:border-primary rounded-lg h-12 px-4 bg-white outline-none transition-all" 
+              required 
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-medium text-slate-700">ชื่อผู้ใช้งาน (Username)</label>
+            <input 
+              type="text" 
+              name="username"
+              value={formData.username}
               onChange={handleChange}
               className="border border-slate-200 focus:ring-2 focus:ring-primary focus:border-primary rounded-lg h-12 px-4 bg-white outline-none transition-all" 
               required 
