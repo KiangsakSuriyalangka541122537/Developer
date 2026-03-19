@@ -61,12 +61,16 @@ export const PrintableRequest = forwardRef<HTMLDivElement, PrintableRequestProps
       >
         {/* Header Section */}
         <div className="relative mb-6">
-          <img 
-            src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Garuda_Emblem_of_Thailand.svg/150px-Garuda_Emblem_of_Thailand.svg.png" 
-            alt="Garuda" 
-            crossOrigin="anonymous"
-            referrerPolicy="no-referrer"
-            className="absolute top-[-1cm] left-[-1.5cm] w-[1.5cm] object-contain" 
+          <div 
+            className="absolute top-[-1cm] left-[-1.5cm] w-[1.5cm] h-[1.5cm]"
+            style={{
+              backgroundImage: 'url("https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Garuda_Emblem_of_Thailand.svg/150px-Garuda_Emblem_of_Thailand.svg.png")',
+              backgroundSize: 'contain',
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'center',
+              WebkitPrintColorAdjust: 'exact',
+              printColorAdjust: 'exact'
+            }}
           />
           <div className="text-center pt-[0.5cm]">
             <span className="text-[29pt] font-bold">บันทึกข้อความ</span>
