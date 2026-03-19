@@ -24,7 +24,7 @@ export default function Login() {
       if (usernameRef.current) {
         usernameRef.current.focus();
       }
-    }, 0);
+    }, 300);
     return () => clearTimeout(timer);
   }, []);
 
