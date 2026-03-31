@@ -6,6 +6,40 @@ import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 import { supabase } from '../lib/supabase';
 
+// Sub-components to reduce Cognitive Complexity
+const StatCard = ({ 
+  label, 
+  value, 
+  icon: Icon, 
+  isActive, 
+  onClick, 
+  activeColor, 
+  inactiveColor, 
+  activeRing 
+}: { 
+  label: string; 
+  value: number; 
+  icon: any; 
+  isActive: boolean; 
+  onClick: () => void; 
+  activeColor: string; 
+  inactiveColor: string; 
+  activeRing: string;
+}) => (
+  <button 
+    onClick={onClick}
+    className={`bg-white p-6 rounded-2xl border transition-all flex flex-col gap-2 text-left group ${isActive ? `${activeColor} ring-2 ${activeRing} shadow-md` : `border-slate-200 shadow-sm ${inactiveColor}`}`}
+  >
+    <div className="flex items-center justify-between">
+      <span className={`font-bold text-sm ${isActive ? activeColor.replace('border-', 'text-') : 'text-slate-500'}`}>{label}</span>
+      <div className={`size-8 rounded-lg flex items-center justify-center transition-colors ${isActive ? activeColor.replace('border-', 'bg-').replace('-500', '').replace('-600', '') + ' text-white' : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'}`}>
+        <Icon className="size-5" />
+      </div>
+    </div>
+    <p className="text-3xl font-bold text-slate-900">{value}</p>
+  </button>
+);
+
 export default function Dashboard() {
   const { requests, users, currentUser, updateRequest } = useAppStore();
   const [filterStatus, setFilterStatus] = useState<string | null>(null);
@@ -39,11 +73,7 @@ export default function Dashboard() {
     : visibleRequests;
 
   const toggleFilter = (status: string | null) => {
-    if (filterStatus === status) {
-      setFilterStatus(null);
-    } else {
-      setFilterStatus(status);
-    }
+    setFilterStatus(prev => prev === status ? null : status);
   };
 
   const handleUpdateRemark = async () => {
@@ -173,57 +203,49 @@ export default function Dashboard() {
 
       <div className="space-y-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <button 
+          <StatCard 
+            label="คำขอทั้งหมด"
+            value={stats.total}
+            icon={BarChart}
+            isActive={!filterStatus}
             onClick={() => setFilterStatus(null)}
-            className={`bg-white p-6 rounded-2xl border transition-all flex flex-col gap-2 text-left group ${!filterStatus ? 'border-primary ring-2 ring-primary/10 shadow-md' : 'border-slate-200 shadow-sm hover:border-primary/30'}`}
-          >
-            <div className="flex items-center justify-between">
-              <span className={`font-bold text-sm ${!filterStatus ? 'text-primary' : 'text-slate-500'}`}>คำขอทั้งหมด</span>
-              <div className={`size-8 rounded-lg flex items-center justify-center transition-colors ${!filterStatus ? 'bg-primary text-white' : 'bg-blue-100 text-blue-600 group-hover:bg-blue-200'}`}>
-                <BarChart className="size-5" />
-              </div>
-            </div>
-            <p className="text-3xl font-bold text-slate-900">{stats.total}</p>
-          </button>
+            activeColor="border-primary"
+            inactiveColor="hover:border-primary/30"
+            activeRing="ring-primary/10"
+          />
 
-          <button 
+          <StatCard 
+            label="รออนุมัติ"
+            value={stats.pending}
+            icon={Clock}
+            isActive={filterStatus === 'pending'}
             onClick={() => toggleFilter('pending')}
-            className={`bg-white p-6 rounded-2xl border transition-all flex flex-col gap-2 text-left group ${filterStatus === 'pending' ? 'border-amber-500 ring-2 ring-amber-500/10 shadow-md' : 'border-slate-200 shadow-sm hover:border-amber-300'}`}
-          >
-            <div className="flex items-center justify-between">
-              <span className={`font-bold text-sm ${filterStatus === 'pending' ? 'text-amber-600' : 'text-slate-500'}`}>รออนุมัติ</span>
-              <div className={`size-8 rounded-lg flex items-center justify-center transition-colors ${filterStatus === 'pending' ? 'bg-amber-500 text-white' : 'bg-amber-100 text-amber-600 group-hover:bg-amber-200'}`}>
-                <Clock className="size-5" />
-              </div>
-            </div>
-            <p className="text-3xl font-bold text-slate-900">{stats.pending}</p>
-          </button>
+            activeColor="border-amber-500"
+            inactiveColor="hover:border-amber-300"
+            activeRing="ring-amber-500/10"
+          />
 
-          <button 
+          <StatCard 
+            label="กำลังดำเนินการ"
+            value={stats.inProgress}
+            icon={Users}
+            isActive={filterStatus === 'in_progress'}
             onClick={() => toggleFilter('in_progress')}
-            className={`bg-white p-6 rounded-2xl border transition-all flex flex-col gap-2 text-left group ${filterStatus === 'in_progress' ? 'border-primary ring-2 ring-primary/10 shadow-md' : 'border-slate-200 shadow-sm hover:border-primary/30'}`}
-          >
-            <div className="flex items-center justify-between">
-              <span className={`font-bold text-sm ${filterStatus === 'in_progress' ? 'text-primary' : 'text-slate-500'}`}>กำลังดำเนินการ</span>
-              <div className={`size-8 rounded-lg flex items-center justify-center transition-colors ${filterStatus === 'in_progress' ? 'bg-primary text-white' : 'bg-primary/10 text-primary group-hover:bg-primary/20'}`}>
-                <Users className="size-5" />
-              </div>
-            </div>
-            <p className="text-3xl font-bold text-slate-900">{stats.inProgress}</p>
-          </button>
+            activeColor="border-primary"
+            inactiveColor="hover:border-primary/30"
+            activeRing="ring-primary/10"
+          />
 
-          <button 
+          <StatCard 
+            label="เสร็จสิ้น"
+            value={stats.done}
+            icon={CheckCircle}
+            isActive={filterStatus === 'done'}
             onClick={() => toggleFilter('done')}
-            className={`bg-white p-6 rounded-2xl border transition-all flex flex-col gap-2 text-left group ${filterStatus === 'done' ? 'border-emerald-500 ring-2 ring-emerald-500/10 shadow-md' : 'border-slate-200 shadow-sm hover:border-emerald-300'}`}
-          >
-            <div className="flex items-center justify-between">
-              <span className={`font-bold text-sm ${filterStatus === 'done' ? 'text-emerald-600' : 'text-slate-500'}`}>เสร็จสิ้น</span>
-              <div className={`size-8 rounded-lg flex items-center justify-center transition-colors ${filterStatus === 'done' ? 'bg-emerald-500 text-white' : 'bg-emerald-100 text-emerald-600 group-hover:bg-emerald-200'}`}>
-                <CheckCircle className="size-5" />
-              </div>
-            </div>
-            <p className="text-3xl font-bold text-slate-900">{stats.done}</p>
-          </button>
+            activeColor="border-emerald-500"
+            inactiveColor="hover:border-emerald-300"
+            activeRing="ring-emerald-500/10"
+          />
         </div>
 
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
