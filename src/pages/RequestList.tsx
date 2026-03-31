@@ -356,7 +356,7 @@ export default function RequestList() {
         if (editFiles.length > 0) {
           const uploadPromises = editFiles.map(async (file) => {
             const fileExt = file.name.split('.').pop();
-            const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+            const fileName = `${crypto.randomUUID()}-${Date.now()}.${fileExt}`;
             const filePath = `attachments/${fileName}`;
 
             const { error: uploadError } = await supabase.storage
@@ -525,7 +525,7 @@ export default function RequestList() {
       if (revisionFiles.length > 0) {
         const uploadPromises = revisionFiles.map(async (file) => {
           const fileExt = file.name.split('.').pop();
-          const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+          const fileName = `${crypto.randomUUID()}-${Date.now()}.${fileExt}`;
           const filePath = `attachments/${fileName}`;
 
           const { error: uploadError } = await supabase.storage

@@ -150,7 +150,9 @@ export const useAppStore = create<AppState>()(
         const now = new Date();
         const year = now.getFullYear();
         const timestamp = now.getTime().toString().slice(-6); // Last 6 digits of timestamp
-        const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+        const randomArray = new Uint32Array(1);
+        crypto.getRandomValues(randomArray);
+        const random = (randomArray[0] % 1000).toString().padStart(3, '0');
         const newId = `REQ-${year}-${timestamp}-${random}`;
         
         const newReq: any = {

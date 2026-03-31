@@ -55,7 +55,7 @@ export default function RequestForm() {
       try {
         const uploadPromises = files.map(async (file) => {
           const fileExt = file.name.split('.').pop();
-          const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+          const fileName = `${crypto.randomUUID()}-${Date.now()}.${fileExt}`;
           const filePath = `attachments/${fileName}`;
 
           const { error: uploadError } = await supabase.storage
