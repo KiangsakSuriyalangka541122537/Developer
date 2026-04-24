@@ -130,14 +130,14 @@ export default function Users() {
     const reader = new FileReader();
     reader.onload = async (evt) => {
       try {
-        const bstr = evt.target?.result;
-        const wb = XLSX.read(bstr, { type: 'binary' });
+        const data = evt.target?.result;
+        const wb = XLSX.read(data, { type: 'array' });
         const wsname = wb.SheetNames[0];
         const ws = wb.Sheets[wsname];
-        const data = XLSX.utils.sheet_to_json(ws, { header: 1 }) as any[][];
+        const rows = XLSX.utils.sheet_to_json(ws, { header: 1 }) as any[][];
         
         // Extract department names from the first column
-        const names = data
+        const names = rows
           .map(row => row[0]?.toString().trim())
           .filter((name, index) => {
             if (!name) return false;
@@ -172,12 +172,12 @@ export default function Users() {
           }
         });
       } catch (error) {
-        console.error('CSV Import Error:', error);
-        alert('เกิดข้อผิดพลาดในการอ่านไฟล์');
+        console.error('Import Error:', error);
+        alert('เกิดข้อผิดพลาดในการอ่านไฟล์ กรุณาตรวจสอบรูปแบบไฟล์อีกครั้ง');
       }
       if (fileInputRef.current) fileInputRef.current.value = '';
     };
-    reader.readAsBinaryString(file);
+    reader.readAsArrayBuffer(file);
   };
 
   const handleDeleteDept = (id: string, name: string) => {
