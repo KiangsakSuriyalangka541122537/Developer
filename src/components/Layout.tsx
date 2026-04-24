@@ -34,7 +34,7 @@ export default function Layout() {
             {currentUser && currentUser.role !== 'department' && (
                <Link to="/workload" className={`font-medium px-3 py-2 rounded-xl transition-all ${location.pathname === '/workload' ? 'text-primary bg-primary/5' : 'text-slate-600 hover:text-primary hover:bg-slate-50'}`}>ภาระงาน</Link>
             )}
-            {currentUser?.role === 'approver' && (
+            {(currentUser?.role === 'approver' || currentUser?.role === 'developer') && (
                <Link to="/users" className={`font-medium px-3 py-2 rounded-xl transition-all ${location.pathname === '/users' ? 'text-primary bg-primary/5' : 'text-slate-600 hover:text-primary hover:bg-slate-50'}`}>หน้าจัดการ</Link>
             )}
           </nav>

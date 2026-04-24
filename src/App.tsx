@@ -56,7 +56,7 @@ export default function App() {
             </ProtectedRoute>
           } />
           <Route path="users" element={
-            <ProtectedRoute allowedRoles={['approver']}>
+            <ProtectedRoute allowedRoles={['approver', 'developer']}>
               <Users />
             </ProtectedRoute>
           } />
