@@ -61,7 +61,51 @@ export default function Reports() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-3">
+      <style>
+        {`
+          @media print {
+            @page {
+              size: A4;
+              margin: 20mm;
+            }
+            body {
+              print-color-adjust: exact;
+              -webkit-print-color-adjust: exact;
+            }
+            .no-print {
+              display: none !important;
+            }
+            .print-container {
+              padding: 0 !important;
+              border: none !important;
+              box-shadow: none !important;
+              width: 100% !important;
+            }
+            table {
+              width: 100% !important;
+              table-layout: fixed !important;
+              border-collapse: collapse !important;
+            }
+            th, td {
+              word-wrap: break-word !important;
+              white-space: normal !important;
+              padding: 8px 4px !important;
+              font-size: 10pt !important;
+              border-bottom: 1px solid #e2e8f0 !important;
+            }
+            /* Hide columns prefix on print for more space if needed, 
+               but here we adjust widths instead */
+            thead {
+              display: table-header-group;
+            }
+            tr {
+              page-break-inside: avoid;
+            }
+          }
+        `}
+      </style>
+
+      <div className="flex items-center gap-3 no-print">
         <div className="size-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary">
           <FileText className="size-6" />
         </div>
@@ -71,7 +115,7 @@ export default function Reports() {
         </div>
       </div>
 
-      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4 no-print">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="flex flex-col gap-2">
             <label className="text-sm font-medium text-slate-700">ตั้งแต่</label>
@@ -139,45 +183,56 @@ export default function Reports() {
         </div>
       </div>
 
-      <div ref={printRef} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden p-4">
+      <div ref={printRef} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden p-4 print-container">
         {/* We add a print-only header so when someone exports as PDF it includes a printed header */}
-        <div className="hidden print:block mb-6 text-center">
-          <h2 className="text-2xl font-bold text-slate-900 mb-2">รายงานข้อมูลคำขอ</h2>
-          <p className="text-slate-600">
-            {startDate ? `ตั้งแต่วันที่ ${new Date(startDate).toLocaleDateString('th-TH')}` : ''}
+        <div className="hidden print:block mb-8 text-center border-b-2 border-slate-200 pb-4">
+          <h2 className="text-2xl font-bold text-slate-900 mb-1">รายงานข้อมูลคำขอรับบริการพัฒนาโปรแกรม</h2>
+          <p className="text-slate-600 font-medium">
+            {startDate ? `จากวันที่ ${new Date(startDate).toLocaleDateString('th-TH')}` : ''}
             {endDate ? ` ถึงวันที่ ${new Date(endDate).toLocaleDateString('th-TH')}` : ''}
-            {!startDate && !endDate ? 'รายงานทั้งหมด' : ''}
+            {!startDate && !endDate ? 'รายการข้อมูลทั้งหมด' : ''}
           </p>
+          <p className="text-[10px] text-slate-400 mt-2">พิมพ์โดย: {currentUser?.name} | วันที่พิมพ์: {new Date().toLocaleString('th-TH')}</p>
         </div>
         
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+        <div className="overflow-x-auto print:overflow-visible">
+          <table className="w-full text-left border-collapse print:table-fixed">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200">
-                <th className="py-4 px-6 text-sm font-semibold text-slate-900 whitespace-nowrap">ID / วันที่</th>
-                <th className="py-4 px-6 text-sm font-semibold text-slate-900">แผนก</th>
-                <th className="py-4 px-6 text-sm font-semibold text-slate-900">หัวข้อ</th>
-                <th className="py-4 px-6 text-sm font-semibold text-slate-900">สถานะ</th>
-                <th className="py-4 px-6 text-sm font-semibold text-slate-900">ผู้พัฒนา</th>
+                <th className="py-4 px-6 text-sm font-semibold text-slate-900 whitespace-nowrap print:w-[18%]">ID / วันที่</th>
+                <th className="py-4 px-6 text-sm font-semibold text-slate-900 print:w-[15%]">แผนก</th>
+                <th className="py-4 px-6 text-sm font-semibold text-slate-900 print:w-[32%]">หัวข้อ</th>
+                <th className="py-4 px-6 text-sm font-semibold text-slate-900 print:w-[15%]">สถานะ</th>
+                <th className="py-4 px-6 text-sm font-semibold text-slate-900 print:w-[20%]">ผู้พัฒนา</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filteredRequests.map(req => (
                 <tr key={req.id} className="hover:bg-slate-50/50 transition-colors">
-                  <td className="py-4 px-6 whitespace-nowrap">
-                    <p className="font-medium text-slate-900">{req.id}</p>
+                  <td className="py-4 px-6">
+                    <p className="font-bold text-slate-900 text-xs print:text-[10pt]">{req.id}</p>
                     <p className="text-xs text-slate-500">{new Date(req.date).toLocaleDateString('th-TH')}</p>
                   </td>
-                  <td className="py-4 px-6 font-medium text-slate-700">{req.department}</td>
-                  <td className="py-4 px-6 text-slate-600 max-w-sm truncate">{req.topic}</td>
-                  <td className="py-4 px-6">
-                    {req.status === 'done' ? <span className="px-2.5 py-1 bg-emerald-100 text-emerald-700 rounded-lg text-xs font-medium">เสร็จสิ้น</span>
-                     : req.status === 'in_progress' ? <span className="px-2.5 py-1 bg-amber-100 text-amber-700 rounded-lg text-xs font-medium">กำลังดำเนินการ</span>
-                     : req.status === 'accepted' ? <span className="px-2.5 py-1 bg-blue-100 text-blue-700 rounded-lg text-xs font-medium">รับงานแล้ว</span>
-                     : req.status === 'rejected' ? <span className="px-2.5 py-1 bg-rose-100 text-rose-700 rounded-lg text-xs font-medium">ถูกปฏิเสธ</span>
-                     : <span className="px-2.5 py-1 bg-slate-100 text-slate-700 rounded-lg text-xs font-medium">รอรับงาน</span>}
+                  <td className="py-4 px-6 font-medium text-slate-700 text-xs print:text-[10pt]">{req.department}</td>
+                  <td className="py-4 px-6 text-slate-600 text-xs print:text-[10pt] break-words whitespace-normal leading-relaxed">
+                    {req.topic}
                   </td>
-                  <td className="py-4 px-6 text-sm font-medium text-slate-700">
+                  <td className="py-4 px-6">
+                    <span className={`px-2.5 py-1 rounded-lg text-xs font-medium whitespace-nowrap print:border print:px-2
+                      ${req.status === 'done' ? 'bg-emerald-100 text-emerald-700 border-emerald-200'
+                       : req.status === 'in_progress' ? 'bg-amber-100 text-amber-700 border-amber-200'
+                       : req.status === 'accepted' ? 'bg-blue-100 text-blue-700 border-blue-200'
+                       : req.status === 'rejected' ? 'bg-rose-100 text-rose-700 border-rose-200'
+                       : 'bg-slate-100 text-slate-700 border-slate-200'}`}
+                    >
+                      {req.status === 'done' ? 'เสร็จสิ้น'
+                       : req.status === 'in_progress' ? 'กำลังดำเนินการ'
+                       : req.status === 'accepted' ? 'รับงานแล้ว'
+                       : req.status === 'rejected' ? 'ถูกปฏิเสธ'
+                       : 'รอรับงาน'}
+                    </span>
+                  </td>
+                  <td className="py-4 px-6 text-xs print:text-[10pt] font-medium text-slate-700">
                     {users.find(u => u.id === req.developerId)?.name || '-'}
                   </td>
                 </tr>
