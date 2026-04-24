@@ -6,7 +6,7 @@ import { Save, RefreshCcw, UploadCloud } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 export default function RequestForm() {
-  const { currentUser, addRequest, users } = useAppStore();
+  const { currentUser, addRequest, departments } = useAppStore();
   const navigate = useNavigate();
   
   const [files, setFiles] = useState<File[]>([]);
@@ -177,7 +177,7 @@ export default function RequestForm() {
                 required
               >
                 <option value="" disabled>-- เลือกแผนก/ฝ่าย --</option>
-                {users.filter(u => u.role === 'department').map(d => (
+                {departments.map(d => (
                   <option key={d.id} value={d.name}>{d.name}</option>
                 ))}
               </select>

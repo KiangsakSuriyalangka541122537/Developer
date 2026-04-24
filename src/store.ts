@@ -14,6 +14,12 @@ export interface User {
   position?: string;
 }
 
+export interface Department {
+  id: string;
+  name: string;
+  createdAt: string;
+}
+
 export interface DevRequest {
   id: string;
   requesterId?: string | null;
@@ -42,6 +48,7 @@ export interface DevRequest {
 interface AppState {
   currentUser: User | null;
   users: User[];
+  departments: Department[];
   requests: DevRequest[];
   isLoading: boolean;
   fetchData: () => Promise<void>;
@@ -53,6 +60,8 @@ interface AppState {
   updateUser: (id: string, updates: Partial<User>) => Promise<void>;
   addUser: (user: Omit<User, 'id'>) => Promise<void>;
   deleteUser: (id: string) => Promise<void>;
+  addDepartment: (name: string) => Promise<void>;
+  deleteDepartment: (id: string) => Promise<void>;
 }
 
 export const useAppStore = create<AppState>()(
@@ -60,15 +69,17 @@ export const useAppStore = create<AppState>()(
     (set, get) => ({
       currentUser: null,
       users: [],
+      departments: [],
       requests: [],
       isLoading: false,
 
       fetchData: async () => {
         set({ isLoading: true });
         try {
-          const [usersRes, requestsRes] = await Promise.all([
+          const [usersRes, requestsRes, departmentsRes] = await Promise.all([
             supabase.from('Dev-users').select('*'),
-            supabase.from('Dev-requests').select('*').order('created_at', { ascending: false })
+            supabase.from('Dev-requests').select('*').order('created_at', { ascending: false }),
+            supabase.from('Dev-departments').select('*').order('name', { ascending: true })
           ]);
 
           if (usersRes.data && requestsRes.data) {
@@ -106,7 +117,9 @@ export const useAppStore = create<AppState>()(
               createdAt: r.created_at
             }));
 
-            set({ users, requests });
+            const departments = departmentsRes.data || [];
+
+            set({ users, requests, departments });
           }
         } catch (error) {
           console.error("Error fetching data:", error);
@@ -295,6 +308,31 @@ export const useAppStore = create<AppState>()(
           await get().fetchData();
         } else {
           console.error("Error deleting user:", error);
+        }
+      },
+
+      addDepartment: async (name) => {
+        const newDept = {
+          id: Date.now().toString(),
+          name
+        };
+        const { error } = await supabase.from('Dev-departments').insert([newDept]);
+        if (!error) {
+          await get().fetchData();
+        } else {
+          console.error("Error adding department:", error);
+          if (error.code === '42P01') {
+            alert("แจ้งเตือน: ยังไม่มีตาราง Dev-departments ในฐานข้อมูล Supabase");
+          }
+        }
+      },
+
+      deleteDepartment: async (id) => {
+        const { error } = await supabase.from('Dev-departments').delete().eq('id', id);
+        if (!error) {
+          await get().fetchData();
+        } else {
+          console.error("Error deleting department:", error);
         }
       }
     }),
