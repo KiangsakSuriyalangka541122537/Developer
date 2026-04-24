@@ -12,6 +12,8 @@ export default function RequestForm() {
   const [files, setFiles] = useState<File[]>([]);
   const [formData, setFormData] = useState({
     requesterName: '',
+    department: currentUser?.name || '',
+    date: new Date().toISOString().split('T')[0],
     topic: '',
     userGroup: '',
     departmentPhone: '',
@@ -84,8 +86,8 @@ export default function RequestForm() {
       await addRequest({
         requesterId: currentUser.id,
         requesterName: formData.requesterName || currentUser.name,
-        department: currentUser.name,
-        date: new Date().toISOString().split('T')[0],
+        department: currentUser.role === 'developer' ? formData.department : currentUser.name,
+        date: currentUser.role === 'developer' ? formData.date : new Date().toISOString().split('T')[0],
         topic: formData.topic,
         userGroup: formData.userGroup,
         departmentPhone: formData.departmentPhone,
@@ -106,6 +108,8 @@ export default function RequestForm() {
   const handleReset = () => {
     setFormData({
       requesterName: '',
+      department: currentUser?.name || '',
+      date: new Date().toISOString().split('T')[0],
       topic: '',
       userGroup: '',
       departmentPhone: '',
@@ -140,21 +144,44 @@ export default function RequestForm() {
             </div>
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-slate-700">วันที่ขอข้อมูล</label>
-              <input 
-                type="text" 
-                value={new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })} 
-                className="bg-slate-50 border-slate-200 rounded-lg h-12 px-4 text-slate-500 cursor-not-allowed outline-none" 
-                readOnly 
-              />
+              {currentUser?.role === 'developer' ? (
+                <input 
+                  type="date"
+                  name="date"
+                  value={formData.date}
+                  onChange={handleChange}
+                  className="border border-slate-200 focus:ring-2 focus:ring-primary focus:border-primary rounded-lg h-12 px-4 bg-white outline-none transition-all"
+                  required
+                />
+              ) : (
+                <input 
+                  type="text" 
+                  value={new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })} 
+                  className="bg-slate-50 border-slate-200 rounded-lg h-12 px-4 text-slate-500 cursor-not-allowed outline-none" 
+                  readOnly 
+                />
+              )}
             </div>
             <div className="flex flex-col gap-2 md:col-span-2">
               <label className="text-sm font-medium text-slate-700">แผนก/ฝ่าย</label>
-              <input 
-                type="text" 
-                value={currentUser?.name || ''} 
-                className="bg-slate-50 border-slate-200 rounded-lg h-12 px-4 text-slate-500 cursor-not-allowed outline-none" 
-                readOnly 
-              />
+              {currentUser?.role === 'developer' ? (
+                <input 
+                  type="text"
+                  name="department"
+                  value={formData.department}
+                  onChange={handleChange}
+                  className="border border-slate-200 focus:ring-2 focus:ring-primary focus:border-primary rounded-lg h-12 px-4 bg-white outline-none transition-all"
+                  placeholder="ระบุแผนก/ฝ่าย"
+                  required
+                />
+              ) : (
+                <input 
+                  type="text" 
+                  value={currentUser?.name || ''} 
+                  className="bg-slate-50 border-slate-200 rounded-lg h-12 px-4 text-slate-500 cursor-not-allowed outline-none" 
+                  readOnly 
+                />
+              )}
             </div>
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-slate-700">กลุ่มผู้ใช้งาน <span className="text-rose-500">*</span></label>
