@@ -1,13 +1,10 @@
 import { useState, useEffect, ChangeEvent } from 'react';
 import { useAppStore, DevRequest } from '../store';
-import { FileText, Edit, Trash2, CheckCircle, XCircle, Forward, UserCheck, Eye, Calendar, MailOpen, ChevronLeft, ChevronRight, UploadCloud, Download, RefreshCw, Save, Clock, Printer, MessageSquare } from 'lucide-react';
+import { FileText, Edit, Trash2, CheckCircle, XCircle, Forward, UserCheck, Eye, Calendar, MailOpen, ChevronLeft, ChevronRight, UploadCloud, Download, RefreshCw, Save, Clock, MessageSquare } from 'lucide-react';
 import ConfirmModal from '../components/ConfirmModal';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 import { supabase } from '../lib/supabase';
-import { useReactToPrint } from 'react-to-print';
-import { PrintableRequest } from '../components/PrintableRequest';
-import { useRef } from 'react';
 
 const THAI_MONTHS = [
   'ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.',
@@ -142,20 +139,6 @@ export default function RequestList() {
     currentSystem: ''
   });
 
-  const printRef = useRef<HTMLDivElement>(null);
-  const [printingReq, setPrintingReq] = useState<DevRequest | null>(null);
-
-  const handlePrint = useReactToPrint({
-    contentRef: printRef,
-    documentTitle: printingReq ? `Request_${printingReq.id}` : 'Request',
-  });
-
-  const triggerPrint = (req: DevRequest) => {
-    setPrintingReq(req);
-    setTimeout(() => {
-      handlePrint();
-    }, 100);
-  };
   const [revisionFormData, setRevisionFormData] = useState({
     topic: '',
     objective: '',
@@ -762,17 +745,6 @@ export default function RequestList() {
                             <Download className="size-5" />
                           </button>
                         )}
-                      </div>
-
-                      {/* Slot 5: Print */}
-                      <div className="w-10 flex justify-center">
-                        <button 
-                          onClick={() => triggerPrint(req)}
-                          className="p-1.5 text-slate-400 hover:text-indigo-600 transition-colors"
-                          title="พิมพ์เอกสาร (PDF)"
-                        >
-                          <Printer className="size-5" />
-                        </button>
                       </div>
 
                       {/* Slot 6: Reject Action */}
@@ -1525,11 +1497,6 @@ export default function RequestList() {
         onConfirm={confirmModal.onConfirm}
         onCancel={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
       />
-
-      {/* Hidden Printable Component */}
-      <div className="hidden">
-        {printingReq && <PrintableRequest request={printingReq} ref={printRef} />}
-      </div>
     </div>
   );
 }

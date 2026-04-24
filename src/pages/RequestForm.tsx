@@ -6,7 +6,7 @@ import { Save, RefreshCcw, UploadCloud } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 export default function RequestForm() {
-  const { currentUser, addRequest } = useAppStore();
+  const { currentUser, addRequest, users } = useAppStore();
   const navigate = useNavigate();
   
   const [files, setFiles] = useState<File[]>([]);
@@ -169,15 +169,18 @@ export default function RequestForm() {
             </div>
             <div className="flex flex-col gap-2 md:col-span-2">
               <label className="text-sm font-medium text-slate-700">แผนก/ฝ่าย <span className="text-rose-500">*</span></label>
-              <input 
-                type="text"
+              <select 
                 name="department"
                 value={formData.department}
                 onChange={handleChange}
                 className="border border-slate-200 focus:ring-2 focus:ring-primary focus:border-primary rounded-lg h-12 px-4 bg-white outline-none transition-all"
-                placeholder="ระบุแผนก/ฝ่าย"
                 required
-              />
+              >
+                <option value="" disabled>-- เลือกแผนก/ฝ่าย --</option>
+                {users.filter(u => u.role === 'department').map(d => (
+                  <option key={d.id} value={d.name}>{d.name}</option>
+                ))}
+              </select>
             </div>
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-slate-700">กลุ่มผู้ใช้งาน <span className="text-rose-500">*</span></label>

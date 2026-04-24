@@ -13,6 +13,7 @@ import RequestList from './pages/RequestList';
 import WorkloadOverview from './pages/WorkloadOverview';
 import Profile from './pages/Profile';
 import Users from './pages/Users';
+import Reports from './pages/Reports';
 import { useAppStore } from './store';
 
 function ProtectedRoute({ children, allowedRoles }: { children: React.ReactNode, allowedRoles?: string[] }) {
@@ -54,6 +55,11 @@ export default function App() {
           <Route path="users" element={
             <ProtectedRoute allowedRoles={['approver', 'developer']}>
               <Users />
+            </ProtectedRoute>
+          } />
+          <Route path="reports" element={
+            <ProtectedRoute allowedRoles={['approver', 'developer']}>
+              <Reports />
             </ProtectedRoute>
           } />
         </Route>
