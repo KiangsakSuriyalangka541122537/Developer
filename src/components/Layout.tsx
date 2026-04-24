@@ -25,7 +25,7 @@ export default function Layout() {
         <div className="flex flex-1 justify-end gap-6 items-center">
           <nav className="hidden md:flex gap-2">
             <Link to="/" className={`font-medium px-3 py-2 rounded-xl transition-all ${location.pathname === '/' ? 'text-primary bg-primary/5' : 'text-slate-600 hover:text-primary hover:bg-slate-50'}`}>Dashboard</Link>
-            {currentUser?.role === 'department' && (
+            {(currentUser?.role === 'department' || currentUser?.role === 'developer' || currentUser?.role === 'approver') && (
               <Link to="/request" className={`font-medium px-3 py-2 rounded-xl transition-all ${location.pathname === '/request' ? 'text-primary bg-primary/5' : 'text-slate-600 hover:text-primary hover:bg-slate-50'}`}>เขียนคำขอ</Link>
             )}
             {currentUser && (
