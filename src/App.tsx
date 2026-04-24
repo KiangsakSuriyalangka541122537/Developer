@@ -35,11 +35,7 @@ export default function App() {
         <Route path="/" element={<Layout />}>
           <Route index element={<Dashboard />} />
           <Route path="login" element={<Login />} />
-          <Route path="request" element={
-            <ProtectedRoute allowedRoles={['department', 'approver', 'developer']}>
-              <RequestForm />
-            </ProtectedRoute>
-          } />
+          <Route path="request" element={<RequestForm />} />
           <Route path="list" element={
             <ProtectedRoute allowedRoles={['department', 'approver', 'developer']}>
               <RequestList />
