@@ -140,60 +140,66 @@ export default function Users() {
         </button>
       </div>
 
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="text-slate-500 text-sm font-medium border-b border-slate-100 bg-slate-50">
-                <th className={`py-4 pl-12 pr-4 ${activeTab === 'department' ? 'w-[45%]' : 'w-[30%]'}`}>
-                  {activeTab === 'department' ? 'ชื่อแผนก' : 'ชื่อ-นามสกุล'}
-                </th>
-                <th className={`py-4 px-4 ${activeTab === 'department' ? 'w-[40%]' : 'w-[20%]'}`}>
-                  ชื่อผู้ใช้งาน (Username)
-                </th>
-                {activeTab === 'staff' && <th className="py-4 px-4 text-center w-[20%]">บทบาท (Role)</th>}
-                {activeTab === 'staff' && <th className="py-4 px-4 w-[20%]">ตำแหน่ง</th>}
-                <th className="py-4 pl-4 pr-12 text-right w-32">จัดการ</th>
-              </tr>
-            </thead>
-            <tbody className="text-sm">
-              {filteredUsers.length > 0 ? filteredUsers.map(user => (
-                <tr key={user.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
-                  <td className="py-4 pl-12 pr-4 font-medium text-slate-900">{user.name}</td>
-                  <td className="py-4 px-4 text-slate-500">{user.username}</td>
+      <div className="space-y-4">
+        {filteredUsers.length > 0 ? filteredUsers.map(user => (
+          <div 
+            key={user.id} 
+            className="group bg-white rounded-2xl border border-slate-200 p-5 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4"
+          >
+            <div className="flex items-center gap-4">
+              <div className="size-12 rounded-xl bg-slate-50 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                {activeTab === 'department' ? <Building2 className="size-6" /> : <UserCircle className="size-6" />}
+              </div>
+              <div>
+                <h3 className="font-bold text-slate-900 text-lg">{user.name}</h3>
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
+                  <span className="text-sm text-slate-500 flex items-center gap-1">
+                    <span className="font-medium text-slate-400">Username:</span> {user.username}
+                  </span>
                   {activeTab === 'staff' && (
-                    <td className="py-4 px-4 text-center">
-                      <span className={`inline-flex items-center justify-center w-32 py-1 rounded-full text-xs font-medium border ${
-                        user.role === 'approver' ? 'bg-purple-50 text-purple-700 border-purple-200' :
-                        user.role === 'developer' ? 'bg-blue-50 text-blue-700 border-blue-200' :
-                        'bg-emerald-50 text-emerald-700 border-emerald-200'
-                      }`}>
-                        {user.role === 'approver' ? 'ผู้อนุมัติงาน' : user.role === 'developer' ? 'ผู้พัฒนาโปรแกรม' : 'แผนก'}
-                      </span>
-                    </td>
+                    <>
+                      <span className="text-slate-300">|</span>
+                      <span className="text-sm text-slate-500 font-medium">{user.position || 'ไม่มีตำแหน่ง'}</span>
+                    </>
                   )}
-                  {activeTab === 'staff' && <td className="py-4 px-4 text-slate-500">{user.position || '-'}</td>}
-                  <td className="py-4 pl-4 pr-12 text-right">
-                    <div className="flex justify-end gap-4">
-                      <button onClick={() => handleOpenModal(user)} className="p-1.5 text-slate-400 hover:text-primary transition-colors" title="แก้ไข">
-                        <Edit2 className="size-5" />
-                      </button>
-                      <button onClick={() => handleDelete(user.id)} className="p-1.5 text-slate-400 hover:text-rose-600 transition-colors" title="ลบ">
-                        <Trash2 className="size-5" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              )) : (
-                <tr>
-                  <td colSpan={activeTab === 'staff' ? 5 : 3} className="py-10 text-center text-slate-400 italic">
-                    ไม่พบข้อมูล
-                  </td>
-                </tr>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between md:justify-end gap-6 border-t md:border-t-0 pt-4 md:pt-0">
+              {activeTab === 'staff' && (
+                <span className={`px-4 py-1.5 rounded-full text-xs font-bold border transition-colors ${
+                  user.role === 'approver' ? 'bg-purple-50 text-purple-700 border-purple-200' :
+                  user.role === 'developer' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                  'bg-emerald-50 text-emerald-700 border-emerald-200'
+                }`}>
+                  {user.role === 'approver' ? 'ผู้อนุมัติงาน' : user.role === 'developer' ? 'ผู้พัฒนาโปรแกรม' : 'แผนก'}
+                </span>
               )}
-            </tbody>
-          </table>
-        </div>
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={() => handleOpenModal(user)} 
+                  className="p-2.5 rounded-xl text-slate-400 hover:text-primary hover:bg-primary/5 transition-all" 
+                  title="แก้ไข"
+                >
+                  <Edit2 className="size-5" />
+                </button>
+                <button 
+                  onClick={() => handleDelete(user.id)} 
+                  className="p-2.5 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all" 
+                  title="ลบ"
+                >
+                  <Trash2 className="size-5" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )) : (
+          <div className="bg-slate-50 rounded-2xl border border-dashed border-slate-300 py-16 text-center text-slate-400">
+            <UsersIcon className="size-12 mx-auto mb-3 opacity-20" />
+            <p className="italic font-medium">ไม่พบข้อมูลในรายการนี้</p>
+          </div>
+        )}
       </div>
 
       {showModal && (
