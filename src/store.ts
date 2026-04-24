@@ -16,7 +16,7 @@ export interface User {
 
 export interface DevRequest {
   id: string;
-  requesterId: string;
+  requesterId?: string | null;
   requesterName: string;
   department: string;
   date: string;
@@ -164,7 +164,6 @@ export const useAppStore = create<AppState>()(
         
         const newReq: any = {
           id: newId,
-          requester_id: reqData.requesterId,
           requester_name: reqData.requesterName,
           department: reqData.department,
           date: reqData.date,
@@ -178,6 +177,10 @@ export const useAppStore = create<AppState>()(
           developer_remark: (reqData as any).developerRemark || null,
           status: 'pending'
         };
+
+        if (reqData.requesterId) {
+          newReq.requester_id = reqData.requesterId;
+        }
 
         // Only add previous_developer_id if it's provided
         if ((reqData as any).previousDeveloperId) {

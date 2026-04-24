@@ -49,7 +49,6 @@ export default function RequestForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!currentUser) return;
 
     let finalAttachmentUrl = formData.attachmentUrl;
 
@@ -84,7 +83,7 @@ export default function RequestForm() {
 
     try {
       await addRequest({
-        requesterId: currentUser?.id || 'anonymous_user',
+        requesterId: currentUser?.id || null,
         requesterName: formData.requesterName,
         department: formData.department,
         date: currentUser?.role === 'developer' ? formData.date : new Date().toISOString().split('T')[0],
@@ -97,7 +96,12 @@ export default function RequestForm() {
         attachmentUrl: finalAttachmentUrl
       });
 
-      navigate('/list');
+      alert('ส่งคำขอสำเร็จ');
+      if (currentUser) {
+        navigate('/list');
+      } else {
+        navigate('/');
+      }
     } catch (error: any) {
       console.error('Error adding request:', error);
       const errorMessage = error?.message || 'ไม่ทราบสาเหตุ';
