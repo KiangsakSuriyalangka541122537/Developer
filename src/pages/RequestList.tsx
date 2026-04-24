@@ -1,6 +1,6 @@
 import { useState, useEffect, ChangeEvent } from 'react';
 import { useAppStore, DevRequest } from '../store';
-import { FileText, Edit, Trash2, CheckCircle, XCircle, Forward, UserCheck, Eye, Calendar, MailOpen, ChevronLeft, ChevronRight, UploadCloud, Download, RefreshCw, Save, Clock, Printer } from 'lucide-react';
+import { FileText, Edit, Trash2, CheckCircle, XCircle, Forward, UserCheck, Eye, Calendar, MailOpen, ChevronLeft, ChevronRight, UploadCloud, Download, RefreshCw, Save, Clock, Printer, MessageSquare } from 'lucide-react';
 import ConfirmModal from '../components/ConfirmModal';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
@@ -1477,13 +1477,19 @@ export default function RequestList() {
                   </div>
                 )}
 
-                <div>
-                  <h5 className="text-sm font-bold text-slate-500 mb-2">หมายเหตุเพิ่มเติม (ถ้ามี)</h5>
+                <div className="bg-blue-50/50 p-4 rounded-2xl border border-blue-100">
+                  <h5 className="text-sm font-bold text-blue-700 mb-2 flex items-center gap-2">
+                    <MessageSquare className="size-4" />
+                    หมายเหตุเพิ่มเติม (ถ้ามี)
+                  </h5>
+                  <p className="text-xs text-blue-600/70 mb-3 font-medium">
+                    * ข้อความที่พิมพ์ในช่องนี้จะแสดงในหน้ารายละเอียดคำขอ (ส่วนของหมายเหตุจากผู้พัฒนา)
+                  </p>
                   <textarea 
                     value={developerRemark}
                     onChange={(e) => setDeveloperRemark(e.target.value)}
-                    className="w-full rounded-2xl border border-slate-200 p-4 outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm min-h-[100px]"
-                    placeholder="ระบุหมายเหตุหรือข้อความที่ต้องการแจ้งแผนก..."
+                    className="w-full rounded-xl border border-blue-200/50 p-4 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-sm min-h-[100px] bg-white transition-all shadow-sm"
+                    placeholder="ระบุข้อความที่ต้องการแจ้งให้ผู้ส่งคำขอทราบ..."
                   />
                 </div>
 
