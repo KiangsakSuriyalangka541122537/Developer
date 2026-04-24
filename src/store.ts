@@ -118,6 +118,13 @@ export const useAppStore = create<AppState>()(
             }));
 
             const departments = departmentsRes.data || [];
+            
+            if (departmentsRes.error) {
+              console.error("Error fetching departments:", departmentsRes.error);
+              if (departmentsRes.error.code === '42P01') {
+                console.warn("Table Dev-departments is missing");
+              }
+            }
 
             set({ users, requests, departments });
           }

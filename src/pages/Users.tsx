@@ -251,9 +251,12 @@ export default function Users() {
               </button>
             </div>
           )) : (
-            <div className="col-span-full bg-slate-50 rounded-2xl border border-dashed border-slate-300 py-16 text-center text-slate-400">
-              <Building2 className="size-12 mx-auto mb-3 opacity-20" />
-              <p className="italic font-medium">ไม่พบข้อมูลแผนก/ฝ่าย</p>
+            <div className="col-span-full bg-slate-50 rounded-2xl border border-dashed border-slate-300 py-12 px-6 text-center">
+              <Building2 className="size-12 mx-auto mb-3 text-slate-300" />
+              <p className="font-bold text-slate-600 mb-2">ไม่พบข้อมูลแผนก/ฝ่าย</p>
+              <p className="text-sm text-slate-500 max-w-md mx-auto">
+                หากคุณกรอกข้อมูลแล้วไม่แสดงผล กรุณาตรวจสอบว่าได้สร้างตาราง <code className="bg-slate-200 px-1 rounded text-primary">Dev-departments</code> ในหน้า SQL Editor ของ Supabase แล้วหรือยัง
+              </p>
             </div>
           )}
         </div>
