@@ -254,9 +254,16 @@ export default function Users() {
             <div className="col-span-full bg-slate-50 rounded-2xl border border-dashed border-slate-300 py-12 px-6 text-center">
               <Building2 className="size-12 mx-auto mb-3 text-slate-300" />
               <p className="font-bold text-slate-600 mb-2">ไม่พบข้อมูลแผนก/ฝ่าย</p>
-              <p className="text-sm text-slate-500 max-w-md mx-auto">
-                หากคุณกรอกข้อมูลแล้วไม่แสดงผล กรุณาตรวจสอบว่าได้สร้างตาราง <code className="bg-slate-200 px-1 rounded text-primary">Dev-departments</code> ในหน้า SQL Editor ของ Supabase แล้วหรือยัง
-              </p>
+              <div className="text-sm text-slate-500 max-w-lg mx-auto space-y-3">
+                <p>หากคุณสร้างตารางแล้วแต่ข้อมูลไม่ขึ้น หรือบันทึกแล้ว error อาจเป็นเพราะ <b>RLS (Row Level Security)</b></p>
+                <div className="bg-slate-800 text-slate-200 p-4 rounded-xl text-left font-mono text-[11px] overflow-x-auto">
+                  <p className="text-emerald-400">-- รันคำสั่งนี้ใน SQL Editor เพื่อเปิดสิทธิ์การเข้าถึง --</p>
+                  <p>ALTER TABLE "Dev-departments" DISABLE ROW LEVEL SECURITY;</p>
+                  <p className="text-slate-500 mt-2">-- หรือสร้าง Policy --</p>
+                  <p>CREATE POLICY "Allow all" ON "Dev-departments" FOR ALL USING (true);</p>
+                </div>
+                <p>อย่าลืมเลือกตารางให้ถูกต้อง (Case Sensitive)</p>
+              </div>
             </div>
           )}
         </div>

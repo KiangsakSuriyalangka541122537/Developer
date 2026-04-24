@@ -82,8 +82,10 @@ export const useAppStore = create<AppState>()(
             supabase.from('Dev-departments').select('*').order('name', { ascending: true })
           ]);
 
-          if (usersRes.data && requestsRes.data) {
-            const users = usersRes.data.map(u => ({
+          const newState: Partial<AppState> = {};
+
+          if (usersRes.data) {
+            newState.users = usersRes.data.map(u => ({
               id: u.id,
               username: u.username,
               password: u.password,
@@ -91,8 +93,12 @@ export const useAppStore = create<AppState>()(
               name: u.name,
               position: u.position
             }));
+          } else if (usersRes.error) {
+            console.error("Error fetching users:", usersRes.error);
+          }
 
-            const requests = requestsRes.data.map(r => ({
+          if (requestsRes.data) {
+            newState.requests = requestsRes.data.map(r => ({
               id: r.id,
               requesterId: r.requester_id,
               requesterName: r.requester_name,
@@ -116,17 +122,25 @@ export const useAppStore = create<AppState>()(
               developerRemark: r.developer_remark,
               createdAt: r.created_at
             }));
+          } else if (requestsRes.error) {
+            console.error("Error fetching requests:", requestsRes.error);
+          }
 
-            const departments = departmentsRes.data || [];
-            
-            if (departmentsRes.error) {
-              console.error("Error fetching departments:", departmentsRes.error);
-              if (departmentsRes.error.code === '42P01') {
-                console.warn("Table Dev-departments is missing");
-              }
+          if (departmentsRes.data) {
+            newState.departments = departmentsRes.data.map(d => ({
+              id: d.id,
+              name: d.name,
+              createdAt: d.created_at
+            }));
+          } else if (departmentsRes.error) {
+            console.error("Error fetching departments:", departmentsRes.error);
+            if (departmentsRes.error.code === '42P01') {
+              console.warn("Table Dev-departments is missing");
             }
+          }
 
-            set({ users, requests, departments });
+          if (Object.keys(newState).length > 0) {
+            set(newState as any);
           }
         } catch (error) {
           console.error("Error fetching data:", error);
@@ -328,9 +342,7 @@ export const useAppStore = create<AppState>()(
           await get().fetchData();
         } else {
           console.error("Error adding department:", error);
-          if (error.code === '42P01') {
-            alert("แจ้งเตือน: ยังไม่มีตาราง Dev-departments ในฐานข้อมูล Supabase");
-          }
+          alert(`ไม่สามารถเพิ่มแผนกได้: ${error.message}\n(ตรวจสอบว่าได้สร้างตารางและเปิดสิทธิ์ RLS หรือยัง)`);
         }
       },
 
