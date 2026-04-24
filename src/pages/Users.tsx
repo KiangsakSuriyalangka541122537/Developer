@@ -1,17 +1,20 @@
 import React, { useState, useRef } from 'react';
 import { useAppStore, User, Role } from '../store';
-import { Users as UsersIcon, Plus, Edit2, Trash2, Save, UserCircle, Building2, Upload, FileSpreadsheet } from 'lucide-react';
+import { Users as UsersIcon, Plus, Edit2, Trash2, Save, UserCircle, Building2, Upload, FileSpreadsheet, X } from 'lucide-react';
 import ConfirmModal from '../components/ConfirmModal';
 import * as XLSX from 'xlsx';
 
 export default function Users() {
-  const { users, addUser, updateUser, deleteUser, currentUser, departments, addDepartment, deleteDepartment, importDepartments } = useAppStore();
+  const { users, addUser, updateUser, deleteUser, currentUser, departments, addDepartment, updateDepartment, deleteDepartment, importDepartments } = useAppStore();
   const [activeTab, setActiveTab] = useState<'users' | 'departments'>('users');
   const [showModal, setShowModal] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [showDeptModal, setShowDeptModal] = useState(false);
   const [deptName, setDeptName] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [editingDeptId, setEditingDeptId] = useState<string | null>(null);
+  const [editingDeptName, setEditingDeptName] = useState('');
   
   // Custom Modal State
   const [confirmModal, setConfirmModal] = useState<{
@@ -194,6 +197,17 @@ export default function Users() {
     });
   };
 
+  const handleStartEditDept = (id: string, name: string) => {
+    setEditingDeptId(id);
+    setEditingDeptName(name);
+  };
+
+  const handleSaveDept = async (id: string) => {
+    if (!editingDeptName.trim()) return;
+    await updateDepartment(id, editingDeptName.trim());
+    setEditingDeptId(null);
+  };
+
   const filteredUsers = users.filter(u => u.role !== 'department');
 
   return (
@@ -313,18 +327,56 @@ export default function Users() {
               key={dept.id}
               className="bg-white rounded-2xl border border-slate-200 p-5 flex items-center justify-between hover:border-emerald-500/50 hover:shadow-lg transition-all"
             >
-              <div className="flex items-center gap-3">
-                <div className="size-10 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
+              <div className="flex items-center gap-3 flex-1 mr-4">
+                <div className="size-10 flex-shrink-0 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
                   <Building2 className="size-5" />
                 </div>
-                <span className="font-bold text-slate-700">{dept.name}</span>
+                {editingDeptId === dept.id ? (
+                  <div className="flex-1 flex items-center gap-2">
+                    <input 
+                      type="text"
+                      autoFocus
+                      value={editingDeptName}
+                      onChange={(e) => setEditingDeptName(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleSaveDept(dept.id);
+                        if (e.key === 'Escape') setEditingDeptId(null);
+                      }}
+                      className="w-full bg-slate-50 border border-emerald-300 rounded-lg px-3 py-1.5 text-sm font-bold text-slate-900 outline-none focus:ring-2 focus:ring-emerald-500/20"
+                    />
+                    <button 
+                      onClick={() => handleSaveDept(dept.id)}
+                      className="p-1.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-all"
+                    >
+                      <Save className="size-4" />
+                    </button>
+                    <button 
+                      onClick={() => setEditingDeptId(null)}
+                      className="p-1.5 rounded-lg bg-slate-100 text-slate-500 hover:bg-slate-200 transition-all"
+                    >
+                      <X className="size-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <span className="font-bold text-slate-700">{dept.name}</span>
+                )}
               </div>
-              <button 
-                onClick={() => handleDeleteDept(dept.id, dept.name)}
-                className="p-2 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all"
-              >
-                <Trash2 className="size-4" />
-              </button>
+              <div className="flex items-center gap-1">
+                {editingDeptId !== dept.id && (
+                  <button 
+                    onClick={() => handleStartEditDept(dept.id, dept.name)}
+                    className="p-2 rounded-lg text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all"
+                  >
+                    <Edit2 className="size-4" />
+                  </button>
+                )}
+                <button 
+                  onClick={() => handleDeleteDept(dept.id, dept.name)}
+                  className="p-2 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all"
+                >
+                  <Trash2 className="size-4" />
+                </button>
+              </div>
             </div>
           )) : (
             <div className="col-span-full bg-slate-50 rounded-2xl border border-dashed border-slate-300 py-12 px-6 text-center">
