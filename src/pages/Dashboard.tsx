@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAppStore, DevRequest } from '../store';
-import { BarChart, Users, CheckCircle, Clock, Briefcase, Lock, Trophy, Filter, Eye, XCircle, FileText, Download, Calendar, RefreshCw, Save } from 'lucide-react';
+import { BarChart, Users, CheckCircle, Clock, Briefcase, Lock, Trophy, Filter, Eye, XCircle, FileText, Download, Calendar, RefreshCw, Save, Building2, ChevronDown } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
@@ -41,8 +41,9 @@ const StatCard = ({
 );
 
 export default function Dashboard() {
-  const { requests, users, currentUser, updateRequest } = useAppStore();
+  const { requests, users, currentUser, updateRequest, departments } = useAppStore();
   const [filterStatus, setFilterStatus] = useState<string | null>(null);
+  const [filterDept, setFilterDept] = useState<string | null>(null);
   const [selectedReq, setSelectedReq] = useState<DevRequest | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [isEditingRemark, setIsEditingRemark] = useState(false);
@@ -52,16 +53,21 @@ export default function Dashboard() {
 
   const visibleRequests = requests;
 
+  const baseRequests = filterDept 
+    ? visibleRequests.filter(r => r.department === filterDept)
+    : visibleRequests;
+
   const stats = {
-    total: visibleRequests.length,
-    pending: visibleRequests.filter(r => r.status === 'pending').length,
-    inProgress: visibleRequests.filter(r => r.status === 'in_progress').length,
-    done: visibleRequests.filter(r => r.status === 'done').length,
+    total: baseRequests.length,
+    pending: baseRequests.filter(r => r.status === 'pending').length,
+    inProgress: baseRequests.filter(r => r.status === 'in_progress').length,
+    done: baseRequests.filter(r => r.status === 'done').length,
+    rejected: baseRequests.filter(r => r.status === 'rejected').length,
   };
 
   const developers = users.filter(u => u.role === 'developer');
   const developerWorkload = developers.map(dev => {
-    const devRequests = requests.filter(r => r.developerId === dev.id);
+    const devRequests = baseRequests.filter(r => r.developerId === dev.id);
     return {
       ...dev,
       accepted: devRequests.filter(r => r.status === 'accepted').length,
@@ -71,8 +77,8 @@ export default function Dashboard() {
   });
 
   const filteredRequests = filterStatus 
-    ? visibleRequests.filter(r => r.status === filterStatus)
-    : visibleRequests;
+    ? baseRequests.filter(r => r.status === filterStatus)
+    : baseRequests;
 
   const displayRequests = !filterStatus 
     ? filteredRequests.filter(r => r.status !== 'done')
@@ -263,7 +269,7 @@ export default function Dashboard() {
       </div>
 
       <div className="space-y-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
           <StatCard 
             label="คำขอทั้งหมด"
             value={stats.total}
@@ -307,19 +313,53 @@ export default function Dashboard() {
             inactiveColor="hover:border-emerald-300"
             activeRing="ring-emerald-500/10"
           />
+
+          <StatCard 
+            label="ปฏิเสธ"
+            value={stats.rejected}
+            icon={XCircle}
+            isActive={filterStatus === 'rejected'}
+            onClick={() => toggleFilter('rejected')}
+            activeColor="border-rose-500"
+            inactiveColor="hover:border-rose-300"
+            activeRing="ring-rose-500/10"
+          />
         </div>
 
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
-          <div className="px-8 py-6 border-b border-slate-100 flex items-center justify-between bg-white sticky top-0 z-10">
+          <div className="px-8 py-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between bg-white sticky top-0 z-10 gap-4">
             <h3 className="font-bold text-lg text-slate-900">
               รายการคำขอ{filterStatus === 'pending' && 'รออนุมัติ'}
               {filterStatus === 'in_progress' && 'กำลังดำเนินการ'}
               {filterStatus === 'done' && 'เสร็จสิ้น'}
-              {!filterStatus && 'ทั้งหมด'}
+              {filterStatus === 'rejected' && 'ที่ถูกปฏิเสธ'}
+              {!filterStatus && 'รอดำเนินการ'}
             </h3>
-            <span className="text-xs font-bold px-2.5 py-1 bg-slate-100 text-slate-500 rounded-full">
-              {filteredRequests.length} รายการ
-            </span>
+            
+            <div className="flex flex-col sm:flex-row items-center gap-4">
+              <div className="relative w-full sm:w-64">
+                <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400 pointer-events-none" />
+                <select 
+                  value={filterDept || ''}
+                  onChange={(e) => setFilterDept(e.target.value || null)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-10 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary appearance-none transition-all cursor-pointer"
+                >
+                  <option value="">ทุกแผนก/ฝ่าย</option>
+                  {departments.map(d => (
+                    <option key={d.id} value={d.name}>{d.name}</option>
+                  ))}
+                  {/* Fallback departments from requests data */}
+                  {Array.from(new Set(requests.map(r => r.department).filter(d => d && !departments.some(dept => dept.name === d)))).map(d => (
+                    <option key={d as string} value={d as string}>{d as string}</option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-slate-400 pointer-events-none" />
+              </div>
+              
+              <span className="text-xs font-bold px-3 py-1.5 bg-slate-100 text-slate-500 rounded-full whitespace-nowrap">
+                {filteredRequests.length} รายการ
+              </span>
+            </div>
           </div>
           <div className="hidden lg:block overflow-x-auto flex-1">
             <table className="w-full text-left">
