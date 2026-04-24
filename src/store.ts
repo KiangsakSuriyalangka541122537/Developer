@@ -195,6 +195,7 @@ export const useAppStore = create<AppState>()(
         const newColumns = ['previous_developer_id', 'source_request_id', 'user_group', 'department_phone', 'developer_remark'];
         if (error && newColumns.some(col => newReq[col] !== undefined)) {
           console.warn("Failed to insert with new columns, retrying without them...", error);
+          alert("แจ้งเตือนจากระบบ: ฐานข้อมูล Supabase ของคุณยังไม่มีคอลัมน์ใหม่ ทำให้ข้อความ/ข้อมูลบางส่วนไม่ถูกบันทึก กรุณาเพิ่มคอลัมน์เหล่านี้ในตาราง Dev-requests: \n- developer_remark (text)\n- user_group (text)\n- department_phone (text)");
           const retryReq = { ...newReq };
           newColumns.forEach(col => delete retryReq[col]);
           const retry = await supabase.from('Dev-requests').insert([retryReq]);
@@ -236,6 +237,7 @@ export const useAppStore = create<AppState>()(
         const newColumns = ['previous_developer_id', 'source_request_id', 'user_group', 'department_phone', 'developer_remark'];
         if (error && newColumns.some(col => dbUpdates[col] !== undefined)) {
           console.warn("Failed to update with new columns, retrying without them...", error);
+          alert("แจ้งเตือนจากระบบ: ฐานข้อมูล Supabase ของคุณยังไม่มีคอลัมน์ใหม่ (เช่น developer_remark) ทำให้ข้อความไม่ถูกบันทึก กรุณาเพิ่มคอลัมน์เหล่านี้ในตาราง Dev-requests: \n- developer_remark (text)\n- user_group (text)\n- department_phone (text)");
           const retryUpdates = { ...dbUpdates };
           newColumns.forEach(col => delete retryUpdates[col]);
           const retry = await supabase.from('Dev-requests').update(retryUpdates).eq('id', id);

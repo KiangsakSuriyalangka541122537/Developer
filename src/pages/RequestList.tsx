@@ -447,6 +447,7 @@ export default function RequestList() {
     setSelectedReq(req);
     setScheduleStartMonth('');
     setScheduleEndMonth('');
+    setDeveloperRemark(req.developerRemark || '');
     setShowScheduleModal(true);
   };
 
