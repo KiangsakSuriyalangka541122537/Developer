@@ -48,6 +48,8 @@ export default function Dashboard() {
   const [isEditingRemark, setIsEditingRemark] = useState(false);
   const [tempRemark, setTempRemark] = useState('');
 
+  const [showDoneList, setShowDoneList] = useState(false);
+
   const visibleRequests = requests;
 
   const stats = {
@@ -72,8 +74,17 @@ export default function Dashboard() {
     ? visibleRequests.filter(r => r.status === filterStatus)
     : visibleRequests;
 
+  const displayRequests = !filterStatus 
+    ? filteredRequests.filter(r => r.status !== 'done')
+    : filteredRequests;
+
+  const doneRequestsInAll = !filterStatus 
+    ? filteredRequests.filter(r => r.status === 'done')
+    : [];
+
   const toggleFilter = (status: string | null) => {
     setFilterStatus(prev => prev === status ? null : status);
+    setShowDoneList(false); // Reset dropdown on filter switch
   };
 
   const handleUpdateRemark = async () => {
@@ -183,6 +194,56 @@ export default function Dashboard() {
     return <span className={`inline-flex items-center justify-center w-24 py-1 rounded-full text-[10px] font-bold border uppercase tracking-tighter ${b.color}`}>{b.label}</span>;
   };
 
+  const renderRow = (req: DevRequest, index: number, isDoneSection: boolean = false) => {
+    const isMyRequest = currentUser?.role === 'department' ? req.department === currentUser.name : false;
+    
+    return (
+      <tr 
+        key={req.id} 
+        className={`border-b border-slate-50 transition-colors group cursor-pointer ${isDoneSection ? 'bg-slate-50/30 hover:bg-slate-50/80' : 'hover:bg-slate-50/80'}`}
+        onClick={() => { setSelectedReq(req); setShowDetailsModal(true); }}
+      >
+        <td className="py-4 pl-8 text-center font-bold text-slate-400 group-hover:text-primary transition-colors">{index + 1}</td>
+        <td className="py-4 px-6 text-slate-700">
+          <div className="flex flex-col">
+            <div className="flex items-center gap-2 font-bold">
+              {req.topic}
+              {isMyRequest && (
+                <div className="size-2 rounded-full bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.4)]" title="งานของแผนกคุณ" />
+              )}
+            </div>
+          </div>
+        </td>
+        <td className="py-4 px-6 text-slate-600 font-medium">{req.department}</td>
+        <td className="py-4 px-6 text-slate-500 font-medium">{new Date(req.date).toLocaleDateString('th-TH')}</td>
+        <td className="py-4 px-6 text-slate-600 font-medium">
+          {req.developerId ? (
+            <span className="bg-slate-100 px-2 py-1 rounded text-[10px] font-bold text-slate-600">
+              {users.find(u => u.id === req.developerId)?.name.replace(/^(นาย|นางสาว|นาง|ดร\.)\s?/, '').split(' ')[0] || '-'}
+            </span>
+          ) : '-'}
+        </td>
+        <td className="py-4 px-6 text-center">
+          {req.attachmentUrl && (
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDownloadAll(req.attachmentUrl!, req.id, req.department, req.date);
+              }}
+              className="p-1.5 text-slate-400 hover:text-emerald-600 transition-colors"
+              title="ดาวน์โหลดเอกสารแนบ"
+            >
+              <Download className="size-5" />
+            </button>
+          )}
+        </td>
+        <td className="py-4 pr-8 text-center">
+          {getStatusBadge(req.status)}
+        </td>
+      </tr>
+    );
+  };
+
   return (
     <div className="space-y-8 overflow-hidden">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -274,56 +335,8 @@ export default function Dashboard() {
                 </tr>
               </thead>
               <tbody className="text-sm">
-                {filteredRequests.map((req, index) => {
-                  const isMyRequest = currentUser?.role === 'department' ? req.department === currentUser.name : false;
-                  
-                  return (
-                    <tr 
-                      key={req.id} 
-                      className="border-b border-slate-50 hover:bg-slate-50/80 transition-colors group cursor-pointer"
-                      onClick={() => { setSelectedReq(req); setShowDetailsModal(true); }}
-                    >
-                      <td className="py-4 pl-8 text-center font-bold text-slate-400 group-hover:text-primary transition-colors">{index + 1}</td>
-                      <td className="py-4 px-6 text-slate-700">
-                        <div className="flex flex-col">
-                          <div className="flex items-center gap-2 font-bold">
-                            {req.topic}
-                            {isMyRequest && (
-                              <div className="size-2 rounded-full bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.4)]" title="งานของแผนกคุณ" />
-                            )}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-4 px-6 text-slate-600 font-medium">{req.department}</td>
-                      <td className="py-4 px-6 text-slate-500 font-medium">{new Date(req.date).toLocaleDateString('th-TH')}</td>
-                      <td className="py-4 px-6 text-slate-600 font-medium">
-                        {req.developerId ? (
-                          <span className="bg-slate-100 px-2 py-1 rounded text-[10px] font-bold text-slate-600">
-                            {users.find(u => u.id === req.developerId)?.name.replace(/^(นาย|นางสาว|นาง|ดร\.)\s?/, '').split(' ')[0] || '-'}
-                          </span>
-                        ) : '-'}
-                      </td>
-                      <td className="py-4 px-6 text-center">
-                        {req.attachmentUrl && (
-                          <button 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDownloadAll(req.attachmentUrl!, req.id, req.department, req.date);
-                            }}
-                            className="p-1.5 text-slate-400 hover:text-emerald-600 transition-colors"
-                            title="ดาวน์โหลดเอกสารแนบ"
-                          >
-                            <Download className="size-5" />
-                          </button>
-                        )}
-                      </td>
-                      <td className="py-4 pr-8 text-center">
-                        {getStatusBadge(req.status)}
-                      </td>
-                    </tr>
-                  );
-                })}
-                {filteredRequests.length === 0 && (
+                {displayRequests.map((req, index) => renderRow(req, index))}
+                {displayRequests.length === 0 && (!doneRequestsInAll.length) && (
                   <tr>
                     <td colSpan={7} className="py-24 text-center text-slate-400 font-medium italic">
                       <div className="flex flex-col items-center gap-2">
@@ -332,6 +345,24 @@ export default function Dashboard() {
                       </div>
                     </td>
                   </tr>
+                )}
+                {!filterStatus && doneRequestsInAll.length > 0 && (
+                  <>
+                    <tr 
+                      className="border-b border-slate-50 bg-slate-50/50 hover:bg-slate-100 transition-colors cursor-pointer"
+                      onClick={() => setShowDoneList(!showDoneList)}
+                    >
+                      <td colSpan={7} className="py-4 px-6 text-center text-slate-600">
+                        <div className="flex items-center justify-center gap-2 font-bold text-slate-500">
+                          {showDoneList ? 'ซ่อนรายการเสร็จสิ้น' : `แสดงรายการเสร็จสิ้นทั้งหมด (${doneRequestsInAll.length} รายการ)`}
+                          <svg className={`size-4 transition-transform duration-200 ${showDoneList ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </div>
+                      </td>
+                    </tr>
+                    {showDoneList && doneRequestsInAll.map((req, index) => renderRow(req, displayRequests.length + index, true))}
+                  </>
                 )}
               </tbody>
             </table>
