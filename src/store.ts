@@ -61,6 +61,7 @@ interface AppState {
   addUser: (user: Omit<User, 'id'>) => Promise<void>;
   deleteUser: (id: string) => Promise<void>;
   addDepartment: (name: string) => Promise<void>;
+  importDepartments: (names: string[]) => Promise<void>;
   deleteDepartment: (id: string) => Promise<void>;
 }
 
@@ -343,6 +344,20 @@ export const useAppStore = create<AppState>()(
         } else {
           console.error("Error adding department:", error);
           alert(`ไม่สามารถเพิ่มแผนกได้: ${error.message}\n(ตรวจสอบว่าได้สร้างตารางและเปิดสิทธิ์ RLS หรือยัง)`);
+        }
+      },
+
+      importDepartments: async (names) => {
+        const newDepts = names.map((name, index) => ({
+          id: (Date.now() + index).toString(),
+          name
+        }));
+        const { error } = await supabase.from('Dev-departments').insert(newDepts);
+        if (!error) {
+          await get().fetchData();
+        } else {
+          console.error("Error importing departments:", error);
+          alert(`ไม่สามารถนำเข้าแผนกได้: ${error.message}`);
         }
       },
 

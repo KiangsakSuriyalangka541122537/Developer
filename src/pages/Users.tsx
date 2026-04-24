@@ -1,15 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useAppStore, User, Role } from '../store';
-import { Users as UsersIcon, Plus, Edit2, Trash2, Save, UserCircle, Building2 } from 'lucide-react';
+import { Users as UsersIcon, Plus, Edit2, Trash2, Save, UserCircle, Building2, Upload, FileSpreadsheet } from 'lucide-react';
 import ConfirmModal from '../components/ConfirmModal';
+import * as XLSX from 'xlsx';
 
 export default function Users() {
-  const { users, addUser, updateUser, deleteUser, currentUser, departments, addDepartment, deleteDepartment } = useAppStore();
+  const { users, addUser, updateUser, deleteUser, currentUser, departments, addDepartment, deleteDepartment, importDepartments } = useAppStore();
   const [activeTab, setActiveTab] = useState<'users' | 'departments'>('users');
   const [showModal, setShowModal] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [showDeptModal, setShowDeptModal] = useState(false);
   const [deptName, setDeptName] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Custom Modal State
   const [confirmModal, setConfirmModal] = useState<{
@@ -121,6 +123,63 @@ export default function Users() {
     });
   };
 
+  const handleImportCSV = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (evt) => {
+      try {
+        const bstr = evt.target?.result;
+        const wb = XLSX.read(bstr, { type: 'binary' });
+        const wsname = wb.SheetNames[0];
+        const ws = wb.Sheets[wsname];
+        const data = XLSX.utils.sheet_to_json(ws, { header: 1 }) as any[][];
+        
+        // Extract department names from the first column
+        const names = data
+          .map(row => row[0]?.toString().trim())
+          .filter((name, index) => {
+            if (!name) return false;
+            // Skip the first row if it's a known header
+            if (index === 0 && (name === 'ชื่อแผนก' || name === 'Department' || name === 'แผนก' || name === 'Name')) {
+              return false;
+            }
+            return true;
+          });
+
+        if (names.length === 0) {
+          alert('ไม่พบข้อมูลรายชื่อแผนกในไฟล์');
+          return;
+        }
+
+        setConfirmModal({
+          isOpen: true,
+          title: 'ยืนยันการนำเข้า',
+          message: `พบรายชื่อแผนกทั้งหมด ${names.length} รายการ คุณต้องการนำเข้าข้อมูลใช่หรือไม่?`,
+          type: 'info',
+          showCancel: true,
+          onConfirm: async () => {
+            await importDepartments(names);
+            setConfirmModal({
+              isOpen: true,
+              title: 'สำเร็จ',
+              message: `นำเข้าข้อมูลแผนก ${names.length} รายการเรียบร้อยแล้ว`,
+              type: 'success',
+              showCancel: false,
+              onConfirm: () => setConfirmModal(prev => ({ ...prev, isOpen: false }))
+            });
+          }
+        });
+      } catch (error) {
+        console.error('CSV Import Error:', error);
+        alert('เกิดข้อผิดพลาดในการอ่านไฟล์');
+      }
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+    reader.readAsBinaryString(file);
+  };
+
   const handleDeleteDept = (id: string, name: string) => {
     setConfirmModal({
       isOpen: true,
@@ -150,10 +209,27 @@ export default function Users() {
             เพิ่มผู้ใช้งาน
           </button>
         ) : (
-          <button onClick={() => setShowDeptModal(true)} className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-md">
-            <Plus className="size-5" />
-            เพิ่มแผนก/ฝ่าย
-          </button>
+          <div className="flex gap-2">
+            <input 
+              type="file" 
+              ref={fileInputRef}
+              onChange={handleImportCSV}
+              accept=".csv,.xlsx,.xls"
+              className="hidden"
+            />
+            <button 
+              onClick={() => fileInputRef.current?.click()} 
+              className="flex items-center justify-center gap-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-6 py-3 rounded-xl font-bold transition-all border border-indigo-200 shadow-sm"
+              title="นำเข้าจากไฟล์ CSV/Excel (คอลัมน์แรกเป็น 'ชื่อแผนก')"
+            >
+              <Upload className="size-5" />
+              นำเข้าไฟล์แผนก
+            </button>
+            <button onClick={() => setShowDeptModal(true)} className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-md">
+              <Plus className="size-5" />
+              เพิ่มแผนก/ฝ่าย
+            </button>
+          </div>
         )}
       </div>
 
