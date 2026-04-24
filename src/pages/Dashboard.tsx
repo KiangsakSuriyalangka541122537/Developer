@@ -321,7 +321,7 @@ export default function Dashboard() {
               {filteredRequests.length} รายการ
             </span>
           </div>
-          <div className="overflow-x-auto flex-1">
+          <div className="hidden lg:block overflow-x-auto flex-1">
             <table className="w-full text-left">
               <thead>
                 <tr className="text-slate-500 text-xs font-bold border-b border-slate-100 bg-slate-50/50 uppercase tracking-wider">
@@ -354,7 +354,7 @@ export default function Dashboard() {
                     >
                       <td colSpan={7} className="py-4 px-6 text-center text-slate-600">
                         <div className="flex items-center justify-center gap-2 font-bold text-slate-500">
-                          {showDoneList ? 'ซ่อนรายการเสร็จสิ้น' : `แสดงรายการเสร็จสิ้นทั้งหมด (${doneRequestsInAll.length} รายการ)`}
+                           {showDoneList ? 'ซ่อนรายการเสร็จสิ้น' : `แสดงรายการเสร็จสิ้นทั้งหมด (${doneRequestsInAll.length} รายการ)`}
                           <svg className={`size-4 transition-transform duration-200 ${showDoneList ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                           </svg>
@@ -367,6 +367,35 @@ export default function Dashboard() {
               </tbody>
             </table>
           </div>
+
+          {/* Mobile View */}
+          <div className="lg:hidden divide-y divide-slate-100">
+            {displayRequests.map((req, index) => (
+              <div 
+                key={req.id} 
+                className="p-5 flex flex-col gap-3 bg-white active:bg-slate-50 transition-colors"
+                onClick={() => { setSelectedReq(req); setShowDetailsModal(true); }}
+              >
+                <div className="flex justify-between items-start">
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">ลำดับ {index + 1} • {new Date(req.date).toLocaleDateString('th-TH')}</span>
+                    <h4 className="font-bold text-slate-900 leading-snug line-clamp-2">{req.topic}</h4>
+                  </div>
+                  {getStatusBadge(req.status)}
+                </div>
+                <div className="flex items-center justify-between mt-1">
+                  <span className="text-xs text-slate-500 font-medium">{req.department}</span>
+                  <div className="flex items-center gap-2 text-xs font-bold text-slate-400">
+                    DEV: <span className="text-slate-600">{req.developerId ? users.find(u => u.id === req.developerId)?.name.split(' ')[0] : '-'}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+            {displayRequests.length === 0 && (
+              <div className="py-12 text-center text-slate-400 italic">ไม่มีข้อมูลแสดง</div>
+            )}
+          </div>
+
         </div>
       </div>
       {/* Details Modal */}

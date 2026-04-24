@@ -36,7 +36,6 @@ export default function Reports() {
 
   const exportExcel = () => {
     const data = filteredRequests.map(req => ({
-      รหัสคำขอ: req.id,
       วันที่: req.date,
       แผนก: req.department,
       หัวข้อ: req.topic,
@@ -199,8 +198,8 @@ export default function Reports() {
           <table className="w-full text-left border-collapse print:table-fixed">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200">
-                <th className="py-4 px-6 text-sm font-semibold text-slate-900 whitespace-nowrap print:w-[18%]">ID / วันที่</th>
-                <th className="py-4 px-6 text-sm font-semibold text-slate-900 print:w-[15%]">แผนก</th>
+                <th className="py-4 px-6 text-sm font-semibold text-slate-900 whitespace-nowrap print:w-[15%]">วันที่</th>
+                <th className="py-4 px-6 text-sm font-semibold text-slate-900 print:w-[18%]">แผนก</th>
                 <th className="py-4 px-6 text-sm font-semibold text-slate-900 print:w-[32%]">หัวข้อ</th>
                 <th className="py-4 px-6 text-sm font-semibold text-slate-900 print:w-[15%]">สถานะ</th>
                 <th className="py-4 px-6 text-sm font-semibold text-slate-900 print:w-[20%]">ผู้พัฒนา</th>
@@ -210,8 +209,7 @@ export default function Reports() {
               {filteredRequests.map(req => (
                 <tr key={req.id} className="hover:bg-slate-50/50 transition-colors">
                   <td className="py-4 px-6">
-                    <p className="font-bold text-slate-900 text-xs print:text-[10pt]">{req.id}</p>
-                    <p className="text-xs text-slate-500">{new Date(req.date).toLocaleDateString('th-TH')}</p>
+                    <p className="text-sm print:text-[10pt] text-slate-700 font-medium">{new Date(req.date).toLocaleDateString('th-TH')}</p>
                   </td>
                   <td className="py-4 px-6 font-medium text-slate-700 text-xs print:text-[10pt]">{req.department}</td>
                   <td className="py-4 px-6 text-slate-600 text-xs print:text-[10pt] break-words whitespace-normal leading-relaxed">

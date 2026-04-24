@@ -618,7 +618,8 @@ export default function RequestList() {
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* Desktop Table View */}
+        <div className="hidden lg:block overflow-x-auto">
           <table className="w-full text-left">
             <thead>
               <tr className="text-slate-500 text-sm font-medium border-b border-slate-100 bg-slate-50">
@@ -638,7 +639,7 @@ export default function RequestList() {
                   <td className="py-4 px-6 text-slate-700">
                     <div className="flex flex-col">
                       <div className="flex items-center gap-2">
-                        <span>{req.topic}</span>
+                        <span className="font-bold line-clamp-1">{req.topic}</span>
                       </div>
                     </div>
                   </td>
@@ -665,42 +666,18 @@ export default function RequestList() {
                         </button>
                       </div>
 
-                      {/* Slot 2: Primary Action (Edit / Assign / Accept / Done) */}
+                      {/* Slot 2: Primary Action */}
                       <div className="w-10 flex justify-center">
                         {currentUser?.role === 'department' && req.status === 'done' && !requests.some(r => 
                           (r.sourceRequestId === req.id || (r.topic || '').trim() === `[แก้ไข/เพิ่มเติม] ${(req.topic || '').trim()}`) && 
                           r.status !== 'rejected'
                         ) && (
-                          <button 
-                            onClick={() => { 
-                              setSelectedReq(req); 
-                              setRevisionFormData({
-                                topic: `[แก้ไข/เพิ่มเติม] ${req.topic}`,
-                                objective: ''
-                              });
-                              setShowRevisionModal(true); 
-                            }} 
-                            className="p-1.5 text-slate-400 hover:text-primary transition-colors" 
-                            title="ขอแก้ไข/เพิ่มเติม"
-                          >
+                          <button onClick={() => { setSelectedReq(req); setRevisionFormData({ topic: `[แก้ไข/เพิ่มเติม] ${req.topic}`, objective: '' }); setShowRevisionModal(true); }} className="p-1.5 text-slate-400 hover:text-primary transition-colors" title="ขอแก้ไข/เพิ่มเติม">
                             <RefreshCw className="size-5" />
                           </button>
                         )}
                         {currentUser?.role === 'department' && req.status === 'pending' && (
-                          <button 
-                            onClick={() => { 
-                              setSelectedReq(req); 
-                              setEditFormData({
-                                topic: req.topic,
-                                estimatedUsers: req.estimatedUsers,
-                                objective: req.objective,
-                                currentSystem: req.currentSystem || ''
-                              });
-                              setShowEditModal(true); 
-                            }} 
-                            className="p-1.5 text-slate-400 hover:text-amber-600 transition-colors" 
-                            title="แก้ไขคำขอ"
-                          >
+                          <button onClick={() => { setSelectedReq(req); setEditFormData({ topic: req.topic, estimatedUsers: req.estimatedUsers, objective: req.objective, currentSystem: req.currentSystem || '' }); setShowEditModal(true); }} className="p-1.5 text-slate-400 hover:text-amber-600 transition-colors" title="แก้ไขคำขอ">
                             <Edit className="size-5" />
                           </button>
                         )}
@@ -725,7 +702,7 @@ export default function RequestList() {
                         )}
                       </div>
 
-                      {/* Slot 3: Secondary Action (Forward) */}
+                      {/* Slot 3: Forward */}
                       <div className="w-10 flex justify-center">
                         {currentUser?.role === 'developer' && (req.status === 'accepted' || req.status === 'in_progress') && req.developerId === currentUser.id && (
                           <button onClick={() => { setSelectedReq(req); setShowAssignModal(true); }} className="p-1.5 text-slate-400 hover:text-blue-600 transition-colors" title="ส่งต่องาน">
@@ -737,17 +714,13 @@ export default function RequestList() {
                       {/* Slot 4: Download */}
                       <div className="w-10 flex justify-center">
                         {req.attachmentUrl && (
-                          <button 
-                            onClick={() => handleDownloadAll(req.attachmentUrl!, req.id, req.department, req.date)}
-                            className="p-1.5 text-slate-400 hover:text-emerald-600 transition-colors"
-                            title="ดาวน์โหลดเอกสารแนบ"
-                          >
+                          <button onClick={() => handleDownloadAll(req.attachmentUrl!, req.id, req.department, req.date)} className="p-1.5 text-slate-400 hover:text-emerald-600 transition-colors" title="ดาวน์โหลดเอกสารแนบ">
                             <Download className="size-5" />
                           </button>
                         )}
                       </div>
 
-                      {/* Slot 6: Reject Action */}
+                      {/* Slot 6: Reject */}
                       <div className="w-10 flex justify-center">
                         {(currentUser?.role === 'approver' || currentUser?.role === 'department') && req.status !== 'done' && req.status !== 'rejected' && (
                            <button onClick={() => { setSelectedReq(req); setShowRejectModal(true); }} className="p-1.5 text-slate-400 hover:text-rose-600 transition-colors" title="ปฏิเสธ">
@@ -772,7 +745,62 @@ export default function RequestList() {
             </tbody>
           </table>
         </div>
+
+        {/* Mobile Card View */}
+        <div className="lg:hidden divide-y divide-slate-100">
+          {visibleRequests.map((req, index) => (
+            <div key={req.id} className="p-5 flex flex-col gap-4 bg-white hover:bg-slate-50 transition-colors" onClick={() => { setSelectedReq(req); setShowDetailsModal(true); }}>
+              <div className="flex justify-between items-start">
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">ลำดับ {index + 1} • {new Date(req.date).toLocaleDateString('th-TH')}</span>
+                  <h3 className="font-bold text-slate-900 line-clamp-2 leading-snug">{req.topic}</h3>
+                  <p className="text-xs text-slate-500 mt-1">{req.department}</p>
+                </div>
+                {getStatusBadge(req.status)}
+              </div>
+
+              <div className="flex items-center justify-between pt-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-bold text-slate-400">DEVELOPER:</span>
+                  <span className="text-xs font-bold text-slate-600">
+                    {req.developerId ? users.find(u => u.id === req.developerId)?.name.split(' ')[0] : '-'}
+                  </span>
+                </div>
+                
+                <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                  <button onClick={() => { setSelectedReq(req); setShowDetailsModal(true); }} className="p-2 text-primary hover:bg-primary/10 rounded-lg">
+                    <Eye className="size-5" />
+                  </button>
+                  {req.attachmentUrl && (
+                    <button onClick={() => handleDownloadAll(req.attachmentUrl!, req.id, req.department, req.date)} className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg">
+                      <Download className="size-5" />
+                    </button>
+                  )}
+                  {currentUser?.role === 'approver' && req.status === 'pending' && (
+                    <button onClick={() => { setSelectedReq(req); setShowAssignModal(true); }} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg">
+                      <MailOpen className="size-5" />
+                    </button>
+                  )}
+                  {currentUser?.role === 'developer' && (req.status === 'accepted' || req.status === 'in_progress') && req.developerId === currentUser.id && (
+                    <button onClick={() => { setSelectedReq(req); setShowAssignModal(true); }} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg">
+                      <Forward className="size-5" />
+                    </button>
+                  )}
+                  {(currentUser?.role === 'approver' || (currentUser?.role === 'developer' && req.developerId === currentUser.id)) && req.status !== 'done' && req.status !== 'rejected' && (
+                    <button onClick={() => { setSelectedReq(req); setShowRejectModal(true); }} className="p-2 text-rose-600 hover:bg-rose-50 rounded-lg">
+                      <XCircle className="size-5" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+          {visibleRequests.length === 0 && (
+            <div className="py-12 text-center text-slate-400 italic">ไม่มีข้อมูลคำขอ</div>
+          )}
+        </div>
       </div>
+
 
       {/* Reject Modal */}
       {showRejectModal && (
