@@ -48,7 +48,7 @@ export default function Layout() {
           </Link>
           
           {/* Desktop Navigation */}
-          <nav className="hidden xl:flex items-center gap-1">
+          <nav className="hidden xl:flex items-center gap-1 ml-auto mr-6">
             {filteredLinks.map(link => (
               <Link 
                 key={link.to}
